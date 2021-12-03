@@ -242,15 +242,16 @@ class Plotter:
         necessary = ["category"]#, "selected",  # "trk_pfp_id", "shr_pfp_id_v",
                      #"backtracked_pdg", "nu_pdg", "ccnc", "trk_bkt_pdg", "shr_bkt_pdg"]
 
+        ##OVERLAY/MC
         missing = np.setdiff1d(necessary, samples["mc"].columns)
 
         if missing.size > 0:
             raise ValueError(
                 "Missing necessary columns in the DataFrame: %s" % missing)
-
+##MC /OVERLAY SECTION
     @staticmethod
-    def _chisquare(data, mc, err_mc):
-        num = (data - mc)**2
+    def _chisquare(data, overlay, err_mc):
+        num = (data - overlay)**2
         den = data+err_mc**2
         if np.count_nonzero(data):
             return sum(num / den) / len(data)
@@ -429,7 +430,7 @@ class Plotter:
         return obs_SM, obs_LEE
             
             
-
+##MC/OVERLAY CHANGES
     def _chisq_full_covariance(self,data, mc,CNP=True,STATONLY=False):
 
         np.set_printoptions(precision=3)
@@ -837,6 +838,7 @@ class Plotter:
         #     query += "& %s <= %g & %s >= %g" % (
         #         variable, plot_options["range"][1], variable, plot_options["range"][0])
 
+        ##MC/OVERLAY CHANGED HERE
         mc_plotted_variable = self._selection(
             variable, self.samples["mc"], query=query, extra_cut=self.nu_pdg, track_cuts=track_cuts)
         mc_plotted_variable = self._select_showers(
@@ -1159,9 +1161,11 @@ class Plotter:
             nu_pdg = nu_pdg+" & ~(mcf_pass_ncnopi==1 & (nslice==0 | (slnunhits/slnhits)>0.1))"
 
         print(query,"\n", self.nu_pdg,"\n",track_cuts,"\n",select_longest)
+        ##OVERLAY MC CHANGE HERE
         category, mc_plotted_variable = categorization(
             self.samples["mc"], variable, query=query, extra_cut=self.nu_pdg, track_cuts=track_cuts, select_longest=select_longest)
 
+        ##OVERLAY/MC CHANGE HERE
         var_dict = defaultdict(list)
         weight_dict = defaultdict(list)
         mc_genie_weights = self._get_genie_weight(
@@ -1345,6 +1349,7 @@ class Plotter:
                 order_var_dict[c] = var_dict[c]
             for c in order_dict.keys():
                 order_weight_dict[c] = weight_dict[c]
+                print("order w sum ", sum(order_weight_dict[c]), " c ", c)
         elif stacksort == 4:
             #put the numu stuff on top
             hasprotons = 23 in var_dict.keys()
@@ -1372,6 +1377,7 @@ class Plotter:
         total = sum(sum(order_weight_dict[c]) for c in order_var_dict)
         if draw_data:
             total += sum([self.weights["ext"]] * len(ext_plotted_variable))
+            print("total ", total)
         labels = [
             "%s: %.1f" % (cat_labels[c], sum(order_weight_dict[c])) \
             if sum(order_weight_dict[c]) else ""
@@ -1408,9 +1414,106 @@ class Plotter:
 
         total_array = np.concatenate(list(order_var_dict.values()))
         total_weight = np.concatenate(list(order_weight_dict.values()))
+        
+        import numpy
+        sumlist = []
+        zlist = []
+        onelist = []
+        twolist = []
+        threelist = []
+        fourlist = []
+        fivelist = []
+        sixlist = []
+        sevenlist = []
+        eightlist = []
+        ninelist = []
+        for i in stacked:
+            #print(i)
+            for j in i:
+                print(j)
+                if (type(j) == numpy.ndarray):
+                    print("sum: ", sum(j))
+                    sumlist.append(sum(j))
+                    zlist.append(j[0])
+                    onelist.append(j[1])
+                    twolist.append(j[2])
+                    threelist.append(j[3])
+                    fourlist.append(j[4])
+                    fivelist.append(j[5])
+                    sixlist.append(j[6])
+                    sevenlist.append(j[7])
+                    eightlist.append(j[8])
+                    ninelist.append(j[9])
+        
+        print("")
+        print("NU NC PI0")
+        print(zlist)
+        zdiff = [abs(k-l) for k,l in zip(zlist[:-1], zlist[1:])]
+        print(zdiff)
+        
+        print("")
+        print("OUT OF FID VOL")
+        print(onelist)
+        onediff = [abs(k-l) for k,l in zip(onelist[:-1], onelist[1:])]
+        print(onediff)
+                
+        print("")
+        print("NU NC")
+        print(twolist)
+        twodiff = [abs(k-l) for k,l in zip(twolist[:-1], twolist[1:])]
+        print(twodiff)
+        
+        print("")
+        print("NUMU CC PI0")
+        print(threelist)
+        threediff = [abs(k-l) for k,l in zip(threelist[:-1], threelist[1:])]
+        print(threediff)
+        
+        print("")
+        print("NUMU CC")
+        print(fourlist)
+        fourdiff = [abs(k-l) for k,l in zip(fourlist[:-1], fourlist[1:])]
+        print(fourdiff) 
+        
+        print("")
+        print("FIVE DIFF")
+        print(fivelist)
+        fivediff = [abs(k-l) for k,l in zip(fivelist[:-1], fivelist[1:])]
+        print(fivediff)
+        
+        print("")
+        print("SIX DIFF")
+        print(sixlist)
+        sixdiff = [abs(k-l) for k,l in zip(sixlist[:-1], sixlist[1:])]
+        print(sixdiff)
+        
+        print("")
+        print("SEVEN DIFF")
+        print(sevenlist)
+        sevendiff = [abs(k-l) for k,l in zip(sevenlist[:-1], sevenlist[1:])]
+        print(sevendiff)
+        
+        print("")
+        print("EIGHT DIFF")
+        print(eightlist)
+        eightdiff = [abs(k-l) for k,l in zip(eightlist[:-1], eightlist[1:])]
+        print(eightdiff)
+        
+        print("")
+        print("NINE DIFF")
+        print(ninelist)
+        ninediff = [abs(k-l) for k,l in zip(ninelist[:-1], ninelist[1:])]
+        print(ninediff)
+        
+        print("") 
+        print("SUMS")
+        print(sumlist)
+        difflist = [abs(k-l) for k,l in zip(sumlist[:-1], sumlist[1:])]
+        print(difflist)
+        print("")
 
         #print(stacked)
-        #print(labels)
+        print("labels ", labels)
 
         plot_options.pop('color', None)
 
@@ -1427,6 +1530,8 @@ class Plotter:
             hatch="//",
             color="white",
             **plot_options)
+            
+            print("n_ext ", n_ext)
 
             total_array = np.concatenate([total_array, ext_plotted_variable])
             total_weight = np.concatenate([total_weight, ext_weight])
@@ -1437,7 +1542,11 @@ class Plotter:
         histtype="step",
         edgecolor="black",
         **plot_options)
+        
+        print("n_tot ", n_tot)
+        print("total array ", total_array)
 
+        ##MC?OVERLAY CHANGE HERE
         bincenters = 0.5 * (bin_edges[1:] + bin_edges[:-1])
         mc_uncertainties, bins = np.histogram(
             mc_plotted_variable, **plot_options)
@@ -1483,11 +1592,13 @@ class Plotter:
         if "ncpi0" in self.samples:
             ncpi0_uncertainties, bins = np.histogram(
                 ncpi0_plotted_variable, **plot_options)
+            print("ncpi0? ", ncpi0_plotted_variable)
             err_ncpi0 = np.array(
                 [n * self.weights["ncpi0"] * self.weights["ncpi0"] for n in ncpi0_uncertainties])
             if ("ncpi0" in self.detsys.keys()):
                 self.detsys["ncpi0"] = self.load_detsys_errors(variable,DETSYSPATH,bin_edges)
             sys_ncpi0 = self.add_detsys_error("ncpi0",ncpi0_uncertainties,self.weights["ncpi0"])
+            
 
         err_ccpi0 = np.array([0 for n in mc_uncertainties])
         sys_ccpi0 = np.array([0 for n in mc_uncertainties])
@@ -1630,6 +1741,8 @@ class Plotter:
         if draw_data:
             n_data, bins = np.histogram(data_plotted_variable, **plot_options)
             self.data = n_data
+            ###PRINT FOR N DATA HERE
+            print("n_data ", n_data)
             data_err = self._data_err(n_data,asymErrs)
 
             self.cov_data_stat[np.diag_indices_from(self.cov_data_stat)] = n_data
@@ -1787,6 +1900,7 @@ class Plotter:
             query += "& %s <= %g & %s >= %g" % (
                 variable, plot_options["range"][1], variable, plot_options["range"][0])
 
+            ##OVERLAY/MC
         mc_plotted_variable = self._selection(
             variable, self.samples["mc"], query=query, extra_cut=self.nu_pdg)
         mc_plotted_variable = self._select_showers(
@@ -1804,6 +1918,7 @@ class Plotter:
         ext_plotted_variable = self._select_showers(
             ext_plotted_variable, variable, self.samples["ext"], query=query)
         ext_weight = [self.weights["ext"]] * len(ext_plotted_variable)
+        
 
         if "dirt" in self.samples:
             dirt_plotted_variable = self._selection(
@@ -2044,6 +2159,7 @@ class Plotter:
             edgecolor="black",
             **plot_options)
 
+        #MC/OVERLAY
         mc_uncertainties, bins = np.histogram(
             mc_plotted_variable, **plot_options)
         nue_uncertainties, bins = np.histogram(
@@ -2204,7 +2320,7 @@ class Plotter:
 
             tree = self.samples[t]
 
-
+            ##MC/OVERLAY
             extra_query = ""
             if t == "mc":
                 extra_query = "& " + self.nu_pdg # "& ~(abs(nu_pdg) == 12 & ccnc == 0) & ~(npi0 == 1 & category != 5)"

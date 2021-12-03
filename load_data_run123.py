@@ -609,7 +609,7 @@ def process_uproot_numu(up,df):
                 & (trk_start_x_v > 5.) & (trk_start_x_v < 251.) & (trk_end_x_v > 5.) & (trk_end_x_v < 251.) \
                 & (trk_start_y_v > -110.) & (trk_start_y_v < 110.) & (trk_end_y_v > -110.) & (trk_end_y_v < 110.) \
                 & (trk_start_z_v > 20.) & (trk_start_z_v < 986.) & (trk_end_z_v > 20.) & (trk_end_z_v < 986.) \
-                & (trk_len_v > 10) & (trk_distance_v < 4.) & (pfp_generation_v == 2) \
+                & (trk_len_v > 15) & (trk_distance_v < 4.) & (pfp_generation_v == 2) \
                 & ( ( (trk_mcs_muon_mom_v - trk_range_muon_mom_v) / trk_range_muon_mom_v ) > -0.5 ) \
                 & ( ( (trk_mcs_muon_mom_v - trk_range_muon_mom_v) / trk_range_muon_mom_v ) < 0.5 )
 
@@ -634,7 +634,7 @@ def process_uproot_numu(up,df):
     trk_score_v = up.array("trk_score_v")
     shr_mask = (trk_score_v<0.5)
     trk_mask = (trk_score_v>0.5)
-    proton_mask = (trk_score_v>0.5)&(trk_llr_pid_v < 0.)
+    proton_mask = (trk_score_v>0.5)&(trk_llr_pid_v < 0.)   #Plot these
     df['n_protons_tot'] = proton_mask.sum()
     df['n_muons_tot'] = muon_mask.sum()
     df['n_tracks_tot'] = trk_mask.sum()
