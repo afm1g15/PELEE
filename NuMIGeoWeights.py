@@ -17,7 +17,7 @@ import time
 
 
 class NuMIGeoWeights:
-    def __init__(self, geoVarRootFileName="/var/work/amoor/NuMI/root_files/NuMI_Beamline_Variations_to_CV_Ratios.root", current="FHC"):
+    def __init__(self, geoVarRootFileName="/media/alex/TOSHIBA EXT/NuMI_Beamline_Variations_to_CV_Ratios.root", current="FHC"):
         self.nameDictionary = {14: 'numu', -14: 'numubar', 12: 'nue', -12:'nuebar'}
         self.fullDictionary = None 
         self.energyEdges    = None
@@ -25,7 +25,7 @@ class NuMIGeoWeights:
         self.createGeoWeigthsDictionary(current, geoVarRootFileName)
 
         
-    def createGeoWeigthsDictionary(self, current="FHC",geoVarRootFileName="/var/work/amoor/NuMI/root_files/NuMI_Beamline_Variations_to_CV_Ratios.root"):
+    def createGeoWeigthsDictionary(self, current="FHC",geoVarRootFileName="/media/alex/TOSHIBA EXT/NuMI_Beamline_Variations_to_CV_Ratios.root"):
         self.fullDictionary = {}
         self.energyEdges    = {}
         self.angleEdges     = {}
