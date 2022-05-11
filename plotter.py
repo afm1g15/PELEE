@@ -237,9 +237,6 @@ class Plotter:
             self.nu_pdg = self.nu_pdg+" & ~(mcf_pass_ncnopi==1 & (nslice==0 | (slnunhits/slnhits)>0.1))"
 
 
-        if "dirt" not in samples:
-            warnings.warn("Missing dirt sample")
-
         necessary = ["category"]#, "selected",  # "trk_pfp_id", "shr_pfp_id_v",
                      #"backtracked_pdg", "nu_pdg", "ccnc", "trk_bkt_pdg", "shr_bkt_pdg"]
 
@@ -1447,6 +1444,7 @@ class Plotter:
         #if ("mc" in self.detsys.keys()):
         #    self.detsys["mc"] = self.load_detsys_errors(variable,DETSYSPATH,bin_edges)
         sys_mc = self.add_detsys_error("mc",mc_uncertainties,self.weights["mc"])
+
 
         nue_uncertainties, bins = np.histogram(
             nue_plotted_variable, **plot_options)
