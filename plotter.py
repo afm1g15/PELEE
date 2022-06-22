@@ -1169,7 +1169,7 @@ class Plotter:
         weight_dict = defaultdict(list)
         mc_genie_weights = self._get_genie_weight(
             self.samples["mc"], variable, query=query, extra_cut=self.nu_pdg, track_cuts=track_cuts,select_longest=select_longest, weightvar=genieweight)
-
+            
         for c, v, w in zip(category, mc_plotted_variable, mc_genie_weights):
             var_dict[c].append(v)
             weight_dict[c].append(self.weights["mc"] * w)
@@ -1413,6 +1413,8 @@ class Plotter:
 
         total_array = np.concatenate(list(order_var_dict.values()))
         total_weight = np.concatenate(list(order_weight_dict.values()))
+        nue_wanted_list = []
+        wanted_key = 3
         
         import numpy
         sumlist = []
@@ -1429,9 +1431,9 @@ class Plotter:
         for i in stacked:
             #print(i)
             for j in i:
-                print(j)
+                #print(j)
                 if (type(j) == numpy.ndarray):
-                    print("sum: ", sum(j))
+                    #print("sum: ", sum(j))
                     sumlist.append(sum(j))
                     zlist.append(j[0])
                     onelist.append(j[1])
@@ -1444,71 +1446,84 @@ class Plotter:
                     eightlist.append(j[8])
                     ninelist.append(j[9])
         
-        print("")
-        print("ZERO DIFF")
-        print(zlist)
+        #print("")
+        #print("ZERO DIFF")
+        #print(zlist)
         zdiff = [abs(k-l) for k,l in zip(zlist[:-1], zlist[1:])]
-        print(zdiff)
+        #print(zdiff)
+        nue_wanted_list.append(zdiff[wanted_key])
         
-        print("")
-        print("ONE DIFF")
-        print(onelist)
+        #print("")
+        #print("ONE DIFF")
+        #print(onelist)
         onediff = [abs(k-l) for k,l in zip(onelist[:-1], onelist[1:])]
-        print(onediff)
+        #print(onediff)
+        nue_wanted_list.append(onediff[wanted_key])
                 
-        print("")
-        print("TWO DIFF")
-        print(twolist)
+        #print("")
+        #print("TWO DIFF")
+        #print(twolist)
         twodiff = [abs(k-l) for k,l in zip(twolist[:-1], twolist[1:])]
-        print(twodiff)
+        #print(twodiff)
+        nue_wanted_list.append(twodiff[wanted_key])
         
-        print("")
-        print("THREE DIFF")
-        print(threelist)
+        #print("")
+        #print("THREE DIFF")
+        #print(threelist)
         threediff = [abs(k-l) for k,l in zip(threelist[:-1], threelist[1:])]
-        print(threediff)
+        #print(threediff)
+        nue_wanted_list.append(threediff[wanted_key])
         
-        print("")
-        print("FOUR DIFF")
-        print(fourlist)
+        #print("")
+        #print("FOUR DIFF")
+        #print(fourlist)
         fourdiff = [abs(k-l) for k,l in zip(fourlist[:-1], fourlist[1:])]
-        print(fourdiff) 
+        #print(fourdiff) 
+        nue_wanted_list.append(fourdiff[wanted_key])
         
-        print("")
-        print("FIVE DIFF")
-        print(fivelist)
+        #print("")
+        #print("FIVE DIFF")
+        #print(fivelist)
         fivediff = [abs(k-l) for k,l in zip(fivelist[:-1], fivelist[1:])]
-        print(fivediff)
+        #print(fivediff)
+        nue_wanted_list.append(fivediff[wanted_key])
         
-        print("")
-        print("SIX DIFF")
-        print(sixlist)
+        #print("")
+        #print("SIX DIFF")
+        #print(sixlist)
         sixdiff = [abs(k-l) for k,l in zip(sixlist[:-1], sixlist[1:])]
-        print(sixdiff)
+        #print(sixdiff)
+        nue_wanted_list.append(sixdiff[wanted_key])
         
-        print("")
-        print("SEVEN DIFF")
-        print(sevenlist)
+        #print("")
+        #print("SEVEN DIFF")
+        #print(sevenlist)
         sevendiff = [abs(k-l) for k,l in zip(sevenlist[:-1], sevenlist[1:])]
-        print(sevendiff)
+        #print(sevendiff)
+        nue_wanted_list.append(sevendiff[wanted_key])
         
-        print("")
-        print("EIGHT DIFF")
-        print(eightlist)
+        #print("")
+        #print("EIGHT DIFF")
+        #print(eightlist)
         eightdiff = [abs(k-l) for k,l in zip(eightlist[:-1], eightlist[1:])]
-        print(eightdiff)
+        #print(eightdiff)
+        nue_wanted_list.append(eightdiff[wanted_key])
         
-        print("")
-        print("NINE DIFF")
-        print(ninelist)
+        #print("")
+        #print("NINE DIFF")
+        #print(ninelist)
         ninediff = [abs(k-l) for k,l in zip(ninelist[:-1], ninelist[1:])]
-        print(ninediff)
+        #print(ninediff)
+        nue_wanted_list.append(ninediff[wanted_key])
         
         print("") 
         print("SUMS")
         print(sumlist)
         difflist = [abs(k-l) for k,l in zip(sumlist[:-1], sumlist[1:])]
         print(difflist)
+        print("")
+        print("Nue Wanted List:")
+        print(nue_wanted_list)
         print("")
 
         #print(stacked)

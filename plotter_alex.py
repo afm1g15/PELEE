@@ -1526,7 +1526,7 @@ class Plotter:
         nue_total = sum(sum(nue_order_weight_dict[c]) for c in nue_order_var_dict)
         if draw_data:
             nue_total += sum([self.weights["nue_ext"]] * len(nue_ext_plotted_variable))
-            print("total ", nue_total)
+            print("nue total ", nue_total)
         labels = [
             "%s: %.1f" % (cat_labels[c], sum(nue_order_weight_dict[c])) \
             if sum(nue_order_weight_dict[c]) else ""
@@ -1564,7 +1564,7 @@ class Plotter:
         nue_total_array = np.concatenate(list(nue_order_var_dict.values()))
         nue_total_weight = np.concatenate(list(nue_order_weight_dict.values()))
         nue_wanted_list = []
-        wanted_key = 7
+        wanted_key = 5 # 7 for full, 5 for truth 
         
         import numpy
         sumlist = []
@@ -1676,6 +1676,14 @@ class Plotter:
         print("")
         
         
+        #nue_fiduc_q = "true_nu_vtx_z < 1036.8 and true_nu_vtx_z > 0 and true_nu_vtx_y < 116.5 and true_nu_vtx_y > -116.5 and true_nu_vtx_x < \
+       # 254.8 and true_nu_vtx_x > -1.55 and (nu_pdg == 12 and ccnc == 0) and nproton > 0"
+       # nue_selected = self.samples["nue_mc"].query(nue_query)
+       # nue_selected_fid = nue_selected.query(nue_fiduc_q)
+       # bins = np.arange(0, 5.5, 0.5)
+        
+        #Remove smearing part
+        ###################################################################
         # true nu energy 
         true_var = 'nu_e'
         # reconstructed nu energy 
@@ -1687,6 +1695,7 @@ class Plotter:
         bins = np.arange(0, 5.5, 0.5)
         #smear = plt.hist2d(nue_selected_fid.query(nue_fiduc_q)["nu_e"],nue_selected_fid.query(nue_fiduc_q)["reco_e"],
             #bins, cmin=0.000000001, cmap='OrRd')
+        
         norm = True 
         
         nue_norm_array = self.plot_smearing(nue_selected_fid, nue_fiduc_q, true_var, reco_var, bins, norm)
@@ -1716,16 +1725,19 @@ class Plotter:
         #    print("Sum of " + str(i+1) +" column: " + str(sumCol));
         #    nue_wanted_list_smeared.append(sumCol)
             
-        print("")
-        print("nue_wanted_list_smeared = ")
-        print(nue_wanted_list_smeared)
-        print("")
+        #print("")
+        #print("nue_wanted_list_smeared = ")
+        #print(nue_wanted_list_smeared)
+        #print("")
+        ##################################################################
+        nue_wanted_list_smeared = nue_wanted_list
+        nue_smeared_array = np.array(nue_wanted_list)
         
         nue_eff = self.plot_signal_and_eff_and_B(nue_selected_fid, self.samples["nue_mc"], nue_fiduc_q, bins, self.samples["nue_mc"].query(nue_fiduc_q))
         
-        print("")
-        print(nue_eff)
-        print("")
+        #print("")
+        #print(nue_eff)
+        #print("")
 
         nue_ratio_nums = []
 
@@ -1826,7 +1838,8 @@ class Plotter:
         numu_total = sum(sum(numu_order_weight_dict[c]) for c in numu_order_var_dict)
         if draw_data:
             numu_total += sum([self.weights["numu_ext"]] * len(numu_ext_plotted_variable))
-            print("total ", numu_total)
+            print("numu total ", numu_total)
+            print("")
         labels = [
             "%s: %.1f" % (cat_labels[c], sum(numu_order_weight_dict[c])) \
             if sum(numu_order_weight_dict[c]) else ""
@@ -1864,7 +1877,7 @@ class Plotter:
         numu_total_array = np.concatenate(list(numu_order_var_dict.values()))
         numu_total_weight = np.concatenate(list(numu_order_weight_dict.values()))
         numu_wanted_list = []
-        wanted_key = 3
+        wanted_key = 3 # 3 for full, 3 for truth
         
         import numpy
         sumlist = []
@@ -1880,7 +1893,7 @@ class Plotter:
         ninelist = []
         for i in numu_stacked:
             for j in i:
-                print(j)
+                #print(j)
                 if (type(j) == numpy.ndarray):
                     #print("sum: ", sum(j))
                     sumlist.append(sum(j))
@@ -1952,11 +1965,14 @@ class Plotter:
         numu_wanted_list.append(sevendiff[wanted_key])
         
         #print("")
-        #print("EIGHT DIFF")
-        #print(eightlist)
+        print("EIGHT DIFF")
+        print(eightlist)
         eightdiff = [abs(k-l) for k,l in zip(eightlist[:-1], eightlist[1:])]
-        #print(eightdiff)
-        numu_wanted_list.append(eightdiff[wanted_key])
+        print(eightdiff)
+        if (eightdiff[wanted_key] > 0.00001):
+            numu_wanted_list.append(eightdiff[wanted_key])
+        else:
+            numu_wanted_list.append(0.0)
         
         #print("")
         #print("NINE DIFF")
@@ -1975,6 +1991,15 @@ class Plotter:
         print(numu_wanted_list)
         print("")
         
+        
+        
+        #numu_fiduc_q = "true_nu_vtx_z < 1036.8 and true_nu_vtx_z > 0 and true_nu_vtx_y < 116.5 and true_nu_vtx_y > -116.5 and true_nu_vtx_x < \
+        #254.8 and true_nu_vtx_x > -1.55 and (nu_pdg == 14 and ccnc == 0) and nproton > 0"
+        #numu_selected = self.samples["numu_mc"].query(numu_query)
+        #numu_selected_fid = numu_selected.query(numu_fiduc_q)
+        #bins = np.arange(0, 5.5, 0.5)
+        
+        ################################################################
         # true nu energy 
         true_var = 'nu_e'
         # reconstructed nu energy 
@@ -1982,8 +2007,10 @@ class Plotter:
         numu_fiduc_q = "true_nu_vtx_z < 1036.8 and true_nu_vtx_z > 0 and true_nu_vtx_y < 116.5 and true_nu_vtx_y > -116.5 and true_nu_vtx_x < \
         254.8 and true_nu_vtx_x > -1.55 and (nu_pdg == 14 and ccnc == 0) and nproton > 0"
         numu_selected = self.samples["numu_mc"].query(numu_query)
-        numu_selected_fid = nue_selected.query(numu_fiduc_q)
+        numu_selected_fid = numu_selected.query(numu_fiduc_q)
         bins = np.arange(0, 5.5, 0.5)
+        
+        
         norm = True 
         
         numu_norm_array = self.plot_smearing(numu_selected_fid, numu_fiduc_q, true_var, reco_var, bins, norm)
@@ -2000,25 +2027,33 @@ class Plotter:
         #print(nue_norm_array)
         #print("")                    
                     
+        
         numu_smeared_array = np.matmul(np.array(numu_wanted_list), numu_norm_array)
+        #numu_smeared_array = np.array(numu_wanted_list)
         #print(nue_smeared_array)
         
         numu_wanted_list_smeared = list(numu_smeared_array)
-        print("")
-        print("numu_wanted_list_smeared = ")
-        print(numu_wanted_list_smeared)
-        print("")
+        #print("")
+        #print("numu_wanted_list_smeared = ")
+        #print(numu_wanted_list_smeared)
+        #print("")
+        #############################################################
+        numu_wanted_list_smeared = numu_wanted_list
+        numu_smeared_array = np.array(numu_wanted_list)
         
         numu_eff = self.plot_signal_and_eff_and_B(numu_selected_fid, self.samples["numu_mc"], numu_fiduc_q, bins, self.samples["numu_mc"].query(numu_fiduc_q))
+        #numu_eff = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
         
-        print("")
-        print(numu_eff)
-        print("")
+        #print("")
+        #print(numu_eff)
+        #print("")
 
         numu_ratio_nums = []
 
         for i in range(len(numu_wanted_list_smeared)):
             num = numu_wanted_list_smeared[i]*(1/numu_eff[i])
+            print("numu_wanted_list_smeared[i] ", numu_wanted_list_smeared[i])
+            print("1/numu_eff[i] ", 1/numu_eff[i])
             numu_ratio_nums.append(num)
             
         print("")
@@ -2026,11 +2061,19 @@ class Plotter:
         print(numu_ratio_nums)
         print("")
         
+        ##############################################################
+        #Initial plots calculated
+        ##############################################################
+        
         rbin_ratios = []
+        
         
         for i in range(len(numu_ratio_nums)):
             if nue_ratio_nums[i] > 0 and numu_ratio_nums[i] > 0:
+                print("nue_ratio_nums[i] ", nue_ratio_nums[i])
+                print("numu_ratio_nums[i]", numu_ratio_nums[i])
                 rratio = nue_ratio_nums[i]/numu_ratio_nums[i]
+                print("rratio ", rratio)
                 rbin_ratios.append(rratio)
             else:
                 rbin_ratios.append(0)
@@ -2045,6 +2088,13 @@ class Plotter:
         for i in range(len(count)):
             weight = count[i]*rbin_ratios[i]
             weights.append(weight)
+            
+        print("")
+        print("Making ratio plot.")
+        print("count, ", count)
+        print("bins, ", bins)
+        print("Weights, ", rbin_ratios)
+        print("")
 
         sel = ratio_ax1.hist(count, bins, color='deepskyblue', weights=rbin_ratios)
         ratio_ax1.set_ylabel('Ratio Nue/Numu', fontsize=15)
@@ -2117,6 +2167,10 @@ class Plotter:
         print("numu n_tot ", numu_n_tot)
         print("total array ", numu_total_array)
         print("")
+        
+        ###########################################################
+        #Individual df uncertainties
+        ###########################################################
             
         ##MC?OVERLAY CHANGE HERE
         nue_bincenters = 0.5 * (nue_bin_edges[1:] + nue_bin_edges[:-1])
@@ -2160,8 +2214,23 @@ class Plotter:
         numu_sys_nue = self.add_detsys_error("numu_nue",numu_nue_uncertainties,self.weights["numu_nue"])
         print("numu_sys_nue: ")
         print(numu_sys_nue)
+        print("numu_nue_plotted_variable: ")
+        print(numu_nue_plotted_variable)
+        print("numu_nue_plotted_variable length: ")
+        print(len(numu_nue_plotted_variable))
         
-        
+        ratio_bins = np.arange(0, 5.5, 0.5)
+        ratio_bincenters = np.arange(0.25, 5.25, 0.5)
+        ratio_bin_edges = np.arange(0, 5.5, 0.5)
+        #ratio_bin_size = 0.5
+        ratio_bin_size = [(ratio_bin_edges[i + 1] - ratio_bin_edges[i]) / 2
+                    for i in range(len(ratio_bin_edges) - 1)] 
+        print("")
+        print("bins ", ratio_bins)
+        print("centers ", ratio_bincenters)
+        print("edges ", ratio_bin_edges)
+        print("size ", ratio_bin_size)
+        """
         my_rows, my_cols = (len(nue_mc_uncertainties), len(numu_mc_uncertainties))
         #ratio_err_mc = [[0]*my_cols]*my_rows
         ratio_err_mc = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
@@ -2185,7 +2254,68 @@ class Plotter:
         print("Ratio_err_mc = ")
         print(ratio_err_mc)
         print("")
+        """
+        ratio_err_mc = []
         
+        #for i in range(len(nue_err_mc)):
+        #    if nue_err_mc[i] > 0 and numu_err_mc[i] > 0:
+        #        rratio = nue_err_mc[i]/numu_err_mc[i]
+        #        ratio_err_mc.append(rratio)
+        #    else:
+        #        ratio_err_mc.append(0)
+        
+        #Get the numbers of that part correctly weighted that were selected
+        x_range=plot_options["range"]
+        n_bins=plot_options["bins"]  
+        weightVar=genieweight
+        
+        tree_nue_mc = self.samples["nue_mc"]
+        extra_query = "& " + self.nu_pdg
+        queried_tree_nue_mc = tree_nue_mc.query(nue_query+extra_query)
+        variable_nue = queried_tree_nue_mc[variable]
+        spline_fix_cv_nue_mc  = queried_tree_nue_mc[weightVar] * self.weights["nue_mc"]
+        nue_selected_mc, bins = np.histogram(
+                    variable_nue,
+                    range=x_range,
+                    bins=n_bins,
+                    weights=spline_fix_cv_nue_mc)  
+        print("nue_selected_mc ", nue_selected_mc)
+        
+        tree_numu_mc = self.samples["numu_mc"]
+        extra_query = "& " + self.nu_pdg
+        queried_tree_numu_mc = tree_numu_mc.query(numu_query+extra_query)
+        variable_numu = queried_tree_numu_mc[variable]
+        spline_fix_cv_numu_mc  = queried_tree_numu_mc[weightVar] * self.weights["numu_mc"]
+        numu_selected_mc, bins = np.histogram(
+                    variable_numu,
+                    range=x_range,
+                    bins=n_bins,
+                    weights=spline_fix_cv_numu_mc)  
+        print("numu_selected_mc ", numu_selected_mc)
+        
+        for i in range(len(nue_err_mc)):
+            dnue = 0
+            dnumu = 0
+            if nue_selected_mc[i] > 0:
+                dnue = (nue_err_mc[i]/nue_selected_mc[i])
+            if numu_selected_mc[i] > 0:
+                dnumu = (numu_err_mc[i]/numu_selected_mc[i])
+            rratio = rbin_ratios[i]*np.sqrt((dnue)**2 + (dnumu)**2)
+            ratio_err_mc.append(rratio)
+        
+        print("")
+        print("nue_err_mc: ")
+        print(nue_err_mc)
+        print("")
+        print("numu_err_mc: ")
+        print(numu_err_mc)
+        print("")
+        print("ratio_err_mc: ")
+        print(ratio_err_mc)
+        print("")
+        ratio_err_mc = np.array(ratio_err_mc)
+        
+        """
         my_rows, my_cols = (len(nue_nue_uncertainties), len(numu_nue_uncertainties))
         #ratio_err_mc = [[0]*my_cols]*my_rows
         ratio_err_nue = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
@@ -2208,7 +2338,60 @@ class Plotter:
         print("")
         print("Ratio_err_nue = ")
         print(ratio_err_nue)
-        print("")        
+        print("")   
+        """
+        ratio_err_nue = []
+        
+        #for i in range(len(nue_err_nue)):
+        #    if nue_err_nue[i] > 0 and numu_err_nue[i] > 0:
+        #        rratio = nue_err_nue[i]/numu_err_nue[i]
+        #        ratio_err_nue.append(rratio)
+        #    else:
+        #        ratio_err_nue.append(0)
+        
+        tree_nue_nue = self.samples["nue_nue"]
+        queried_tree_nue_nue = tree_nue_nue.query(nue_query)
+        variable_nue = queried_tree_nue_nue[variable]
+        spline_fix_cv_nue_nue  = queried_tree_nue_nue[weightVar] * self.weights["nue_nue"]
+        nue_selected_nue, bins = np.histogram(
+                    variable_nue,
+                    range=x_range,
+                    bins=n_bins,
+                    weights=spline_fix_cv_nue_nue)  
+        print("nue_selected_nue ", nue_selected_nue)
+        
+        tree_numu_nue = self.samples["numu_nue"]
+        queried_tree_numu_nue = tree_numu_nue.query(numu_query)
+        variable_numu = queried_tree_numu_nue[variable]
+        spline_fix_cv_numu_nue  = queried_tree_numu_nue[weightVar] * self.weights["numu_nue"]
+        numu_selected_nue, bins = np.histogram(
+                    variable_numu,
+                    range=x_range,
+                    bins=n_bins,
+                    weights=spline_fix_cv_numu_nue)  
+        print("numu_selected_nue ", numu_selected_nue)
+        
+        for i in range(len(nue_err_mc)):
+            dnue = 0
+            dnumu = 0
+            if nue_selected_nue[i] > 0:
+                dnue = (nue_err_nue[i]/nue_selected_nue[i])
+            if numu_selected_nue[i] > 0:
+                dnumu = (numu_err_nue[i]/numu_selected_nue[i])
+            rratio = rbin_ratios[i]*np.sqrt((dnue)**2 + (dnumu)**2)
+            ratio_err_nue.append(rratio)
+        
+        print("")
+        print("nue_err_nue: ")
+        print(nue_err_nue)
+        print("")
+        print("numu_err_nue: ")
+        print(numu_err_nue)
+        print("")
+        print("ratio_err_nue: ")
+        print(ratio_err_nue)
+        print("")
+        ratio_err_nue = np.array(ratio_err_nue)
         
         
 
@@ -2221,8 +2404,8 @@ class Plotter:
         #if ("dirt" in self.detsys.keys()):
         #    self.detsys["dirt"] = self.load_detsys_errors(variable,DETSYSPATH,bin_edges)
             nue_sys_dirt = self.add_detsys_error("nue_dirt",nue_dirt_uncertainties,self.weights["nue_dirt"])
-            print("nue_sys_dirt: ")
-            print(nue_sys_dirt)
+            #print("nue_sys_dirt: ")
+            #print(nue_sys_dirt)
             
         numu_err_dirt = np.array([0 for n in numu_mc_uncertainties])        
         if "numu_dirt" in self.samples:
@@ -2233,9 +2416,9 @@ class Plotter:
         #if ("dirt" in self.detsys.keys()):
         #    self.detsys["dirt"] = self.load_detsys_errors(variable,DETSYSPATH,bin_edges)
             numu_sys_dirt = self.add_detsys_error("numu_dirt",numu_dirt_uncertainties,self.weights["numu_dirt"])
-            print("numu_sys_dirt: ")
-            print(numu_sys_dirt)
-            
+            #print("numu_sys_dirt: ")
+            #print(numu_sys_dirt)
+        """   
         ratio_err_dirt = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]       
         if "numu_dirt" and "nue_dirt" in self.samples: 
             i = 0
@@ -2258,7 +2441,55 @@ class Plotter:
             print("Ratio_err_dirt = ")
             print(ratio_err_dirt)
             print("") 
-
+        """
+        ratio_err_dirt = []
+        
+       # for i in range(len(nue_err_dirt)):
+       #     if nue_err_dirt[i] > 0 and numu_err_dirt[i] > 0:
+       #         rratio = nue_err_dirt[i]/numu_err_dirt[i]
+       #         ratio_err_dirt.append(rratio)
+       #     else:
+       #         ratio_err_dirt.append(0)
+        
+        tree_nue_dirt = self.samples["nue_dirt"]
+        queried_tree_nue_dirt = tree_nue_dirt.query(nue_query)
+        variable_dirt = queried_tree_nue_dirt[variable]
+        spline_fix_cv_nue_dirt  = queried_tree_nue_dirt[weightVar] * self.weights["nue_dirt"]
+        nue_selected_dirt, bins = np.histogram(
+                    variable_dirt,
+                    range=x_range,
+                    bins=n_bins,
+                    weights=spline_fix_cv_nue_dirt)  
+        print("nue_selected_dirt ", nue_selected_dirt)
+        
+        tree_numu_dirt = self.samples["numu_dirt"]
+        queried_tree_numu_dirt = tree_numu_dirt.query(numu_query)
+        variable_numu = queried_tree_numu_dirt[variable]
+        spline_fix_cv_numu_dirt  = queried_tree_numu_dirt[weightVar] * self.weights["numu_dirt"]
+        numu_selected_dirt, bins = np.histogram(
+                    variable_numu,
+                    range=x_range,
+                    bins=n_bins,
+                    weights=spline_fix_cv_numu_dirt)  
+        print("numu_selected_dirt ", numu_selected_dirt)
+        
+        
+        for i in range(len(nue_err_mc)):
+            dnue = 0
+            dnumu = 0
+            if nue_selected_dirt[i] > 0:
+                dnue = (nue_err_dirt[i]/nue_selected_dirt[i])
+            if numu_selected_dirt[i] > 0:
+                dnumu = (numu_err_dirt[i]/numu_selected_dirt[i])
+            rratio = rbin_ratios[i]*np.sqrt((dnue)**2 + (dnumu)**2)
+            ratio_err_dirt.append(rratio)
+         
+        print("")
+        print("ratio_err_dirt: ")
+        print(ratio_err_dirt)
+        print("")
+        ratio_err_dirt = np.array(ratio_err_dirt)
+        
             
 #Shouldn't need these errors
         err_lee = np.array([0 for n in nue_mc_uncertainties])
@@ -2378,16 +2609,17 @@ class Plotter:
             numu_detsys_err = numu_sys_mc + numu_sys_nue + sys_ncpi0 + sys_ccpi0 + sys_ccnopi + sys_cccpi + sys_nccpi + sys_ncnopi
         #print("detsys_err: {}".format(detsys_err))
         numu_exp_err = np.sqrt(numu_exp_err**2 + numu_detsys_err**2)
-        print("")
-        print("numu_exp_err = ")        
-        print(numu_exp_err)
-        print("")
+        #print("")
+        #print("numu_exp_err = ")        
+        #print(numu_exp_err)
+        #print("")
         #print ('total exp_err : ', exp_err)
 
         numu_bin_size = [(numu_bin_edges[i + 1] - numu_bin_edges[i]) / 2
                     for i in range(len(numu_bin_edges) - 1)]     
         
         if draw_data:
+            """"
             ratio_err_ext = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
             i = 0
             for n in nue_n_ext:
@@ -2409,9 +2641,59 @@ class Plotter:
             print("Ratio_err_ext = ")
             print(ratio_err_ext)
             print("")
+            """
+            ratio_err_ext = []
+            #this has no extra genie weight
+            
+            #for i in range(len(nue_err_ext)):
+            #    if nue_err_ext[i] > 0 and numu_err_ext[i] > 0:
+            #        rratio = nue_err_ext[i]/numu_err_ext[i]
+            #        ratio_err_ext.append(rratio)
+            #    else:
+            #        ratio_err_ext.append(0)
+            
+            tree_nue_ext = self.samples["nue_ext"]
+            queried_tree_nue_ext = tree_nue_ext.query(nue_query)
+            variable_nue = queried_tree_nue_ext[variable]
+            #spline_fix_cv_nue_ext  = self.weights["nue_ext"]
+            nue_selected_ext, bins = np.histogram(
+                        variable_nue,
+                        range=x_range,
+                        bins=n_bins)  
+            print("nue_selected_ext ", nue_selected_ext)
+
+            tree_numu_ext = self.samples["numu_ext"]
+            queried_tree_numu_ext = tree_numu_ext.query(numu_query)
+            variable_numu = queried_tree_numu_ext[variable]
+            #spline_fix_cv_numu_ext  = self.weights["numu_ext"]
+            numu_selected_ext, bins = np.histogram(
+                        variable_numu,
+                        range=x_range,
+                        bins=n_bins)  
+            print("numu_selected_ext ", numu_selected_ext)
+            
+            for i in range(len(nue_err_mc)):
+                dnue = 0
+                dnumu = 0
+                if nue_selected_ext[i] > 0:
+                    dnue = (nue_err_ext[i]/nue_selected_ext[i])
+                if numu_selected_ext[i] > 0:
+                    dnumu = (numu_err_ext[i]/numu_selected_ext[i])
+                rratio = rbin_ratios[i]*np.sqrt((dnue)**2 + (dnumu)**2)
+                ratio_err_ext.append(rratio)
+            
+
+            print("")
+            print("ratio_err_ext: ")
+            print(ratio_err_ext)
+            print("")
         else:
             ratio_err_ext = np.zeros(len(numu_err_mc))
             
+            
+        ratio_err_ext = np.array(ratio_err_ext)
+            
+        """    
         #detsys = 0 so only need this line
         ratio_exp_erra    = np.add(ratio_err_mc, ratio_err_ext)
         ratio_exp_errb    = np.add(ratio_exp_erra, ratio_err_nue)
@@ -2422,12 +2704,17 @@ class Plotter:
         print(ratio_exp_err)
         print("")
         """
+        """
         ratio_exp_err_diag[np.diag_indices_from( ratio_exp_err_diag)] = ratio_exp_err
         print("")
         print("Ratio_exp_err diag= ")        
         print(ratio_exp_err_diag)
         print("")
         """
+        
+        ###########################################################
+        #Making cov matricies
+        ###########################################################
 
         self.nue_cov           = np.zeros([len(nue_exp_err), len(nue_exp_err)])
         self.nue_cov_mc_stat   = np.zeros([len(nue_exp_err), len(nue_exp_err)])
@@ -2461,15 +2748,43 @@ class Plotter:
         else:
             self.numu_cov_mc_detsys[np.diag_indices_from(self.numu_cov_mc_detsys)] = (numu_sys_mc + numu_sys_nue + sys_ncpi0 + sys_ccpi0 + sys_ccnopi + sys_cccpi + sys_nccpi + sys_ncnopi)**2 
             
-            
-        self.ratio_cov_mc_stat  = ratio_exp_err
+        #print("")
+        #print("self.numu_cov_mc_stat = ", self.numu_cov_mc_stat)
+        #print("")
+        ##self.rati
+        #print("")
+        #print("self.ratio_cov_mc_stat = ", self.ratio_cov_mc_stat)
+        #print("")
+        ##self.rati
+        
+        print("")
+        print("Into Cov MC Stat ratio:")
+        print("")
+        print("ratio_err_mc")
+        print(ratio_err_mc)
+        print("ratio_err_ext")
+        print(ratio_err_ext)
+        print("ratio_err_nue")
+        print(ratio_err_nue) #<--
+        print("ratio_err_nue")
+        print(ratio_err_dirt)
+        
+        self.ratio_cov_mc_stat[np.diag_indices_from(self.ratio_cov_mc_stat)]     = (ratio_err_mc + ratio_err_ext + ratio_err_nue + ratio_err_dirt + err_ncpi0 + err_ccpi0 + err_ccnopi + err_cccpi + err_nccpi + err_ncnopi)
+        print("")
+        print("self.ratio_cov_mc_stat = ", self.ratio_cov_mc_stat)
+        print("")
+        #self.ratio_cov_mc_stat  = ratio_exp_err
         #detsys cov will be 0, so leave it
             
             
         
-        
+        print("")
+        print("Into Draw Sys")
+        print("")
         if draw_sys:
             if (COVMATRIX == ""):
+                print("")
+                print("----------------------------------------------------")
                 print("IN COVMATRIX_XS_PPFX (NUE)")
                 self.nue_cov = (self.sys_err("weightsPPFX",variable,nue_query,plot_options["range"],plot_options["bins"],genieweight, "nue")+
                             self.sys_err("weightsGenie",variable,nue_query,plot_options["range"],plot_options["bins"],genieweight, "nue")+
@@ -2486,12 +2801,14 @@ class Plotter:
             nue_exp_err = np.sqrt( np.diag((self.nue_cov + self.nue_cov_mc_stat + self.nue_cov_mc_detsys))) # + exp_err*exp_err) # Is this the error line?
 
             np.set_printoptions(formatter={'float': lambda x: "{0:0.3f}".format(x)})
-            print("draw Sys (NUE)")
+            print("drawn Sys (NUE)")
+            print("----------------------------------------------------")
             
             #cov = self.sys_err("weightsFlux", variable, query, plot_options["range"], plot_options["bins"], "weightSplineTimesTuneTimesPPFX")
             
         if draw_sys:
             if (COVMATRIX == ""):
+                print("")
                 print("IN COVMATRIX_XS_PPFX (NUMU)")
                 self.numu_cov = (self.sys_err("weightsPPFX",variable,numu_query,plot_options["range"],plot_options["bins"],genieweight, "numu")+
                             self.sys_err("weightsGenie",variable,numu_query,plot_options["range"],plot_options["bins"],genieweight, "numu")+
@@ -2508,30 +2825,39 @@ class Plotter:
             numu_exp_err = np.sqrt( np.diag((self.numu_cov + self.numu_cov_mc_stat + self.numu_cov_mc_detsys))) # + exp_err*exp_err) # Is this the error line?
 
             np.set_printoptions(formatter={'float': lambda x: "{0:0.3f}".format(x)})
-            print("draw Sys (NUMU)")
+            print("drawn Sys (NUMU)")
+            print("----------------------------------------------------")
             
             
         if draw_sys:
             if (COVMATRIX == ""):
+                print("")
                 print("IN COVMATRIX_XS_PPFX (RATIO)")
-                self.ratio_cov = (self.sys_err_ratio("weightsPPFX",variable,nue_query,numu_query,plot_options["range"],plot_options["bins"],genieweight, nue_var_dict, nue_weight_dict)+
-                            self.sys_err_ratio("weightsGenie",variable,nue_query,numu_query,plot_options["range"],plot_options["bins"],genieweight)+
-                            self.sys_err_ratio("weightsReint",variable,nue_query,numu_query, plot_options["range"],plot_options["bins"],genieweight))
+                self.ratio_cov = (self.sys_err_ratio("weightsPPFX",variable,nue_query,numu_query,plot_options["range"],plot_options["bins"],genieweight, nue_var_dict, nue_weight_dict, nue_ext_plotted_variable, numu_var_dict, numu_weight_dict, numu_ext_plotted_variable, cat_labels, kind, plot_options)+
+                            self.sys_err_ratio("weightsGenie",variable,nue_query,numu_query,plot_options["range"],plot_options["bins"],genieweight, nue_var_dict, nue_weight_dict, nue_ext_plotted_variable, numu_var_dict, numu_weight_dict, numu_ext_plotted_variable, cat_labels, kind, plot_options)+
+                            self.sys_err_ratio("weightsReint",variable,nue_query,numu_query, plot_options["range"],plot_options["bins"],genieweight, nue_var_dict, nue_weight_dict, nue_ext_plotted_variable, numu_var_dict, numu_weight_dict, numu_ext_plotted_variable, cat_labels, kind, plot_options))
                 if draw_geoSys:
-                    print("Add Drawing Geo Sys (numu)")
-                    self.ratio_cov += self.sys_err_NuMIGeo("weightsNuMIGeo",variable,numu_query,plot_options["range"],plot_options["bins"],genieweight, "numu")
+                    print("Add Drawing Geo Sys (ratio)")
+                    self.ratio_cov += self.sys_err_NuMIGeo_ratio("weightsNuMIGeo",variable,nue_query,numu_query,plot_options["range"],plot_options["bins"],genieweight, nue_var_dict, nue_weight_dict, nue_ext_plotted_variable, numu_var_dict, numu_weight_dict, numu_ext_plotted_variable, cat_labels, kind, plot_options)
 
                 #self.cov = (self.sys_err("weightsReint",variable,query,plot_options["range"],plot_options["bins"],genieweight))
 
             else:
                 self.ratio_cov = self.get_SBNFit_cov_matrix(COVMATRIX,len(numu_bin_edges)-1)
                 
-            ratio_exp_err = np.sqrt( np.diag((self.numu_cov + self.numu_cov_mc_stat + self.numu_cov_mc_detsys)))
+            ratio_exp_err = np.sqrt( np.diag((self.ratio_cov + self.ratio_cov_mc_stat + self.ratio_cov_mc_detsys)))
+            print("self.ratio_cov ",self.ratio_cov ) #~0.2
+            print("")
+            print("self.ratio_cov_mc_stat ", self.ratio_cov_mc_stat) ## ~0.8
+            print("")
+            print("self.ratio_cov_mc_detsys ", self.ratio_cov_mc_detsys) # 0
+            print("")
+            print("ratio_exp_err ", ratio_exp_err)
+            print("")
 
             np.set_printoptions(formatter={'float': lambda x: "{0:0.3f}".format(x)})
-            print("draw Sys (RATIO)")            
-            
-            
+            print("drawn Sys (RATIO)")      
+            print("----------------------------------------------------")
             
             
             
@@ -2558,9 +2884,10 @@ class Plotter:
         #ax1.bar(bincenters, n_tot, facecolor='none',
         #       edgecolor='none', width=0, yerr=exp_err)
         
-        
+        ratio_n_tot = rbin_ratios
         nue_ax1.bar(nue_bincenters, nue_exp_err*2,width=[n*2 for n in nue_bin_size],facecolor='tab:blue',alpha=0.2,bottom=(nue_n_tot-nue_exp_err))
-        numu_ax1.bar(numu_bincenters, numu_exp_err*2,width=[n*2 for n in numu_bin_size],facecolor='tab:blue',alpha=0.2,bottom=(numu_n_tot-numu_exp_err))        
+        numu_ax1.bar(numu_bincenters, numu_exp_err*2,width=[n*2 for n in numu_bin_size],facecolor='tab:blue',alpha=0.2,bottom=(numu_n_tot-numu_exp_err))
+        ratio_ax1.bar(ratio_bincenters, ratio_exp_err*2,width=[n*2 for n in ratio_bin_size],facecolor='tab:blue',alpha=0.2,bottom=(ratio_n_tot-ratio_exp_err))
         #ax1.errorbar(bincenters,n_tot,yerr=exp_err,fmt='k.',lw=35,alpha=0.2)
         '''
         ax1.fill_between(
@@ -2573,6 +2900,7 @@ class Plotter:
         '''
 
         if draw_data:
+            plot_options.pop('color', None)
             nue_n_data, nue_bins = np.histogram(nue_data_plotted_variable, **plot_options)
             self.nue_data = nue_n_data
             nue_data_err = self._data_err(nue_n_data,asymErrs)
@@ -2946,7 +3274,7 @@ class Plotter:
         #fig = plt.figure(figsize=(8, 7))
         gs = gridspec.GridSpec(1, 1)#, height_ratios=[2, 1])
         #gs = gridspec.GridSpec(2, 1, height_ratios=[2, 1])
-        print (gs[0])
+        #print (gs[0])
 
         ax1 = plt.subplot(gs[0])
         #ax2 = plt.subplot(gs[1])
@@ -3219,7 +3547,7 @@ class Plotter:
 
             ##MC/OVERLAY
             extra_query = ""
-            if t == "nue_mc" or "numu_mc":
+            if t == ("nue_mc" or "numu_mc"):
                 extra_query = "& " + self.nu_pdg # "& ~(abs(nu_pdg) == 12 & ccnc == 0) & ~(npi0 == 1 & category != 5)"
 
             queried_tree = tree.query(query+extra_query)
@@ -3257,12 +3585,12 @@ class Plotter:
                     # n is an array - of full number mc in that df
                     n, bins = np.histogram(
                         variable, weights=weight*spline_fix_var, range=x_range, bins=n_bins)
-                    print("n = ", n)
                     n_tot[i] += n           #will run 500 times
 
         cov = np.empty([len(n_cv), len(n_cv)])
         cov.fill(0)
 
+        print("n_tot ", n_tot)
         for n in n_tot:
             for i in range(len(n_cv)):
                 for j in range(len(n_cv)):
@@ -3273,9 +3601,9 @@ class Plotter:
         return cov
     
         # NuMI needs to add PPFX workaround for dirt
-    def sys_err_ratio(self, name, var_name, query_nue, query_numu, x_range, n_bins, weightVar, nue_var_dict, nue_weight_dict):
+    def sys_err_ratio(self, name, var_name, query_nue, query_numu, x_range, n_bins, weightVar, nue_var_dict, nue_weight_dict, nue_ext_plotted_variable, numu_var_dict, numu_weight_dict, numu_ext_plotted_variable, cat_labels, kind, plot_options):
         # how many universes?
-        Nuniverse = 10 #100 #len(df)
+        Nuniverse = 500 #100 #len(df)
         print("Universes",Nuniverse)
 
         n_tot = np.empty([Nuniverse, n_bins])
@@ -3286,20 +3614,40 @@ class Plotter:
         #for t in self.samples:
         #    if t in ["nue_ext", "numu_ext","nue_data", "numu_data", "lee", "data_7e18", "data_1e20","nue_dirt","numu_dirt"]: 
         #        continue
-        keylist = [["nue_mc", "numu_mc"], ["nue_nue", "numu_nue"]]
+        
+        #keylist = [["nue_mc", "numu_mc"], ["nue_nue", "numu_nue"]]
+        #what we actually need is nue_nue and numu_mc in a ratio
+        keylist = [["nue_nue", "numu_mc"]]
 
         for t in keylist:
+            #print(" KEYS , ", t)
             
             tree_nue = self.samples[t[0]]
             tree_numu = self.samples[t[1]]
             
             ##MC/OVERLAY
-            extra_query = ""
-            if t[0] or t[1] == "nue_mc" or "numu_mc":
-                extra_query = "& " + self.nu_pdg
+            extra_query_nue = ""
+            extra_query_numu = ""
+            if t[0] == "nue_mc":
+                extra_query_nue = "& " + self.nu_pdg
+            if t[1] == "numu_mc":
+                extra_query_numu = "& " + self.nu_pdg
+            if t[0] == "numu_mc":
+                extra_query_numu = "& " + self.nu_pdg
+            if t[1] == "nue_mc":
+                extra_query_nue = "& " + self.nu_pdg
 
-            queried_tree_nue = tree_nue.query(query_nue+extra_query)
-            queried_tree_numu = tree_numu.query(query_numu+extra_query)
+            #removed extra query for truth test
+            #queried_tree_nue = tree_nue.query(query_nue+extra_query)
+            queried_tree_nue = tree_nue.query(query_nue+extra_query_nue)
+            queried_tree_numu = tree_numu.query(query_numu+extra_query_numu)
+            #print("")
+            #print("----------------------------------------------------------------------")
+            #print("queried_tree_nue ", queried_tree_nue)
+            #print("----------------------------------------------------------------------")
+            #print("queried_tree_numu ", queried_tree_numu)
+            #print("----------------------------------------------------------------------")
+            #print("")
             variable_nue = queried_tree_nue[var_name]
             variable_numu = queried_tree_numu[var_name]
             syst_weights_nue = queried_tree_nue[name]
@@ -3325,6 +3673,7 @@ class Plotter:
              
             stacksort = 3
 
+            #DO THIS FIRST FOR NUE
             # order stacked distributions
             nue_order_dict = {}
             nue_order_var_dict    = {}
@@ -3403,13 +3752,12 @@ class Plotter:
             nue_total = sum(sum(nue_order_weight_dict[c]) for c in nue_order_var_dict)
             #if draw_data:
             nue_total += sum([self.weights["nue_ext"]] * len(nue_ext_plotted_variable))
-            print("total ", nue_total)
+            #print("total nue in sys ratio err ", nue_total)
             labels = [
                 "%s: %.1f" % (cat_labels[c], sum(nue_order_weight_dict[c])) \
                 if sum(nue_order_weight_dict[c]) else ""
                 for c in nue_order_var_dict.keys()
             ]
-
 
             if kind == "event_category":
                 plot_options["color"] = [category_colors[c]
@@ -3423,46 +3771,224 @@ class Plotter:
             else:
                 plot_options["color"] = [int_colors[c]
                                          for c in nue_order_var_dict.keys()]
-
-            nue_stacked = np.hist(
-                nue_order_var_dict.values(),
-                weights=list(nue_order_weight_dict.values()),
-                stacked=True,
-                label=labels,
-                **plot_options)
-
-            n_cv, bins = np.histogram(
+                
+            #print(" VARIABLE NUE: , ", variable_nue)
+            n_cv_nue, bins = np.histogram(
                     variable_nue,
                     range=x_range,
                     bins=n_bins,
                     weights=spline_fix_cv_nue)
-            n_cv_tot += n_cv    #this should run twice
-            print("")
-            print("ncv")
-            print(n_cv)
 
-            if not df.empty:  #df is the df of weights here
+           # nue_stacked = np.histogram(
+           #     nue_order_var_dict.values(),
+           #     weights=list(nue_order_weight_dict.values()),
+           #     stacked=True,
+           #     label=labels,
+           #     **plot_options)
+            
+            
+            #NOW DO IT FOR NUMU
+            # order stacked distributions
+            numu_order_dict = {}
+            numu_order_var_dict    = {}
+            numu_order_weight_dict = {}
+            if (stacksort >= 1 and stacksort <= 3):
+                # figure out ordering based on total yield.
+                # Options are to have no exceptions (stacksort=1),
+                # put eLEE on top (stacksort=2), or put nue+eLEE on top (stacksort=3)
+                # put numu on top (stacksort >= 4)
+                has1   = False
+                has10  = False
+                has11  = False
+                has111 = False
+                has12  = False
+                for c in numu_var_dict.keys():
+                    if stacksort >= 2:
+                        if int(c)==111:
+                            has111 = True
+                            continue
+                    if stacksort == 3:
+                        if int(c)==1:
+                            has1 = True
+                            continue
+                        if int(c)==12:
+                            has12 = True
+                            continue
+
+                        if int(c)==10:
+                            has10 = True
+                            continue
+                        if int(c)==11:
+                            has11 = True
+                            continue
+                    numu_order_dict[c] = sum(numu_weight_dict[c])
+                    numu_order_dict = {k: v for k, v in sorted(numu_order_dict.items(), key=lambda item: item[1])}
+                if has1:
+                    numu_order_dict[1] = sum(numu_weight_dict[1])
+                if has1:
+                    numu_order_dict[12] = sum(numu_weight_dict[12])
+                if has10:
+                    numu_order_dict[10] = sum(numu_weight_dict[10])
+                if has11:
+                    numu_order_dict[11] = sum(numu_weight_dict[11])
+                if has111:
+                    numu_order_dict[111] = sum(numu_weight_dict[111])
+                # now that the order has been sorted out, fill the actual dicts
+                for c in numu_order_dict.keys():
+                    numu_order_var_dict[c] = numu_var_dict[c]
+                for c in numu_order_dict.keys():
+                    numu_order_weight_dict[c] = numu_weight_dict[c]
+                    #print("order w sum ", sum(numu_order_weight_dict[c]), " c ", c)
+            elif stacksort == 4:
+                #put the numu stuff on top
+                hasprotons = 23 in numu_var_dict.keys()
+                keys = list(numu_var_dict.keys())
+                if hasprotons:
+                    keys.remove(22)#take them out
+                    keys.remove(23)
+                    keys.remove(24)
+                    keys.remove(25)
+                    keys.append(22)#and put at end
+                    keys.append(23)
+                    keys.append(24)
+                    keys.append(25)
+
+                for c in keys:
+                    numu_order_var_dict[c] = numu_var_dict[c]
+                    numu_order_weight_dict[c] = numu_weight_dict[c]
+            else:
+                for c in numu_var_dict.keys():
+                    numu_order_var_dict[c] = numu_var_dict[c]
+                for c in weight_dict.keys():
+                    numu_order_weight_dict[c] = numu_weight_dict[c]
+
+
+            numu_total = sum(sum(numu_order_weight_dict[c]) for c in numu_order_var_dict)
+            #if draw_data:
+            numu_total += sum([self.weights["numu_ext"]] * len(numu_ext_plotted_variable))
+            #print("total numu in sys ratio err ", numu_total)
+            labels = [
+                "%s: %.1f" % (cat_labels[c], sum(numu_order_weight_dict[c])) \
+                if sum(numu_order_weight_dict[c]) else ""
+                for c in numu_order_var_dict.keys()
+            ]
+
+
+            if kind == "event_category":
+                plot_options["color"] = [category_colors[c]
+                                         for c in numu_order_var_dict.keys()]
+            elif kind == "particle_pdg":
+                plot_options["color"] = [pdg_colors[c]
+                                         for c in numu_order_var_dict.keys()]
+            elif kind == "flux":
+                plot_options["color"] = [flux_colors[c]
+                                         for c in numu_order_var_dict.keys()]
+            else:
+                plot_options["color"] = [int_colors[c]
+                                         for c in numu_order_var_dict.keys()]
+
+           # nue_stacked = np.histogram(
+           #     nue_order_var_dict.values(),
+           #     weights=list(nue_order_weight_dict.values()),
+           #     stacked=True,
+           #     label=labels,
+           #     **plot_options)
+            
+          #  n_cv_nue, bins = np.histogram(
+          #          variable_nue,
+          #          range=x_range,
+          #          bins=n_bins,
+          #          weights=spline_fix_cv_nue)
+            
+            #print(" VARIABLE NUMU: , ", variable_numu)
+            n_cv_numu, bins = np.histogram(
+                    variable_numu,
+                    range=x_range,
+                    bins=n_bins,
+                    weights=spline_fix_cv_numu)            
+            
+            rbin_cv_ratios = []
+            
+            #print("len(n_cv_numu) ", len(n_cv_numu))
+
+            for i in range(len(n_cv_numu)):
+                #print("n_cv_nue[i] ", n_cv_nue[i])
+                #print("n_cv_numu[i] ", n_cv_numu[i])
+                if n_cv_nue[i] > 0 and n_cv_numu[i] > 0:
+                    rratio = n_cv_nue[i]/n_cv_numu[i]
+                    rbin_cv_ratios.append(rratio)
+                else:
+                    rbin_cv_ratios.append(0)
+
+            
+            #print("")
+            #print("bin_cv_ratios:")
+            #print(rbin_cv_ratios)
+            #print("")
+            
+            
+            n_cv_tot += rbin_cv_ratios    #this should run twice
+
+            
+            
+            if (not df_n.empty) and (not df_m.empty):  #df is the df of weights here
                 for i in range(Nuniverse):
-                    weight = df[i].values / 1000. 
-                    weight[np.isnan(weight)] = 1
-                    weight[weight > 100] = 1
-                    weight[weight < 0] = 1
-                    weight[weight == np.inf] = 1
+                    weight_n = df_n[i].values / 1000. 
+                    weight_n[np.isnan(weight_n)] = 1
+                    weight_n[weight_n > 100] = 1
+                    weight_n[weight_n < 0] = 1
+                    weight_n[weight_n == np.inf] = 1
+                    weight_m = df_m[i].values / 1000. 
+                    weight_m[np.isnan(weight_m)] = 1
+                    weight_m[weight_m > 100] = 1
+                    weight_m[weight_m < 0] = 1
+                    weight_m[weight_m == np.inf] = 1                    
                     # n is an array - of full number mc in that df
-                    n, bins = np.histogram(
-                            variable, weights=weight*spline_fix_var, range=x_range, bins=n_bins)
-                    print("n = ", n)
-                    n_tot[i] += n           #will run 500 times
+                    n_n, bins = np.histogram(
+                            variable_nue, weights=weight_n*spline_fix_var_nue, range=x_range, bins=n_bins)
+                    n_m, bins = np.histogram(
+                            variable_numu, weights=weight_m*spline_fix_var_numu, range=x_range, bins=n_bins)       
+                    
+                    rbin_ratios_sys = []
+        
+                    for g in range(len(n_n)):
+                        if n_n[g] > 0 and n_m[g] > 0:
+                            rratio = n_n[g]/n_m[g]
+                            rbin_ratios_sys.append(rratio)
+                        else:
+                            rbin_ratios_sys.append(0)
 
-        cov = np.empty([len(n_cv), len(n_cv)])
+                    #print("")
+                    #print("bin_ratios:")
+                    #print(rbin_ratios_sys)
+                    #print("")
+
+                    #n->rbin_ratios_sys
+                    n_tot[i] += rbin_ratios_sys          #will run 500 times
+                    #print("i ", i)
+                    #print("n_tot[i]", n_tot[i])
+                    #print("n_tot ", n_tot)
+
+        cov = np.empty([len(rbin_cv_ratios), len(rbin_cv_ratios)])
         cov.fill(0)
+        #print("n_tot")
+        #print(n_tot)
+        #print("")
+        #print("n_cv_tot")
+        #print(n_cv_tot)
 
         for n in n_tot:
-            for i in range(len(n_cv)):
-                for j in range(len(n_cv)):
+            for i in range(len(rbin_cv_ratios)):
+                for j in range(len(rbin_cv_ratios)):
+                    #print("n[i]", n[i])
+                    #print("n_cv_tot[i]", n_cv_tot[i])
                     cov[i][j] += (n[i] - n_cv_tot[i]) * (n[j] - n_cv_tot[j])
 
         cov /= Nuniverse
+        print("")
+        print("cov of ratio sys error = ", cov)
+        print("--------------------------------------------------")
+        print("")
 
         return cov
 
@@ -3491,7 +4017,7 @@ class Plotter:
 
 
             extra_query = ""
-            if t == "nue_mc" or "numu_mc":
+            if t == ("nue_mc" or "numu_mc"):
                 extra_query = "& " + self.nu_pdg # "& ~(abs(nu_pdg) == 12 & ccnc == 0) & ~(npi0 == 1 & category != 5)"
 
             queried_tree = tree.query(query+extra_query)
@@ -3561,7 +4087,7 @@ class Plotter:
                
                 tree = self.samples[t]
                 extra_query = ""
-                if t == "nue_mc" or "numu_mc":
+                if t == ("nue_mc" or "numu_mc"):
                     extra_query = "& " + self.nu_pdg # "& ~(abs(nu_pdg) == 12 & ccnc == 0) & ~(npi0 == 1 & category != 5)"
 
                 queried_tree = tree.query(query+extra_query)
@@ -3597,6 +4123,7 @@ class Plotter:
 
                         n, bins = np.histogram(
                             variable, weights=weight*spline_fix_var, range=x_range, bins=n_bins)
+                        #print("i = ", i)
                         n_tot[i] += n
 
             tempCov = np.empty([len(n_cv), len(n_cv)])
@@ -3611,8 +4138,374 @@ class Plotter:
                 cov = tempCov
             else:
                 cov += tempCov
+            
+        print("")
+        print("cov NuMI Geo = ", cov)
+        print("")
 
             
+        return cov
+    
+    def sys_err_NuMIGeo_ratio(self, name, var_name, query_nue, query_numu, x_range, n_bins, weightVar, nue_var_dict, nue_weight_dict, nue_ext_plotted_variable, numu_var_dict, numu_weight_dict, numu_ext_plotted_variable, cat_labels, kind, plot_options):
+        # how many universes?
+        Nuniverse = 10 #100 
+        print("Universes NuMI Geo: ",Nuniverse)
+
+        for variationNumber in [x*2 for x in range(10)]:
+            n_tot = np.empty([2, n_bins])
+            n_cv_tot = np.empty(n_bins)
+            n_tot.fill(0)
+            n_cv_tot.fill(0)########
+
+            #for t in self.samples:
+            #    if t in ["nue_ext", "numu_ext","nue_data", "numu_data", "lee", "data_7e18", "data_1e20","nue_dirt","numu_dirt"]: 
+            #        continue
+            #keylist = [["nue_mc", "numu_mc"], ["nue_nue", "numu_nue"]]
+            keylist = [["nue_nue", "numu_mc"]]
+            
+
+            for t in keylist:
+
+                tree_nue = self.samples[t[0]]
+                tree_numu = self.samples[t[1]]
+
+                ##MC/OVERLAY
+                extra_query_nue = ""
+                extra_query_numu = ""
+                if t[0] == "nue_mc":
+                    extra_query_nue = "& " + self.nu_pdg
+                if t[1] == "numu_mc":
+                    extra_query_numu = "& " + self.nu_pdg
+                if t[0] == "numu_mc":
+                    extra_query_numu = "& " + self.nu_pdg
+                if t[1] == "nue_mc":
+                    extra_query_nue = "& " + self.nu_pdg
+
+                queried_tree_nue = tree_nue.query(query_nue+extra_query_nue)
+                queried_tree_numu = tree_numu.query(query_numu+extra_query_numu)
+                variable_nue = queried_tree_nue[var_name]
+                variable_numu = queried_tree_numu[var_name]
+                syst_weights_nue = queried_tree_nue[name]
+                syst_weights_numu = queried_tree_numu[name]
+
+                spline_fix_cv_nue  = queried_tree_nue[weightVar] * self.weights[t[0]]
+                spline_fix_var_nue = queried_tree_nue[weightVar] * self.weights[t[0]]
+                spline_fix_cv_numu  = queried_tree_numu[weightVar] * self.weights[t[1]]
+                spline_fix_var_numu = queried_tree_numu[weightVar] * self.weights[t[1]]
+                if (name != "weightsNuMIGeo"):
+                    sys.exit(1)
+
+                sn = syst_weights_nue
+                df_n = pd.DataFrame(sn.values.tolist())
+                sm = syst_weights_numu
+                df_m = pd.DataFrame(sm.values.tolist())
+
+                if var_name[-2:] == "_v":
+                    #this will break for vector, "_v", entries
+                    variable_nue = variable_nue.apply(lambda x: x[0])
+                    variable_numu = variable_numu.apply(lambda x: x[0])
+
+                stacksort = 3
+
+                # order stacked distributions
+                nue_order_dict = {}
+                nue_order_var_dict    = {}
+                nue_order_weight_dict = {}
+                if (stacksort >= 1 and stacksort <= 3):
+                    # figure out ordering based on total yield.
+                    # Options are to have no exceptions (stacksort=1),
+                    # put eLEE on top (stacksort=2), or put nue+eLEE on top (stacksort=3)
+                    # put numu on top (stacksort >= 4)
+                    has1   = False
+                    has10  = False
+                    has11  = False
+                    has111 = False
+                    has12  = False
+                    for c in nue_var_dict.keys():
+                        if stacksort >= 2:
+                            if int(c)==111:
+                                has111 = True
+                                continue
+                        if stacksort == 3:
+                            if int(c)==1:
+                                has1 = True
+                                continue
+                            if int(c)==12:
+                                has12 = True
+                                continue
+
+                            if int(c)==10:
+                                has10 = True
+                                continue
+                            if int(c)==11:
+                                has11 = True
+                                continue
+                        nue_order_dict[c] = sum(nue_weight_dict[c])
+                        nue_order_dict = {k: v for k, v in sorted(nue_order_dict.items(), key=lambda item: item[1])}
+                    if has1:
+                        nue_order_dict[1] = sum(nue_weight_dict[1])
+                    if has1:
+                        nue_order_dict[12] = sum(nue_weight_dict[12])
+                    if has10:
+                        nue_order_dict[10] = sum(nue_weight_dict[10])
+                    if has11:
+                        nue_order_dict[11] = sum(nue_weight_dict[11])
+                    if has111:
+                        nue_order_dict[111] = sum(nue_weight_dict[111])
+                    # now that the order has been sorted out, fill the actual dicts
+                    for c in nue_order_dict.keys():
+                        nue_order_var_dict[c] = nue_var_dict[c]
+                    for c in nue_order_dict.keys():
+                        nue_order_weight_dict[c] = nue_weight_dict[c]
+                        #print("order w sum ", sum(numu_order_weight_dict[c]), " c ", c)
+                elif stacksort == 4:
+                    #put the numu stuff on top
+                    hasprotons = 23 in nue_var_dict.keys()
+                    keys = list(nue_var_dict.keys())
+                    if hasprotons:
+                        keys.remove(22)#take them out
+                        keys.remove(23)
+                        keys.remove(24)
+                        keys.remove(25)
+                        keys.append(22)#and put at end
+                        keys.append(23)
+                        keys.append(24)
+                        keys.append(25)
+
+                    for c in keys:
+                        nue_order_var_dict[c] = nue_var_dict[c]
+                        nue_order_weight_dict[c] = nue_weight_dict[c]
+                else:
+                    for c in nue_var_dict.keys():
+                        nue_order_var_dict[c] = nue_var_dict[c]
+                    for c in weight_dict.keys():
+                        nue_order_weight_dict[c] = nue_weight_dict[c]
+
+
+                nue_total = sum(sum(nue_order_weight_dict[c]) for c in nue_order_var_dict)
+                #if draw_data:
+                nue_total += sum([self.weights["nue_ext"]] * len(nue_ext_plotted_variable))
+                #print("total ", nue_total)
+                labels = [
+                    "%s: %.1f" % (cat_labels[c], sum(nue_order_weight_dict[c])) \
+                    if sum(nue_order_weight_dict[c]) else ""
+                    for c in nue_order_var_dict.keys()
+                ]
+
+
+                if kind == "event_category":
+                    plot_options["color"] = [category_colors[c]
+                                             for c in nue_order_var_dict.keys()]
+                elif kind == "particle_pdg":
+                    plot_options["color"] = [pdg_colors[c]
+                                             for c in nue_order_var_dict.keys()]
+                elif kind == "flux":
+                    plot_options["color"] = [flux_colors[c]
+                                             for c in nue_order_var_dict.keys()]
+                else:
+                    plot_options["color"] = [int_colors[c]
+                                             for c in nue_order_var_dict.keys()]
+
+               # nue_stacked = np.histogram(
+               #     nue_order_var_dict.values(),
+               #     weights=list(nue_order_weight_dict.values()),
+               #     stacked=True,
+               #     label=labels,
+               #     **plot_options)
+
+                
+                #NOW DO IT FOR NUMU
+                # order stacked distributions
+                numu_order_dict = {}
+                numu_order_var_dict    = {}
+                numu_order_weight_dict = {}
+                if (stacksort >= 1 and stacksort <= 3):
+                    # figure out ordering based on total yield.
+                    # Options are to have no exceptions (stacksort=1),
+                    # put eLEE on top (stacksort=2), or put nue+eLEE on top (stacksort=3)
+                    # put numu on top (stacksort >= 4)
+                    has1   = False
+                    has10  = False
+                    has11  = False
+                    has111 = False
+                    has12  = False
+                    for c in numu_var_dict.keys():
+                        if stacksort >= 2:
+                            if int(c)==111:
+                                has111 = True
+                                continue
+                        if stacksort == 3:
+                            if int(c)==1:
+                                has1 = True
+                                continue
+                            if int(c)==12:
+                                has12 = True
+                                continue
+
+                            if int(c)==10:
+                                has10 = True
+                                continue
+                            if int(c)==11:
+                                has11 = True
+                                continue
+                        numu_order_dict[c] = sum(numu_weight_dict[c])
+                        numu_order_dict = {k: v for k, v in sorted(numu_order_dict.items(), key=lambda item: item[1])}
+                    if has1:
+                        numu_order_dict[1] = sum(numu_weight_dict[1])
+                    if has1:
+                        numu_order_dict[12] = sum(numu_weight_dict[12])
+                    if has10:
+                        numu_order_dict[10] = sum(numu_weight_dict[10])
+                    if has11:
+                        numu_order_dict[11] = sum(numu_weight_dict[11])
+                    if has111:
+                        numu_order_dict[111] = sum(numu_weight_dict[111])
+                    # now that the order has been sorted out, fill the actual dicts
+                    for c in numu_order_dict.keys():
+                        numu_order_var_dict[c] = numu_var_dict[c]
+                    for c in numu_order_dict.keys():
+                        numu_order_weight_dict[c] = numu_weight_dict[c]
+                        #print("order w sum ", sum(numu_order_weight_dict[c]), " c ", c)
+                elif stacksort == 4:
+                    #put the numu stuff on top
+                    hasprotons = 23 in numu_var_dict.keys()
+                    keys = list(numu_var_dict.keys())
+                    if hasprotons:
+                        keys.remove(22)#take them out
+                        keys.remove(23)
+                        keys.remove(24)
+                        keys.remove(25)
+                        keys.append(22)#and put at end
+                        keys.append(23)
+                        keys.append(24)
+                        keys.append(25)
+
+                    for c in keys:
+                        numu_order_var_dict[c] = numu_var_dict[c]
+                        numu_order_weight_dict[c] = numu_weight_dict[c]
+                else:
+                    for c in numu_var_dict.keys():
+                        numu_order_var_dict[c] = numu_var_dict[c]
+                    for c in weight_dict.keys():
+                        numu_order_weight_dict[c] = numu_weight_dict[c]
+
+
+                numu_total = sum(sum(numu_order_weight_dict[c]) for c in numu_order_var_dict)
+                #if draw_data:
+                numu_total += sum([self.weights["numu_ext"]] * len(numu_ext_plotted_variable))
+                #print("total ", numu_total)
+                labels = [
+                    "%s: %.1f" % (cat_labels[c], sum(numu_order_weight_dict[c])) \
+                    if sum(numu_order_weight_dict[c]) else ""
+                    for c in numu_order_var_dict.keys()
+                ]
+
+
+                if kind == "event_category":
+                    plot_options["color"] = [category_colors[c]
+                                             for c in numu_order_var_dict.keys()]
+                elif kind == "particle_pdg":
+                    plot_options["color"] = [pdg_colors[c]
+                                             for c in numu_order_var_dict.keys()]
+                elif kind == "flux":
+                    plot_options["color"] = [flux_colors[c]
+                                             for c in numu_order_var_dict.keys()]
+                else:
+                    plot_options["color"] = [int_colors[c]
+                                             for c in numu_order_var_dict.keys()]
+
+               # nue_stacked = np.histogram(
+               #     nue_order_var_dict.values(),
+               #     weights=list(nue_order_weight_dict.values()),
+               #     stacked=True,
+               #     label=labels,
+               #     **plot_options)
+
+                n_cv_nue, bins = np.histogram(
+                        variable_nue,
+                        range=x_range,
+                        bins=n_bins,
+                        weights=spline_fix_cv_nue)
+
+                n_cv_numu, bins = np.histogram(
+                        variable_numu,
+                        range=x_range,
+                        bins=n_bins,
+                        weights=spline_fix_cv_numu)            
+
+                rbin_cv_ratios = []
+
+                for i in range(len(n_cv_numu)):
+                    if n_cv_nue[i] > 0 and n_cv_numu[i] > 0:
+                        rratio = n_cv_nue[i]/n_cv_numu[i]
+                        rbin_cv_ratios.append(rratio)
+                    else:
+                        rbin_cv_ratios.append(0)
+
+                #print("")
+                #print("bin_cv_ratios in geo sys:")
+                #print(rbin_cv_ratios)
+                #print("")
+
+
+                n_cv_tot += rbin_cv_ratios    #this should run twice
+
+
+                if (not df_n.empty) and (not df_m.empty):  #df is the df of weights here
+                    for i in range(2):
+                        weight_n = df_n[i+variationNumber].values
+                        weight_n[np.isnan(weight_n)] = 1
+                        weight_n[weight_n > 100] = 1
+                        weight_n[weight_n < 0] = 1
+                        weight_n[weight_n == np.inf] = 1
+                        weight_m = df_m[i+variationNumber].values
+                        weight_m[np.isnan(weight_m)] = 1
+                        weight_m[weight_m > 100] = 1
+                        weight_m[weight_m < 0] = 1
+                        weight_m[weight_m == np.inf] = 1                    
+                        # n is an array - of full number mc in that df
+                        n_n, bins = np.histogram(
+                                variable_nue, weights=weight_n*spline_fix_var_nue, range=x_range, bins=n_bins)
+                        n_m, bins = np.histogram(
+                                variable_numu, weights=weight_m*spline_fix_var_numu, range=x_range, bins=n_bins)       
+
+                        rbin_ratios_sys = []
+
+                        for j in range(len(n_n)):
+                            if n_n[j] > 0 and n_m[j] > 0:
+                                rratio = n_n[j]/n_m[j]
+                                rbin_ratios_sys.append(rratio)
+                            else:
+                                rbin_ratios_sys.append(0)
+
+                        #print("")
+                        #print("bin_ratios in NuMI Geo Ratio Sys:")
+                        #print(rbin_ratios_sys)
+                        #print("")
+
+                        #n->rbin_ratios_sys
+                        n_tot[i] += rbin_ratios_sys          #will run 500 times
+
+
+            tempCov = np.empty([len(rbin_cv_ratios), len(rbin_cv_ratios)])
+            tempCov.fill(0)
+            for n in n_tot:
+                for i in range(len(rbin_cv_ratios)):
+                    for j in range(len(rbin_cv_ratios)):
+                        tempCov[i][j] += (n[i] - n_cv_tot[i]) * (n[j] - n_cv_tot[j])
+
+
+            tempCov /= 2
+            if variationNumber == 0:
+                cov = tempCov
+            else:
+                cov += tempCov            
+
+            
+        #print("")
+        #print("cov NuMI Geo ratio = ", cov)
+        #print("")
+
         return cov
 
     def get_SBNFit_cov_matrix(self,COVMATRIX,NBINS):
