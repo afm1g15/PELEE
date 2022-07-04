@@ -16,7 +16,6 @@ Example:
         title="$E_{deposited}$ [GeV]",
         bins=20,
         range=(0, 2)
-    )
 
 Attributes:
     category_labels (dict): Description of event categories
@@ -1142,7 +1141,9 @@ class Plotter:
         if (len(nue_var_dict) != 0):
             c, nue_order_var_dict, nue_order_weight_dict = Plotter_Functions_Alex.plotColourSorting.sortStackDists(stacksort, nue_var_dict, nue_weight_dict)
         else:
-            return nue_fig, nue_ax1, nue_ax1
+            print("Had to return early.")
+            #return nue_fig, nue_ax1, nue_ax1, nue_var_dict, nue_weight_dict
+            return nue_var_dict, nue_weight_dict, nue_weight_dict
 
         nue_total = sum(sum(nue_order_weight_dict[c]) for c in nue_order_var_dict)
         
@@ -1151,6 +1152,9 @@ class Plotter:
             if sum(nue_order_weight_dict[c]) else ""
             for c in nue_order_var_dict.keys()
         ]
+        
+        #print("cat labels")
+        #print(cat_labels)
 
 
         if kind == "event_category":
@@ -1172,6 +1176,9 @@ class Plotter:
             stacked=True,
             label=labels,
             **plot_options)
+        
+        #print("plot opts")
+        #print(**plot_options)
 
         nue_total_array = np.concatenate(list(nue_order_var_dict.values()))
         nue_total_weight = np.concatenate(list(nue_order_weight_dict.values()))
@@ -1385,9 +1392,11 @@ class Plotter:
         elif ratio:
             return nue_fig, nue_ax1, nue_ax2, nue_stacked, labels, numu_fig, numu_ax1, labels
         elif draw_data:
-            return nue_fig, nue_ax1, nue_stacked, labels
+            print("Returning")
+            #return nue_fig, nue_ax1, nue_stacked, labels, nue_order_var_dict, nue_order_weight_dict
+            return nue_order_var_dict, nue_order_weight_dict, labels
         else:
-            return nue_fig, nue_ax1, nue_stacked, labels
+            return nue_fig, nue_ax1, nue_stacked, labels, nue_order_var_dict, nue_order_weight_dict
 
     def _plot_variable_samples(self, variable, query, title, asymErrs, **plot_options):
 
@@ -1911,6 +1920,7 @@ class Plotter:
         ax2.set_ylabel('Efficiency', fontsize=15)
         ax2.set_title("True Numu Energy and Efficiency") 
         plt.text(0, 0.95, r'MicroBooNE Preliminary', fontweight='bold')
+        plt.close()
        
 
         #plt.show()
