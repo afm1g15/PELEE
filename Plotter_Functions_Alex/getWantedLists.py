@@ -125,8 +125,8 @@ def getWantedLists(wanted_key, numu_stacked):
         
         
         #print("")
-        print("EIGHT DIFF")
-        print(eightlist)
+        #print("EIGHT DIFF")
+        #print(eightlist)
         eightdiff = [abs(k-l) for k,l in zip(eightlist[:-1], eightlist[1:])]
         print(eightdiff)
         if (len(eightlist) != 0):
@@ -161,7 +161,7 @@ def getWantedLists(wanted_key, numu_stacked):
         difflist = [abs(k-l) for k,l in zip(sumlist[:-1], sumlist[1:])]
         print(difflist)
         print("")
-        print("Numu Wanted List:")
+        print("Wanted List:")
         print(numu_wanted_list)
         print("")
         
