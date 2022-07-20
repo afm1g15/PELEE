@@ -674,7 +674,7 @@ class Plotter:
             if (colvals.sum() != 0):
                 print ('name : ',colname)
                 print ('nan entries : ',colvals.sum())
-        '''  
+        '''
         df = sample.query(sel_query)
         
         #if (track_cuts != None):
@@ -961,13 +961,13 @@ class Plotter:
                 query)["leeweight"] * self.weights["lee"]
 
         nue_total_weight = np.concatenate((nue_mc_weight, nue_nue_weight, nue_ext_weight, nue_dirt_weight, ncpi0_weight, ccpi0_weight, ccnopi_weight, cccpi_weight, nccpi_weight, ncnopi_weight, lee_weight))
-        nuw_total_variable = np.concatenate((nue_mc_plotted_variable, nue_nue_plotted_variable, nue_ext_plotted_variable, nue_dirt_plotted_variable, ncpi0_plotted_variable, ccpi0_plotted_variable, ccnopi_plotted_variable, cccpi_plotted_variable, nccpi_plotted_variable, ncnopi_plotted_variable, lee_plotted_variable))
+        nue_total_variable = np.concatenate((nue_mc_plotted_variable, nue_nue_plotted_variable, nue_ext_plotted_variable, nue_dirt_plotted_variable, ncpi0_plotted_variable, ccpi0_plotted_variable, ccnopi_plotted_variable, cccpi_plotted_variable, nccpi_plotted_variable, ncnopi_plotted_variable, lee_plotted_variable))
         numu_total_weight = np.concatenate((numu_mc_weight, numu_nue_weight, numu_ext_weight, numu_dirt_weight, ncpi0_weight, ccpi0_weight, ccnopi_weight, cccpi_weight, nccpi_weight, ncnopi_weight, lee_weight))
         numu_total_variable = np.concatenate((numu_mc_plotted_variable, numu_nue_plotted_variable, numu_ext_plotted_variable, numu_dirt_plotted_variable, ncpi0_plotted_variable, ccpi0_plotted_variable, ccnopi_plotted_variable, cccpi_plotted_variable, nccpi_plotted_variable, ncnopi_plotted_variable, lee_plotted_variable))
         return nue_total_variable, nue_total_weight, numu_total_variable, numu_total_weight
 
 ############################################################################################################################
-    def plot_variable(self, variable, query="selected==1", currentsample = "nue_nue", typeerr = "standard", weight = "weightsPPFX", title="", kind="event_category", draw_geoSys=False,
+    def plot_variable(self, variable, query="selected==1", currentsample = "nue_nue", typeerr = "standard", weight = "weightsPPFX", category_query = "", title="", kind="event_category", draw_geoSys=False,
                       draw_sys=False, stacksort=0, track_cuts=None, select_longest=False,
                       detsys=None,ratio=True,chisq=False,draw_data=True,asymErrs=False,genieweight="weightSplineTimesTuneTimesPPFX",
                       ncol=2,
@@ -1057,10 +1057,10 @@ class Plotter:
         
         if (typeerr == "standard"):
             print("standard sys err")
-            n_cv_tot, n_tots = self.sys_err(weight,variable,query,plot_options["range"],plot_options["bins"],genieweight, "nue")
+            n_cv_tot, n_tots, dfs, df_vars, df_splines = self.sys_err(weight,variable,query,plot_options["range"],plot_options["bins"],genieweight, "nue", categorization, category_query)
         elif (typeerr == "NuMIGeo"):
             print("NuMI Geo sys err")
-            n_cv_tot, n_tots = self.sys_err_NuMIGeo("weightsNuMIGeo",variable,query,plot_options["range"],plot_options["bins"],genieweight, "nue")
+            n_cv_tot, n_tots, dfs, df_vars, df_splines = self.sys_err_NuMIGeo("weightsNuMIGeo",variable,query,plot_options["range"],plot_options["bins"],genieweight, "nue", categorization, category_query)
         
         
         
@@ -1073,17 +1073,22 @@ class Plotter:
             return nue_fig, nue_ax1, nue_ax2, nue_stacked, labels, numu_fig, numu_ax1, labels
         elif draw_data:
             print("Returning")
-            return n_cv_tot, n_tots, n_tots
+            print("--------------------------")
+            print("")
+            return n_cv_tot, n_tots, dfs, df_vars, df_splines
         else:
             return nue_fig, nue_ax1, nue_stacked, labels, nue_order_var_dict, nue_order_weight_dict
 
         
 #############################################################################################################################
-    def sys_err(self, name, var_name, query, x_range, n_bins, weightVar, key):
+    def sys_err(self, name, var_name, query, x_range, n_bins, weightVar, key, categorization, category_query):
         n_tots = []
+        dfs_ppfx = []
+        df_ppfx_vars = []
+        df_ppfx_splines = []
         
         # how many universes?
-        Nuniverse = 10 #100 #len(df)
+        Nuniverse = 20 #100 #len(df)
         print("Universes",Nuniverse)
 
         n_tot = np.empty([Nuniverse, n_bins])
@@ -1099,9 +1104,16 @@ class Plotter:
             extra_query = ""
             if t == ("nue_mc" or "numu_mc"):
                 extra_query = "& " + self.nu_pdg
+                print("extra query added.")
+                
+            if t == ("nue_mc" or "numu_mc"):
+                extra_cut = "& " + self.nu_pdg
+            else:
+                extra_cut = None
 
-            queried_tree = tree.query(query+extra_query)
+            queried_tree = tree.query(query+extra_query+category_query)
             variable = queried_tree[var_name]
+            #print(queried_tree["category"])
             syst_weights = queried_tree[name]
             
             spline_fix_cv  = queried_tree[weightVar] * self.weights[t]
@@ -1111,9 +1123,18 @@ class Plotter:
 
             s = syst_weights
             df = pd.DataFrame(s.values.tolist())
-
+            
             if var_name[-2:] == "_v":
                 variable = variable.apply(lambda x: x[0])
+                
+            track_cuts = None
+            select_longest=False
+            
+            #category, mc_plotted_variable = categorization(
+            #        tree, "reco_e", query=query, extra_cut=extra_cut, track_cuts=track_cuts, select_longest=select_longest)
+            
+            #print(category)
+            #print(type(category))
 
             n_cv, bins = np.histogram(
                 variable,
@@ -1135,6 +1156,9 @@ class Plotter:
                     n_tot[i] += n           #will run 500 times
                     
         n_tots.append(n_tot)
+        dfs_ppfx.append(df)
+        df_ppfx_vars.append(variable)
+        df_ppfx_splines.append(spline_fix_var)
         """
         cov = np.empty([len(n_cv), len(n_cv)])
         cov.fill(0)
@@ -1148,12 +1172,15 @@ class Plotter:
         cov /= Nuniverse
         """
         
-        return n_cv_tot, n_tots            
+        return n_cv_tot, n_tots, dfs_ppfx, df_ppfx_vars, df_ppfx_splines            
     
                       
-    def sys_err_NuMIGeo(self, name, var_name, query, x_range, n_bins, weightVar, key):
+    def sys_err_NuMIGeo(self, name, var_name, query, x_range, n_bins, weightVar, key, categorization, category_query):
       # how many universes?
         n_tots = []
+        dfs_geo = []
+        df_geo_vars = []
+        df_geo_splines = []
         
         print("Number of variations Universes",10)
         for variationNumber in [x*2 for x in range(10)]:
@@ -1207,6 +1234,9 @@ class Plotter:
 
                         
                 n_tots.append(n_tot)
+                dfs_geo.append(df)
+                df_geo_vars.append(variable)
+                df_geo_splines.append(spline_fix_var)
     #        tempCov = np.empty([len(n_cv), len(n_cv)])
     #        tempCov.fill(0)
     #        for n in n_tot:
@@ -1225,7 +1255,7 @@ class Plotter:
 #        print("")
 
             
-        return n_cv_tot, n_tots
+        return n_cv_tot, n_tots, dfs_geo, df_geo_vars, df_geo_splines 
                       
 ##############################################################################################################################
     def _plot_variable_samples(self, variable, query, title, asymErrs, **plot_options):
