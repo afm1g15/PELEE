@@ -730,6 +730,7 @@ class Plotter:
     def _categorize_entries(self, sample, variable, query="selected==1", extra_cut=None, track_cuts=None, select_longest=True):
         category = self._selection(
             "category", sample, query=query, extra_cut=extra_cut, track_cuts=track_cuts, select_longest=select_longest)
+        #print("CATEGORY = ", category)
         plotted_variable = self._selection(
             variable, sample, query=query, extra_cut=extra_cut, track_cuts=track_cuts, select_longest=select_longest)
 
@@ -1218,7 +1219,8 @@ class Plotter:
 
         current_total_array = np.concatenate(list(current_order_var_dict.values()))
         current_total_weight = np.concatenate(list(current_order_weight_dict.values()))
-        wanted_key = 5 # 7 for full, 5 for truth 
+        
+        wanted_key = 1 # 7 for full, 5 for truth 
 
         current_wanted_list = Plotter_Functions_Alex.getWantedLists.getWantedLists(wanted_key, current_stacked)
         
@@ -1241,6 +1243,7 @@ class Plotter:
         elif (currentsample == "numu_dirt"):
             current_selected = self.samples["numu_dirt"].query(query)
             
+        """    
         current_selected_fid = current_selected.query(current_fiduc_q)
         bins = np.arange(0, 5.5, 0.5)
         norm = True 
@@ -1254,7 +1257,7 @@ class Plotter:
                 else:
                     current_norm_array[i][j] = 0
                     
-      
+        """
         #nue_smeared_array = np.matmul(np.array(nue_wanted_list), nue_norm_array)
         
         #nue_wanted_list_smeared = list(nue_smeared_array)
@@ -1263,6 +1266,7 @@ class Plotter:
         current_wanted_list_smeared = current_wanted_list
         current_smeared_array = np.array(current_wanted_list)
         
+        """
         if (currentsample == "nue_nue"):
             current_eff = self.plot_signal_and_eff_and_B(current_selected_fid, self.samples["nue_nue"], current_fiduc_q, bins, self.samples["nue_nue"].query(current_fiduc_q))
         elif (currentsample == "nue_mc"):
@@ -1288,6 +1292,7 @@ class Plotter:
         print(current_ratio_nums)
         print("")
 
+        """
         plot_options.pop('color', None)
 
         current_total_hist, current_total_bins = np.histogram(

@@ -1088,7 +1088,7 @@ class Plotter:
         df_ppfx_splines = []
         
         # how many universes?
-        Nuniverse = 20 #100 #len(df)
+        Nuniverse = 500 #100 #len(df)
         print("Universes",Nuniverse)
 
         n_tot = np.empty([Nuniverse, n_bins])
@@ -1127,8 +1127,8 @@ class Plotter:
             if var_name[-2:] == "_v":
                 variable = variable.apply(lambda x: x[0])
                 
-            track_cuts = None
-            select_longest=False
+            #track_cuts = None
+            #select_longest=False
             
             #category, mc_plotted_variable = categorization(
             #        tree, "reco_e", query=query, extra_cut=extra_cut, track_cuts=track_cuts, select_longest=select_longest)
@@ -1159,6 +1159,9 @@ class Plotter:
         dfs_ppfx.append(df)
         df_ppfx_vars.append(variable)
         df_ppfx_splines.append(spline_fix_var)
+        #careful here re categories
+        
+        
         """
         cov = np.empty([len(n_cv), len(n_cv)])
         cov.fill(0)
@@ -1170,6 +1173,9 @@ class Plotter:
                     cov[i][j] += (n[i] - n_cv_tot[i]) * (n[j] - n_cv_tot[j])
 
         cov /= Nuniverse
+        print("cov ")
+        print(cov)
+        print("")
         """
         
         return n_cv_tot, n_tots, dfs_ppfx, df_ppfx_vars, df_ppfx_splines            
@@ -1196,7 +1202,7 @@ class Plotter:
                 if t == ("nue_mc" or "numu_mc"):
                     extra_query = "& " + self.nu_pdg # "& ~(abs(nu_pdg) == 12 & ccnc == 0) & ~(npi0 == 1 & category != 5)"
 
-                queried_tree = tree.query(query+extra_query)
+                queried_tree = tree.query(query+extra_query+category_query)
                 variable = queried_tree[var_name]
                 syst_weights = queried_tree[name]
                 spline_fix_cv  = queried_tree[weightVar] * self.weights[t]
