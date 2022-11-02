@@ -1048,7 +1048,6 @@ class Plotter:
             current_category, current_plotted_variable = categorization(
                 self.samples["nue_dirt"], variable, query=query, track_cuts=track_cuts, select_longest=select_longest) 
         elif (currentsample == "numu_mc"):
-            print("current sample is: ", currentsample)
             current_category, current_plotted_variable = categorization(
                 self.samples["numu_mc"], variable, query=query, extra_cut=self.nu_pdg, track_cuts=track_cuts, select_longest=select_longest)
         elif (currentsample == "numu_dirt"):
@@ -1087,7 +1086,7 @@ class Plotter:
                 current_weight_dict[c].append(self.weights["numu_mc"] * w)
             elif (currentsample == "numu_dirt"):
                 current_weight_dict[c].append(self.weights["numu_dirt"] * w)    
-
+       
         
         if "ncpi0" in self.samples:
             ncpi0_genie_weights = self._get_genie_weight(
@@ -1186,6 +1185,7 @@ class Plotter:
             return current_var_dict, current_weight_dict, current_weight_dict
 
         current_total = sum(sum(current_order_weight_dict[c]) for c in current_order_var_dict)
+        print("current_total ", current_total)
         
         labels = [
             "%s: %.1f" % (cat_labels[c], sum(current_order_weight_dict[c])) \
@@ -1207,6 +1207,19 @@ class Plotter:
             plot_options["color"] = [int_colors[c]
                                      for c in current_order_var_dict.keys()]
 
+        #print("---------------Current order var----------------")
+        #print(len(current_order_var_dict[2]))
+        #print(np.sum(~np.isnan(current_order_var_dict[2])))
+        #print(type(current_order_var_dict[2]))
+        #print(current_order_var_dict[2])
+        #print("-------------------------------")
+        #print("----------current weight var------------")
+        #print(len(current_order_weight_dict[2]))
+        #print(np.sum(~np.isnan(current_order_weight_dict[2])))
+        #print(type(current_order_weight_dict[2]))
+        #print(current_order_weight_dict[2])
+        #print("-------------------------------")
+            
         current_stacked = nue_ax1.hist(
             current_order_var_dict.values(),
             weights=list(current_order_weight_dict.values()),
@@ -1214,15 +1227,30 @@ class Plotter:
             label=labels,
             **plot_options)
         
+        #print("-----------------current stacked--------------")
+        #print(len(current_stacked))
+        #print(np.sum(~np.isnan(current_stacked)))
+        #print(type(current_stacked))
+        #print(current_stacked)
+        #print("-------------------------------")
+        
         #print("plot opts")
         #print(**plot_options)
 
         current_total_array = np.concatenate(list(current_order_var_dict.values()))
         current_total_weight = np.concatenate(list(current_order_weight_dict.values()))
         
+        #print("-----------------current total array--------------")
+        #print(len(current_total_array))
+        #print(np.sum(~np.isnan(current_total_array)))
+        #print(type(current_total_array))
+        #print(current_total_array)
+        #print("-------------------------------")
+        
         wanted_key = 1 # 7 for full, 5 for truth 
 
         current_wanted_list = Plotter_Functions_Alex.getWantedLists.getWantedLists(wanted_key, current_stacked)
+        print("current_wanted_list ", current_wanted_list)
         
         #Remove smearing part
         ###################################################################
@@ -1298,6 +1326,8 @@ class Plotter:
         current_total_hist, current_total_bins = np.histogram(
             current_total_array, weights=current_total_weight,  **plot_options)
         
+        print("current_total_hist ", current_total_hist)
+        
        
         
         ##############################################################
@@ -1317,7 +1347,8 @@ class Plotter:
         
         print("")        
         print("current n_tot ", current_n_tot)
-        #print("total array ", nue_total_array)
+        print("total array ", current_total_array)
+        print("total weight array ", current_total_weight)
 
           
 

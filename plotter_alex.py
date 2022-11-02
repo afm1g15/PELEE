@@ -38,6 +38,12 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
 
+import importlib
+import Plotter_Functions_Alex
+importlib.reload(Plotter_Functions_Alex)
+from Plotter_Functions_Alex import plotColourSorting, getWantedLists
+importlib.reload(plotColourSorting)
+
 
 category_labels = {
     1: r"$\nu_e$ Other",
@@ -961,7 +967,7 @@ class Plotter:
                 query)["leeweight"] * self.weights["lee"]
 
         nue_total_weight = np.concatenate((nue_mc_weight, nue_nue_weight, nue_ext_weight, nue_dirt_weight, ncpi0_weight, ccpi0_weight, ccnopi_weight, cccpi_weight, nccpi_weight, ncnopi_weight, lee_weight))
-        nuw_total_variable = np.concatenate((nue_mc_plotted_variable, nue_nue_plotted_variable, nue_ext_plotted_variable, nue_dirt_plotted_variable, ncpi0_plotted_variable, ccpi0_plotted_variable, ccnopi_plotted_variable, cccpi_plotted_variable, nccpi_plotted_variable, ncnopi_plotted_variable, lee_plotted_variable))
+        nue_total_variable = np.concatenate((nue_mc_plotted_variable, nue_nue_plotted_variable, nue_ext_plotted_variable, nue_dirt_plotted_variable, ncpi0_plotted_variable, ccpi0_plotted_variable, ccnopi_plotted_variable, cccpi_plotted_variable, nccpi_plotted_variable, ncnopi_plotted_variable, lee_plotted_variable))
         numu_total_weight = np.concatenate((numu_mc_weight, numu_nue_weight, numu_ext_weight, numu_dirt_weight, ncpi0_weight, ccpi0_weight, ccnopi_weight, cccpi_weight, nccpi_weight, ncnopi_weight, lee_weight))
         numu_total_variable = np.concatenate((numu_mc_plotted_variable, numu_nue_plotted_variable, numu_ext_plotted_variable, numu_dirt_plotted_variable, ncpi0_plotted_variable, ccpi0_plotted_variable, ccnopi_plotted_variable, cccpi_plotted_variable, nccpi_plotted_variable, ncnopi_plotted_variable, lee_plotted_variable))
         return nue_total_variable, nue_total_weight, numu_total_variable, numu_total_weight
@@ -1259,6 +1265,10 @@ class Plotter:
         ##OVERLAY MC CHANGE HERE
         nue_category, nue_mc_plotted_variable = categorization(
             self.samples["nue_mc"], variable, query=nue_query, extra_cut=self.nu_pdg, track_cuts=track_cuts, select_longest=select_longest)
+        nue_category_mc_unis = nue_category
+        print("nue_category_mc_unis", nue_category_mc_unis)
+        print("nue_category", nue_category)
+        nue_mc_plotted_variable_mc_unis = nue_mc_plotted_variable
         
         numu_category, numu_mc_plotted_variable = categorization(
             self.samples["numu_mc"], variable, query=numu_query, extra_cut=self.nu_pdg, track_cuts=track_cuts, select_longest=select_longest)
@@ -1268,6 +1278,7 @@ class Plotter:
         nue_weight_dict = defaultdict(list)
         nue_mc_genie_weights = self._get_genie_weight(
             self.samples["nue_mc"], variable, query=nue_query, extra_cut=self.nu_pdg, track_cuts=track_cuts,select_longest=select_longest, weightvar=genieweight)
+        nue_mc_genie_weights_mc_unis = nue_mc_genie_weights
         
         numu_var_dict = defaultdict(list)
         numu_weight_dict = defaultdict(list)
@@ -1280,9 +1291,12 @@ class Plotter:
 
         nue_nue_genie_weights = self._get_genie_weight(
             self.samples["nue_nue"], variable, query=nue_query, track_cuts=track_cuts, select_longest=select_longest, weightvar=genieweight)
+        nue_nue_genie_weights_nue_unis = nue_nue_genie_weights
 
         nue_category, nue_nue_plotted_variable = categorization(
             self.samples["nue_nue"], variable, query=nue_query, track_cuts=track_cuts, select_longest=select_longest)
+        nue_category_nue_unis = nue_category
+        nue_nue_plotted_variable_nue_unis = nue_nue_plotted_variable
         
         for c, v, w in zip(numu_category, numu_mc_plotted_variable, numu_mc_genie_weights):
             numu_var_dict[c].append(v)
@@ -1365,8 +1379,11 @@ class Plotter:
         if "nue_dirt" in self.samples:
             nue_dirt_genie_weights = self._get_genie_weight(
                 self.samples["nue_dirt"], variable, query=nue_query, track_cuts=track_cuts, select_longest=select_longest, weightvar=genieweight)
+            nue_dirt_genie_weights_dirt_unis = nue_dirt_genie_weights
             nue_category, nue_dirt_plotted_variable = categorization(
                 self.samples["nue_dirt"], variable, query=nue_query, track_cuts=track_cuts, select_longest=select_longest)
+            nue_category_dirt_unis = nue_category
+            nue_dirt_plotted_variable_dirt_unis = nue_dirt_plotted_variable
 
             for c, v, w in zip(nue_category, nue_dirt_plotted_variable, nue_dirt_genie_weights):
                 nue_var_dict[c].append(v)
@@ -1387,13 +1404,8 @@ class Plotter:
         if "lee" in self.samples:
             category, lee_plotted_variable = categorization(
                 self.samples["lee"], variable, query=query, track_cuts=track_cuts, select_longest=select_longest)
-            #print ('weight 1 : ',len(self.samples["lee"].query(query)["leeweight"]))
-            #print ('weight 2 : ',len(self._selection("weightSplineTimesTuneTimesPPFX", self.samples["lee"], query=query, track_cuts=track_cuts, select_longest=select_longest)))
-            #print ('track cuts : ',track_cuts)
-            #print ('select_longest : ',select_longest)
             leeweight = self._get_genie_weight(
                 self.samples["lee"], variable, query=query, track_cuts=track_cuts, select_longest=select_longest,weightsignal="leeweight", weightvar=genieweight)
-            #self.samples["lee"].query(query)["leeweight"] * self._selection("weightSplineTimesTuneTimesPPFX", self.samples["lee"], query=query, track_cuts=track_cuts, select_longest=select_longest)
 
             for c, v, w in zip(category, lee_plotted_variable, leeweight):
                 var_dict[c].append(v)
@@ -1448,80 +1460,7 @@ class Plotter:
             ratio_ax1 = plt.subplot(ratio_gs[0])
 
 #-------------------------------
-        # order stacked distributions
-        nue_order_dict = {}
-        nue_order_var_dict    = {}
-        nue_order_weight_dict = {}
-        if (stacksort >= 1 and stacksort <= 3):
-            # figure out ordering based on total yield.
-            # Options are to have no exceptions (stacksort=1),
-            # put eLEE on top (stacksort=2), or put nue+eLEE on top (stacksort=3)
-            # put numu on top (stacksort >= 4)
-            has1   = False
-            has10  = False
-            has11  = False
-            has111 = False
-            has12  = False
-            for c in nue_var_dict.keys():
-                if stacksort >= 2:
-                    if int(c)==111:
-                        has111 = True
-                        continue
-                if stacksort == 3:
-                    if int(c)==1:
-                        has1 = True
-                        continue
-                    if int(c)==12:
-                        has12 = True
-                        continue
-
-                    if int(c)==10:
-                        has10 = True
-                        continue
-                    if int(c)==11:
-                        has11 = True
-                        continue
-                nue_order_dict[c] = sum(nue_weight_dict[c])
-                nue_order_dict = {k: v for k, v in sorted(nue_order_dict.items(), key=lambda item: item[1])}
-            if has1:
-                nue_order_dict[1] = sum(nue_weight_dict[1])
-            if has1:
-                nue_order_dict[12] = sum(nue_weight_dict[12])
-            if has10:
-                nue_order_dict[10] = sum(nue_weight_dict[10])
-            if has11:
-                nue_order_dict[11] = sum(nue_weight_dict[11])
-            if has111:
-                nue_order_dict[111] = sum(nue_weight_dict[111])
-            # now that the order has been sorted out, fill the actual dicts
-            for c in nue_order_dict.keys():
-                nue_order_var_dict[c] = nue_var_dict[c]
-            for c in nue_order_dict.keys():
-                nue_order_weight_dict[c] = nue_weight_dict[c]
-                #print("order w sum ", sum(nue_order_weight_dict[c]), " c ", c)
-        elif stacksort == 4:
-            #put the numu stuff on top
-            hasprotons = 23 in nue_var_dict.keys()
-            keys = list(nue_var_dict.keys())
-            if hasprotons:
-                keys.remove(22)#take them out
-                keys.remove(23)
-                keys.remove(24)
-                keys.remove(25)
-                keys.append(22)#and put at end
-                keys.append(23)
-                keys.append(24)
-                keys.append(25)
-
-            for c in keys:
-                nue_order_var_dict[c] = nue_var_dict[c]
-                nue_order_weight_dict[c] = weight_dict[c]
-        else:
-            for c in nue_var_dict.keys():
-                nue_order_var_dict[c] = nue_var_dict[c]
-            for c in weight_dict.keys():
-                nue_order_weight_dict[c] = weight_dict[c]
-
+        c, nue_order_var_dict, nue_order_weight_dict = Plotter_Functions_Alex.plotColourSorting.sortStackDists(stacksort, nue_var_dict, nue_weight_dict)
 
         nue_total = sum(sum(nue_order_weight_dict[c]) for c in nue_order_var_dict)
         if draw_data:
@@ -1547,13 +1486,6 @@ class Plotter:
             plot_options["color"] = [int_colors[c]
                                      for c in nue_order_var_dict.keys()]
 
-        #for key in order_var_dict:
-        #    print ('key ',key)
-        #    print ('val ',order_var_dict[key])
-        #for key in order_weight_dict:
-        #    print ('key ',key)
-        #    print ('val ',order_weight_dict[key])
-
         nue_stacked = nue_ax1.hist(
             nue_order_var_dict.values(),
             weights=list(nue_order_weight_dict.values()),
@@ -1563,124 +1495,9 @@ class Plotter:
 
         nue_total_array = np.concatenate(list(nue_order_var_dict.values()))
         nue_total_weight = np.concatenate(list(nue_order_weight_dict.values()))
-        nue_wanted_list = []
         wanted_key = 5 # 7 for full, 5 for truth 
-        
-        import numpy
-        sumlist = []
-        zlist = []
-        onelist = []
-        twolist = []
-        threelist = []
-        fourlist = []
-        fivelist = []
-        sixlist = []
-        sevenlist = []
-        eightlist = []
-        ninelist = []
-        for i in nue_stacked:
-            for j in i:
-                #print(j)
-                if (type(j) == numpy.ndarray):
-                    #print("sum: ", sum(j))
-                    sumlist.append(sum(j))
-                    zlist.append(j[0])
-                    onelist.append(j[1])
-                    twolist.append(j[2])
-                    threelist.append(j[3])
-                    fourlist.append(j[4])
-                    fivelist.append(j[5])
-                    sixlist.append(j[6])
-                    sevenlist.append(j[7])
-                    eightlist.append(j[8])
-                    ninelist.append(j[9])
-        
-        #print("")
-        #print("ZERO DIFF")
-        #print(zlist)
-        zdiff = [abs(k-l) for k,l in zip(zlist[:-1], zlist[1:])]
-        #print(zdiff)
-        nue_wanted_list.append(zdiff[wanted_key])
-        
-        #print("")
-        #print("ONE DIFF")
-        #print(onelist)
-        onediff = [abs(k-l) for k,l in zip(onelist[:-1], onelist[1:])]
-        #print(onediff)
-        nue_wanted_list.append(onediff[wanted_key])
-                
-        #print("")
-        #print("TWO DIFF")
-        #print(twolist)
-        twodiff = [abs(k-l) for k,l in zip(twolist[:-1], twolist[1:])]
-        #print(twodiff)
-        nue_wanted_list.append(twodiff[wanted_key])
-        
-        #print("")
-        #print("THREE DIFF")
-        #print(threelist)
-        threediff = [abs(k-l) for k,l in zip(threelist[:-1], threelist[1:])]
-        #print(threediff)
-        nue_wanted_list.append(threediff[wanted_key])
-        
-        #print("")
-        #print("FOUR DIFF")
-        #print(fourlist)
-        fourdiff = [abs(k-l) for k,l in zip(fourlist[:-1], fourlist[1:])]
-        #print(fourdiff) 
-        nue_wanted_list.append(fourdiff[wanted_key])
-        
-        #print("")
-        #print("FIVE DIFF")
-        #print(fivelist)
-        fivediff = [abs(k-l) for k,l in zip(fivelist[:-1], fivelist[1:])]
-        #print(fivediff)
-        nue_wanted_list.append(fivediff[wanted_key])
-        
-        #print("")
-        #print("SIX DIFF")
-        #print(sixlist)
-        sixdiff = [abs(k-l) for k,l in zip(sixlist[:-1], sixlist[1:])]
-        #print(sixdiff)
-        nue_wanted_list.append(sixdiff[wanted_key])
-        
-        #print("")
-        #print("SEVEN DIFF")
-        #print(sevenlist)
-        sevendiff = [abs(k-l) for k,l in zip(sevenlist[:-1], sevenlist[1:])]
-        #print(sevendiff)
-        nue_wanted_list.append(sevendiff[wanted_key])
-        
-        #print("")
-        #print("EIGHT DIFF")
-        #print(eightlist)
-        eightdiff = [abs(k-l) for k,l in zip(eightlist[:-1], eightlist[1:])]
-        #print(eightdiff)
-        nue_wanted_list.append(eightdiff[wanted_key])
-        
-        #print("")
-        #print("NINE DIFF")
-        #print(ninelist)
-        ninediff = [abs(k-l) for k,l in zip(ninelist[:-1], ninelist[1:])]
-        #print(ninediff)
-        nue_wanted_list.append(ninediff[wanted_key])
-        
-        print("") 
-        print("SUMS")
-        print(sumlist)
-        difflist = [abs(k-l) for k,l in zip(sumlist[:-1], sumlist[1:])]
-        print(difflist)
-        print("")
-        print("Nue Wanted List:")
-        print(nue_wanted_list)
-        print("")
-        
-        
-        #nue_fiduc_q = "true_nu_vtx_z < 1036.8 and true_nu_vtx_z > 0 and true_nu_vtx_y < 116.5 and true_nu_vtx_y > -116.5 and true_nu_vtx_x < \
-       # 254.8 and true_nu_vtx_x > -1.55 and (nu_pdg == 12 and ccnc == 0) and nproton > 0"
-       # nue_selected = self.samples["nue_mc"].query(nue_query)
-       # nue_selected_fid = nue_selected.query(nue_fiduc_q)
-       # bins = np.arange(0, 5.5, 0.5)
+
+        nue_wanted_list = Plotter_Functions_Alex.getWantedLists.getWantedLists(wanted_key, nue_stacked)
         
         #Remove smearing part
         ###################################################################
@@ -1734,10 +1551,6 @@ class Plotter:
         nue_smeared_array = np.array(nue_wanted_list)
         
         nue_eff = self.plot_signal_and_eff_and_B(nue_selected_fid, self.samples["nue_mc"], nue_fiduc_q, bins, self.samples["nue_mc"].query(nue_fiduc_q))
-        
-        #print("")
-        #print(nue_eff)
-        #print("")
 
         nue_ratio_nums = []
 
@@ -1749,10 +1562,6 @@ class Plotter:
         print("nue_ratio_nums:")
         print(nue_ratio_nums)
         print("")
-        
-
-        #print(stacked)
-        #print("labels ", labels)
 
         plot_options.pop('color', None)
 
@@ -1760,81 +1569,7 @@ class Plotter:
             nue_total_array, weights=nue_total_weight,  **plot_options)
         
         #----------------------------------
-        # order stacked distributions
-        numu_order_dict = {}
-        numu_order_var_dict    = {}
-        numu_order_weight_dict = {}
-        if (stacksort >= 1 and stacksort <= 3):
-            # figure out ordering based on total yield.
-            # Options are to have no exceptions (stacksort=1),
-            # put eLEE on top (stacksort=2), or put nue+eLEE on top (stacksort=3)
-            # put numu on top (stacksort >= 4)
-            has1   = False
-            has10  = False
-            has11  = False
-            has111 = False
-            has12  = False
-            for c in numu_var_dict.keys():
-                if stacksort >= 2:
-                    if int(c)==111:
-                        has111 = True
-                        continue
-                if stacksort == 3:
-                    if int(c)==1:
-                        has1 = True
-                        continue
-                    if int(c)==12:
-                        has12 = True
-                        continue
-
-                    if int(c)==10:
-                        has10 = True
-                        continue
-                    if int(c)==11:
-                        has11 = True
-                        continue
-                numu_order_dict[c] = sum(numu_weight_dict[c])
-                numu_order_dict = {k: v for k, v in sorted(numu_order_dict.items(), key=lambda item: item[1])}
-            if has1:
-                numu_order_dict[1] = sum(numu_weight_dict[1])
-            if has1:
-                numu_order_dict[12] = sum(numu_weight_dict[12])
-            if has10:
-                numu_order_dict[10] = sum(numu_weight_dict[10])
-            if has11:
-                numu_order_dict[11] = sum(numu_weight_dict[11])
-            if has111:
-                numu_order_dict[111] = sum(numu_weight_dict[111])
-            # now that the order has been sorted out, fill the actual dicts
-            for c in numu_order_dict.keys():
-                numu_order_var_dict[c] = numu_var_dict[c]
-            for c in numu_order_dict.keys():
-                numu_order_weight_dict[c] = numu_weight_dict[c]
-                #print("order w sum ", sum(numu_order_weight_dict[c]), " c ", c)
-        elif stacksort == 4:
-            #put the numu stuff on top
-            hasprotons = 23 in numu_var_dict.keys()
-            keys = list(numu_var_dict.keys())
-            if hasprotons:
-                keys.remove(22)#take them out
-                keys.remove(23)
-                keys.remove(24)
-                keys.remove(25)
-                keys.append(22)#and put at end
-                keys.append(23)
-                keys.append(24)
-                keys.append(25)
-
-            for c in keys:
-                numu_order_var_dict[c] = numu_var_dict[c]
-                numu_order_weight_dict[c] = numu_weight_dict[c]
-        else:
-            for c in numu_var_dict.keys():
-                numu_order_var_dict[c] = numu_var_dict[c]
-            for c in weight_dict.keys():
-                numu_order_weight_dict[c] = numu_weight_dict[c]
-
-
+        c, numu_order_var_dict, numu_order_weight_dict = Plotter_Functions_Alex.plotColourSorting.sortStackDists(stacksort, numu_var_dict, numu_weight_dict)
         numu_total = sum(sum(numu_order_weight_dict[c]) for c in numu_order_var_dict)
         if draw_data:
             numu_total += sum([self.weights["numu_ext"]] * len(numu_ext_plotted_variable))
@@ -1859,14 +1594,6 @@ class Plotter:
         else:
             plot_options["color"] = [int_colors[c]
                                      for c in numu_order_var_dict.keys()]
-
-        #for key in order_var_dict:
-        #    print ('key ',key)
-        #    print ('val ',order_var_dict[key])
-        #for key in order_weight_dict:
-        #    print ('key ',key)
-        #    print ('val ',order_weight_dict[key])
-
         numu_stacked = numu_ax1.hist(
             numu_order_var_dict.values(),
             weights=list(numu_order_weight_dict.values()),
@@ -1876,128 +1603,9 @@ class Plotter:
 
         numu_total_array = np.concatenate(list(numu_order_var_dict.values()))
         numu_total_weight = np.concatenate(list(numu_order_weight_dict.values()))
-        numu_wanted_list = []
         wanted_key = 3 # 3 for full, 3 for truth
         
-        import numpy
-        sumlist = []
-        zlist = []
-        onelist = []
-        twolist = []
-        threelist = []
-        fourlist = []
-        fivelist = []
-        sixlist = []
-        sevenlist = []
-        eightlist = []
-        ninelist = []
-        for i in numu_stacked:
-            for j in i:
-                #print(j)
-                if (type(j) == numpy.ndarray):
-                    #print("sum: ", sum(j))
-                    sumlist.append(sum(j))
-                    zlist.append(j[0])
-                    onelist.append(j[1])
-                    twolist.append(j[2])
-                    threelist.append(j[3])
-                    fourlist.append(j[4])
-                    fivelist.append(j[5])
-                    sixlist.append(j[6])
-                    sevenlist.append(j[7])
-                    eightlist.append(j[8])
-                    ninelist.append(j[9])
-        
-        #print("")
-        #print("ZERO DIFF")
-        #print(zlist)
-        zdiff = [abs(k-l) for k,l in zip(zlist[:-1], zlist[1:])]
-        #print(zdiff)
-        numu_wanted_list.append(zdiff[wanted_key])
-        
-        #print("")
-        #print("ONE DIFF")
-        #print(onelist)
-        onediff = [abs(k-l) for k,l in zip(onelist[:-1], onelist[1:])]
-        #print(onediff)
-        numu_wanted_list.append(onediff[wanted_key]) 
- 
-        #print("")
-        #print("TWO DIFF")
-        #print(twolist)
-        twodiff = [abs(k-l) for k,l in zip(twolist[:-1], twolist[1:])]
-        #print(twodiff)
-        numu_wanted_list.append(twodiff[wanted_key])
-        
-        #print("")
-        #print("THREE DIFF")
-        #print(threelist)
-        threediff = [abs(k-l) for k,l in zip(threelist[:-1], threelist[1:])]
-        #print(threediff)
-        numu_wanted_list.append(threediff[wanted_key])
-        
-        #print("")
-        #print("FOUR DIFF")
-        #print(fourlist)
-        fourdiff = [abs(k-l) for k,l in zip(fourlist[:-1], fourlist[1:])]
-        #print(fourdiff) 
-        numu_wanted_list.append(fourdiff[wanted_key])
-        
-        #print("")
-        #print("FIVE DIFF")
-        #print(fivelist)
-        fivediff = [abs(k-l) for k,l in zip(fivelist[:-1], fivelist[1:])]
-        #print(fivediff)
-        numu_wanted_list.append(fivediff[wanted_key])
-        
-        #print("")
-        #print("SIX DIFF")
-        #print(sixlist)
-        sixdiff = [abs(k-l) for k,l in zip(sixlist[:-1], sixlist[1:])]
-        #print(sixdiff)
-        numu_wanted_list.append(sixdiff[wanted_key])
-        
-        #print("")
-        #print("SEVEN DIFF")
-        #print(sevenlist)
-        sevendiff = [abs(k-l) for k,l in zip(sevenlist[:-1], sevenlist[1:])]
-        #print(sevendiff)
-        numu_wanted_list.append(sevendiff[wanted_key])
-        
-        #print("")
-        print("EIGHT DIFF")
-        print(eightlist)
-        eightdiff = [abs(k-l) for k,l in zip(eightlist[:-1], eightlist[1:])]
-        print(eightdiff)
-        if (eightdiff[wanted_key] > 0.00001):
-            numu_wanted_list.append(eightdiff[wanted_key])
-        else:
-            numu_wanted_list.append(0.0)
-        
-        #print("")
-        #print("NINE DIFF")
-        #print(ninelist)
-        ninediff = [abs(k-l) for k,l in zip(ninelist[:-1], ninelist[1:])]
-        #print(ninediff)
-        numu_wanted_list.append(ninediff[wanted_key])
-        
-        print("") 
-        print("SUMS")
-        print(sumlist)
-        difflist = [abs(k-l) for k,l in zip(sumlist[:-1], sumlist[1:])]
-        print(difflist)
-        print("")
-        print("Numu Wanted List:")
-        print(numu_wanted_list)
-        print("")
-        
-        
-        
-        #numu_fiduc_q = "true_nu_vtx_z < 1036.8 and true_nu_vtx_z > 0 and true_nu_vtx_y < 116.5 and true_nu_vtx_y > -116.5 and true_nu_vtx_x < \
-        #254.8 and true_nu_vtx_x > -1.55 and (nu_pdg == 14 and ccnc == 0) and nproton > 0"
-        #numu_selected = self.samples["numu_mc"].query(numu_query)
-        #numu_selected_fid = numu_selected.query(numu_fiduc_q)
-        #bins = np.arange(0, 5.5, 0.5)
+        numu_wanted_list = Plotter_Functions_Alex.getWantedLists.getWantedLists(wanted_key, numu_stacked)
         
         ################################################################
         # true nu energy 
@@ -2100,10 +1708,6 @@ class Plotter:
         ratio_ax1.set_ylabel('Ratio Nue/Numu', fontsize=15)
         ratio_ax1.set_xlabel('True Nu Energy [GeV]', fontsize=15)
         ratio_ax1.set_title("Ratio")
-        
-        
-        #print(stacked)
-        #print("labels ", labels)
 
         plot_options.pop('color', None)
 
@@ -2178,8 +1782,6 @@ class Plotter:
             nue_mc_plotted_variable, **plot_options)
         nue_err_mc = np.array(
             [n * self.weights["nue_mc"] * self.weights["nue_mc"] for n in nue_mc_uncertainties])
-        #if ("mc" in self.detsys.keys()):
-        #    self.detsys["mc"] = self.load_detsys_errors(variable,DETSYSPATH,bin_edges)
         nue_sys_mc = self.add_detsys_error("nue_mc",nue_mc_uncertainties,self.weights["nue_mc"])
         print("nue_sys_mc: ")
         print(nue_sys_mc)
@@ -2188,8 +1790,6 @@ class Plotter:
             nue_nue_plotted_variable, **plot_options)
         nue_err_nue = np.array(
             [n * self.weights["nue_nue"] * self.weights["nue_nue"] for n in nue_nue_uncertainties])
-        #if ("nue" in self.detsys.keys()):
-        #    self.detsys["nue"] = self.load_detsys_errors(variable,DETSYSPATH,bin_edges)
         nue_sys_nue = self.add_detsys_error("nue_nue",nue_nue_uncertainties,self.weights["nue_nue"])
         print("nue_sys nue: ")
         print(nue_sys_nue)
@@ -2199,8 +1799,6 @@ class Plotter:
             numu_mc_plotted_variable, **plot_options)
         numu_err_mc = np.array(
             [n * self.weights["numu_mc"] * self.weights["numu_mc"] for n in numu_mc_uncertainties])
-        #if ("mc" in self.detsys.keys()):
-        #    self.detsys["mc"] = self.load_detsys_errors(variable,DETSYSPATH,bin_edges)
         numu_sys_mc = self.add_detsys_error("numu_mc",numu_mc_uncertainties,self.weights["numu_mc"])
         print("numu_sys_mc: ")
         print(numu_sys_mc)
@@ -2209,8 +1807,6 @@ class Plotter:
             numu_nue_plotted_variable, **plot_options)
         numu_err_nue = np.array(
             [n * self.weights["numu_nue"] * self.weights["numu_nue"] for n in numu_nue_uncertainties])
-        #if ("nue" in self.detsys.keys()):
-        #    self.detsys["nue"] = self.load_detsys_errors(variable,DETSYSPATH,bin_edges)
         numu_sys_nue = self.add_detsys_error("numu_nue",numu_nue_uncertainties,self.weights["numu_nue"])
         print("numu_sys_nue: ")
         print(numu_sys_nue)
@@ -2230,39 +1826,8 @@ class Plotter:
         print("centers ", ratio_bincenters)
         print("edges ", ratio_bin_edges)
         print("size ", ratio_bin_size)
-        """
-        my_rows, my_cols = (len(nue_mc_uncertainties), len(numu_mc_uncertainties))
-        #ratio_err_mc = [[0]*my_cols]*my_rows
-        ratio_err_mc = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
-        i = 0
-        for n in nue_mc_uncertainties:
-            j = 0
-            for m in numu_mc_uncertainties:
-                val1 = n
-                err1 = n * self.weights["nue_mc"] * self.weights["nue_mc"]
-                val2 = m
-                err2 = m * self.weights["numu_mc"] * self.weights["numu_mc"]
-                ratio_err = self.div_err(n/m, err1, val1, err2, val2)
-                if ratio_err > 0:
-                    ratio_err_mc[i][j] = ratio_err
-                else:
-                    ratio_err_mc[i][j] = 0
-                j = j + 1
-            i = i + 1
-                
-        print("")
-        print("Ratio_err_mc = ")
-        print(ratio_err_mc)
-        print("")
-        """
+
         ratio_err_mc = []
-        
-        #for i in range(len(nue_err_mc)):
-        #    if nue_err_mc[i] > 0 and numu_err_mc[i] > 0:
-        #        rratio = nue_err_mc[i]/numu_err_mc[i]
-        #        ratio_err_mc.append(rratio)
-        #    else:
-        #        ratio_err_mc.append(0)
         
         #Get the numbers of that part correctly weighted that were selected
         x_range=plot_options["range"]
@@ -2314,40 +1879,8 @@ class Plotter:
         print(ratio_err_mc)
         print("")
         ratio_err_mc = np.array(ratio_err_mc)
-        
-        """
-        my_rows, my_cols = (len(nue_nue_uncertainties), len(numu_nue_uncertainties))
-        #ratio_err_mc = [[0]*my_cols]*my_rows
-        ratio_err_nue = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
-        i = 0
-        for n in nue_nue_uncertainties:
-            j = 0
-            for m in numu_nue_uncertainties:
-                val1 = n
-                err1 = n * self.weights["nue_nue"] * self.weights["nue_nue"]
-                val2 = m
-                err2 = m * self.weights["numu_nue"] * self.weights["numu_nue"]
-                ratio_err = self.div_err(n/m, err1, val1, err2, val2)
-                if ratio_err > 0:
-                    ratio_err_nue[i][j] = ratio_err
-                else:
-                    ratio_err_nue[i][j] = 0
-                j = j + 1
-            i = i + 1
-                
-        print("")
-        print("Ratio_err_nue = ")
-        print(ratio_err_nue)
-        print("")   
-        """
+
         ratio_err_nue = []
-        
-        #for i in range(len(nue_err_nue)):
-        #    if nue_err_nue[i] > 0 and numu_err_nue[i] > 0:
-        #        rratio = nue_err_nue[i]/numu_err_nue[i]
-        #        ratio_err_nue.append(rratio)
-        #    else:
-        #        ratio_err_nue.append(0)
         
         tree_nue_nue = self.samples["nue_nue"]
         queried_tree_nue_nue = tree_nue_nue.query(nue_query)
@@ -2401,11 +1934,7 @@ class Plotter:
                 nue_dirt_plotted_variable, **plot_options)
             nue_err_dirt = np.array(
                 [n * self.weights["nue_dirt"] * self.weights["nue_dirt"] for n in nue_dirt_uncertainties])
-        #if ("dirt" in self.detsys.keys()):
-        #    self.detsys["dirt"] = self.load_detsys_errors(variable,DETSYSPATH,bin_edges)
             nue_sys_dirt = self.add_detsys_error("nue_dirt",nue_dirt_uncertainties,self.weights["nue_dirt"])
-            #print("nue_sys_dirt: ")
-            #print(nue_sys_dirt)
             
         numu_err_dirt = np.array([0 for n in numu_mc_uncertainties])        
         if "numu_dirt" in self.samples:
@@ -2413,43 +1942,9 @@ class Plotter:
                 numu_dirt_plotted_variable, **plot_options)
             numu_err_dirt = np.array(
                 [n * self.weights["numu_dirt"] * self.weights["numu_dirt"] for n in numu_dirt_uncertainties])
-        #if ("dirt" in self.detsys.keys()):
-        #    self.detsys["dirt"] = self.load_detsys_errors(variable,DETSYSPATH,bin_edges)
             numu_sys_dirt = self.add_detsys_error("numu_dirt",numu_dirt_uncertainties,self.weights["numu_dirt"])
-            #print("numu_sys_dirt: ")
-            #print(numu_sys_dirt)
-        """   
-        ratio_err_dirt = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]       
-        if "numu_dirt" and "nue_dirt" in self.samples: 
-            i = 0
-            for n in nue_dirt_uncertainties:
-                j = 0
-                for m in numu_dirt_uncertainties:
-                    val1 = n
-                    err1 = n * self.weights["nue_dirt"] * self.weights["nue_dirt"]
-                    val2 = m
-                    err2 = m * self.weights["numu_dirt"] * self.weights["numu_dirt"]
-                    ratio_err = self.div_err(n/m, err1, val1, err2, val2)
-                    if ratio_err > 0:
-                        ratio_err_dirt[i][j] = ratio_err
-                    else:
-                        ratio_err_dirt[i][j] = 0
-                    j = j + 1
-                i = i + 1
-                
-            print("")
-            print("Ratio_err_dirt = ")
-            print(ratio_err_dirt)
-            print("") 
-        """
+
         ratio_err_dirt = []
-        
-       # for i in range(len(nue_err_dirt)):
-       #     if nue_err_dirt[i] > 0 and numu_err_dirt[i] > 0:
-       #         rratio = nue_err_dirt[i]/numu_err_dirt[i]
-       #         ratio_err_dirt.append(rratio)
-       #     else:
-       #         ratio_err_dirt.append(0)
         
         tree_nue_dirt = self.samples["nue_dirt"]
         queried_tree_nue_dirt = tree_nue_dirt.query(nue_query)
@@ -2607,41 +2102,13 @@ class Plotter:
             numu_detsys_err = numu_sys_mc + numu_sys_nue + numu_sys_dirt + sys_ncpi0 + sys_ccpi0 + sys_ccnopi + sys_cccpi + sys_nccpi + sys_ncnopi
         else:
             numu_detsys_err = numu_sys_mc + numu_sys_nue + sys_ncpi0 + sys_ccpi0 + sys_ccnopi + sys_cccpi + sys_nccpi + sys_ncnopi
-        #print("detsys_err: {}".format(detsys_err))
         numu_exp_err = np.sqrt(numu_exp_err**2 + numu_detsys_err**2)
-        #print("")
-        #print("numu_exp_err = ")        
-        #print(numu_exp_err)
-        #print("")
-        #print ('total exp_err : ', exp_err)
 
         numu_bin_size = [(numu_bin_edges[i + 1] - numu_bin_edges[i]) / 2
                     for i in range(len(numu_bin_edges) - 1)]     
         
         if draw_data:
-            """"
-            ratio_err_ext = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
-            i = 0
-            for n in nue_n_ext:
-                j = 0
-                for m in numu_n_ext:
-                    val1 = n
-                    err1 = n * self.weights["nue_ext"] * self.weights["nue_ext"]
-                    val2 = m
-                    err2 = m * self.weights["numu_ext"] * self.weights["numu_ext"]
-                    ratio_err = self.div_err(n/m, err1, val1, err2, val2)
-                    if ratio_err > 0:
-                        ratio_err_ext[i][j] = ratio_err
-                    else:
-                        ratio_err_ext[i][j] = 0
-                    j = j + 1
-                i = i + 1
-                
-            print("")
-            print("Ratio_err_ext = ")
-            print(ratio_err_ext)
-            print("")
-            """
+            
             ratio_err_ext = []
             #this has no extra genie weight
             
@@ -2692,25 +2159,6 @@ class Plotter:
             
             
         ratio_err_ext = np.array(ratio_err_ext)
-            
-        """    
-        #detsys = 0 so only need this line
-        ratio_exp_erra    = np.add(ratio_err_mc, ratio_err_ext)
-        ratio_exp_errb    = np.add(ratio_exp_erra, ratio_err_nue)
-        ratio_exp_errc    = np.add(ratio_exp_errb, ratio_err_dirt)
-        ratio_exp_err    = np.sqrt(ratio_exp_errc)
-        print("")
-        print("Ratio_exp_err = ")        
-        print(ratio_exp_err)
-        print("")
-        """
-        """
-        ratio_exp_err_diag[np.diag_indices_from( ratio_exp_err_diag)] = ratio_exp_err
-        print("")
-        print("Ratio_exp_err diag= ")        
-        print(ratio_exp_err_diag)
-        print("")
-        """
         
         ###########################################################
         #Making cov matricies
@@ -2748,14 +2196,6 @@ class Plotter:
         else:
             self.numu_cov_mc_detsys[np.diag_indices_from(self.numu_cov_mc_detsys)] = (numu_sys_mc + numu_sys_nue + sys_ncpi0 + sys_ccpi0 + sys_ccnopi + sys_cccpi + sys_nccpi + sys_ncnopi)**2 
             
-        #print("")
-        #print("self.numu_cov_mc_stat = ", self.numu_cov_mc_stat)
-        #print("")
-        ##self.rati
-        #print("")
-        #print("self.ratio_cov_mc_stat = ", self.ratio_cov_mc_stat)
-        #print("")
-        ##self.rati
         
         print("")
         print("Into Cov MC Stat ratio:")
@@ -2793,12 +2233,17 @@ class Plotter:
                     print("Add Drawing Geo Sys (NUE)")
                     self.nue_cov += self.sys_err_NuMIGeo("weightsNuMIGeo",variable,nue_query,plot_options["range"],plot_options["bins"],genieweight, "nue")
 
-                #self.cov = (self.sys_err("weightsReint",variable,query,plot_options["range"],plot_options["bins"],genieweight))
-
             else:
                 self.nue_cov = self.nue_get_SBNFit_cov_matrix(COVMATRIX,len(nue_bin_edges)-1)
+            
+            print("")
+            print("self.nue_cov")
+            print(self.nue_cov)
+            print("")
                 
             nue_exp_err = np.sqrt( np.diag((self.nue_cov + self.nue_cov_mc_stat + self.nue_cov_mc_detsys))) # + exp_err*exp_err) # Is this the error line?
+            print("nue_exp_err ", nue_exp_err)
+            print("")
 
             np.set_printoptions(formatter={'float': lambda x: "{0:0.3f}".format(x)})
             print("drawn Sys (NUE)")
@@ -2822,7 +2267,14 @@ class Plotter:
             else:
                 self.numu_cov = self.get_SBNFit_cov_matrix(COVMATRIX,len(numu_bin_edges)-1)
                 
+            print("")
+            print("self.numu_cov")
+            print(self.numu_cov)
+            print("")
+                
             numu_exp_err = np.sqrt( np.diag((self.numu_cov + self.numu_cov_mc_stat + self.numu_cov_mc_detsys))) # + exp_err*exp_err) # Is this the error line?
+            print("numu_exp_err ", numu_exp_err)
+            print("")
 
             np.set_printoptions(formatter={'float': lambda x: "{0:0.3f}".format(x)})
             print("drawn Sys (NUMU)")
@@ -2833,9 +2285,9 @@ class Plotter:
             if (COVMATRIX == ""):
                 print("")
                 print("IN COVMATRIX_XS_PPFX (RATIO)")
-                self.ratio_cov = (self.sys_err_ratio("weightsPPFX",variable,nue_query,numu_query,plot_options["range"],plot_options["bins"],genieweight, nue_var_dict, nue_weight_dict, nue_ext_plotted_variable, numu_var_dict, numu_weight_dict, numu_ext_plotted_variable, cat_labels, kind, plot_options)+
-                            self.sys_err_ratio("weightsGenie",variable,nue_query,numu_query,plot_options["range"],plot_options["bins"],genieweight, nue_var_dict, nue_weight_dict, nue_ext_plotted_variable, numu_var_dict, numu_weight_dict, numu_ext_plotted_variable, cat_labels, kind, plot_options)+
-                            self.sys_err_ratio("weightsReint",variable,nue_query,numu_query, plot_options["range"],plot_options["bins"],genieweight, nue_var_dict, nue_weight_dict, nue_ext_plotted_variable, numu_var_dict, numu_weight_dict, numu_ext_plotted_variable, cat_labels, kind, plot_options))
+                self.ratio_cov = (self.sys_err_ratio("weightsPPFX",variable,nue_query,numu_query,plot_options["range"],plot_options["bins"],genieweight, nue_var_dict, nue_weight_dict, nue_ext_plotted_variable, nue_category_mc_unis, nue_mc_plotted_variable_mc_unis, nue_mc_genie_weights_mc_unis, nue_category_nue_unis, nue_nue_plotted_variable_nue_unis, nue_nue_genie_weights_nue_unis, nue_category_dirt_unis, nue_dirt_plotted_variable_dirt_unis, nue_dirt_genie_weights_dirt_unis, numu_var_dict, numu_weight_dict, numu_ext_plotted_variable, cat_labels, kind, plot_options)+
+                            self.sys_err_ratio("weightsGenie",variable,nue_query,numu_query,plot_options["range"],plot_options["bins"],genieweight, nue_var_dict, nue_weight_dict, nue_ext_plotted_variable, nue_category_mc_unis, nue_mc_plotted_variable_mc_unis, nue_mc_genie_weights_mc_unis, nue_category_nue_unis, nue_nue_plotted_variable_nue_unis, nue_nue_genie_weights_nue_unis, nue_category_dirt_unis, nue_dirt_plotted_variable_dirt_unis, nue_dirt_genie_weights_dirt_unis, numu_var_dict, numu_weight_dict, numu_ext_plotted_variable, cat_labels, kind, plot_options)+
+                            self.sys_err_ratio("weightsReint",variable,nue_query,numu_query, plot_options["range"],plot_options["bins"],genieweight, nue_var_dict, nue_weight_dict, nue_ext_plotted_variable, nue_category_mc_unis, nue_mc_plotted_variable_mc_unis, nue_mc_genie_weights_mc_unis, nue_category_nue_unis, nue_nue_plotted_variable_nue_unis, nue_nue_genie_weights_nue_unis, nue_category_dirt_unis, nue_dirt_plotted_variable_dirt_unis, nue_dirt_genie_weights_dirt_unis, numu_var_dict, numu_weight_dict, numu_ext_plotted_variable, cat_labels, kind, plot_options))
                 if draw_geoSys:
                     print("Add Drawing Geo Sys (ratio)")
                     self.ratio_cov += self.sys_err_NuMIGeo_ratio("weightsNuMIGeo",variable,nue_query,numu_query,plot_options["range"],plot_options["bins"],genieweight, nue_var_dict, nue_weight_dict, nue_ext_plotted_variable, numu_var_dict, numu_weight_dict, numu_ext_plotted_variable, cat_labels, kind, plot_options)
@@ -3090,6 +2542,8 @@ class Plotter:
         if title == variable:
             numu_ax1.set_title(numu_query)            
 
+            
+        ratio_fig.savefig("full_ratio_fig.pdf")
         if ratio and draw_data:
             return nue_fig, nue_ax1, nue_ax2, numu_fig, numu_ax1, numu_ax2, nue_stacked, labels, nue_n_ext, numu_stacked, labels, numu_n_ext
         elif ratio:
@@ -3525,7 +2979,7 @@ class Plotter:
     # NuMI needs to add PPFX workaround for dirt
     def sys_err(self, name, var_name, query, x_range, n_bins, weightVar, key):
         # how many universes?
-        Nuniverse = 10 #100 #len(df)
+        Nuniverse = 20 #100 #len(df)
         print("Universes",Nuniverse)
 
         n_tot = np.empty([Nuniverse, n_bins])
@@ -3590,33 +3044,30 @@ class Plotter:
         cov = np.empty([len(n_cv), len(n_cv)])
         cov.fill(0)
 
-        print("n_tot ", n_tot)
+        #print("n_tot ", n_tot)
         for n in n_tot:
             for i in range(len(n_cv)):
                 for j in range(len(n_cv)):
                     cov[i][j] += (n[i] - n_cv_tot[i]) * (n[j] - n_cv_tot[j])
 
         cov /= Nuniverse
+        print("")
+        print("cov sys err: = ", cov)
+        print("")
 
         return cov
     
         # NuMI needs to add PPFX workaround for dirt
-    def sys_err_ratio(self, name, var_name, query_nue, query_numu, x_range, n_bins, weightVar, nue_var_dict, nue_weight_dict, nue_ext_plotted_variable, numu_var_dict, numu_weight_dict, numu_ext_plotted_variable, cat_labels, kind, plot_options):
+    def sys_err_ratio(self, name, var_name, query_nue, query_numu, x_range, n_bins, weightVar, nue_var_dict, nue_weight_dict, nue_ext_plotted_variable, nue_category_mc_unis, nue_mc_plotted_variable_mc_unis, nue_mc_genie_weights_mc_unis, nue_category_nue_unis, nue_nue_plotted_variable_nue_unis, nue_nue_genie_weights_nue_unis, nue_category_dirt_unis, nue_dirt_plotted_variable_dirt_unis, nue_dirt_genie_weights_dirt_unis, numu_var_dict, numu_weight_dict, numu_ext_plotted_variable, cat_labels, kind, plot_options):
         # how many universes?
-        Nuniverse = 500 #100 #len(df)
+        Nuniverse = 20 #100 #len(df)
         print("Universes",Nuniverse)
 
         n_tot = np.empty([Nuniverse, n_bins])
         n_cv_tot = np.empty(n_bins)
         n_tot.fill(0)
         n_cv_tot.fill(0)
-
-        #for t in self.samples:
-        #    if t in ["nue_ext", "numu_ext","nue_data", "numu_data", "lee", "data_7e18", "data_1e20","nue_dirt","numu_dirt"]: 
-        #        continue
         
-        #keylist = [["nue_mc", "numu_mc"], ["nue_nue", "numu_nue"]]
-        #what we actually need is nue_nue and numu_mc in a ratio
         keylist = [["nue_nue", "numu_mc"]]
 
         for t in keylist:
@@ -3637,17 +3088,8 @@ class Plotter:
             if t[1] == "nue_mc":
                 extra_query_nue = "& " + self.nu_pdg
 
-            #removed extra query for truth test
-            #queried_tree_nue = tree_nue.query(query_nue+extra_query)
             queried_tree_nue = tree_nue.query(query_nue+extra_query_nue)
             queried_tree_numu = tree_numu.query(query_numu+extra_query_numu)
-            #print("")
-            #print("----------------------------------------------------------------------")
-            #print("queried_tree_nue ", queried_tree_nue)
-            #print("----------------------------------------------------------------------")
-            #print("queried_tree_numu ", queried_tree_numu)
-            #print("----------------------------------------------------------------------")
-            #print("")
             variable_nue = queried_tree_nue[var_name]
             variable_numu = queried_tree_numu[var_name]
             syst_weights_nue = queried_tree_nue[name]
@@ -3675,80 +3117,9 @@ class Plotter:
 
             #DO THIS FIRST FOR NUE
             # order stacked distributions
-            nue_order_dict = {}
-            nue_order_var_dict    = {}
-            nue_order_weight_dict = {}
-            if (stacksort >= 1 and stacksort <= 3):
-                # figure out ordering based on total yield.
-                # Options are to have no exceptions (stacksort=1),
-                # put eLEE on top (stacksort=2), or put nue+eLEE on top (stacksort=3)
-                # put numu on top (stacksort >= 4)
-                has1   = False
-                has10  = False
-                has11  = False
-                has111 = False
-                has12  = False
-                for c in nue_var_dict.keys():
-                    if stacksort >= 2:
-                        if int(c)==111:
-                            has111 = True
-                            continue
-                    if stacksort == 3:
-                        if int(c)==1:
-                            has1 = True
-                            continue
-                        if int(c)==12:
-                            has12 = True
-                            continue
-
-                        if int(c)==10:
-                            has10 = True
-                            continue
-                        if int(c)==11:
-                            has11 = True
-                            continue
-                    nue_order_dict[c] = sum(nue_weight_dict[c])
-                    nue_order_dict = {k: v for k, v in sorted(nue_order_dict.items(), key=lambda item: item[1])}
-                if has1:
-                    nue_order_dict[1] = sum(nue_weight_dict[1])
-                if has1:
-                    nue_order_dict[12] = sum(nue_weight_dict[12])
-                if has10:
-                    nue_order_dict[10] = sum(nue_weight_dict[10])
-                if has11:
-                    nue_order_dict[11] = sum(nue_weight_dict[11])
-                if has111:
-                    nue_order_dict[111] = sum(nue_weight_dict[111])
-                # now that the order has been sorted out, fill the actual dicts
-                for c in nue_order_dict.keys():
-                    nue_order_var_dict[c] = nue_var_dict[c]
-                for c in nue_order_dict.keys():
-                    nue_order_weight_dict[c] = nue_weight_dict[c]
-                    #print("order w sum ", sum(numu_order_weight_dict[c]), " c ", c)
-            elif stacksort == 4:
-                #put the numu stuff on top
-                hasprotons = 23 in nue_var_dict.keys()
-                keys = list(nue_var_dict.keys())
-                if hasprotons:
-                    keys.remove(22)#take them out
-                    keys.remove(23)
-                    keys.remove(24)
-                    keys.remove(25)
-                    keys.append(22)#and put at end
-                    keys.append(23)
-                    keys.append(24)
-                    keys.append(25)
-
-                for c in keys:
-                    nue_order_var_dict[c] = nue_var_dict[c]
-                    nue_order_weight_dict[c] = nue_weight_dict[c]
-            else:
-                for c in nue_var_dict.keys():
-                    nue_order_var_dict[c] = nue_var_dict[c]
-                for c in weight_dict.keys():
-                    nue_order_weight_dict[c] = nue_weight_dict[c]
-
-
+            
+            c, nue_order_var_dict, nue_order_weight_dict = Plotter_Functions_Alex.plotColourSorting.sortStackDists(stacksort, nue_var_dict, nue_weight_dict)
+            
             nue_total = sum(sum(nue_order_weight_dict[c]) for c in nue_order_var_dict)
             #if draw_data:
             nue_total += sum([self.weights["nue_ext"]] * len(nue_ext_plotted_variable))
@@ -3771,13 +3142,33 @@ class Plotter:
             else:
                 plot_options["color"] = [int_colors[c]
                                          for c in nue_order_var_dict.keys()]
+            """    
+            nue_fig = plt.figure(figsize=(8, 7))
+            nue_gs = gridspec.GridSpec(2, 1, height_ratios=[2, 1])
+            nue_ax1 = plt.subplot(nue_gs[0])
+            nue_ax2 = plt.subplot(nue_gs[1])
                 
+            nue_stacked = nue_ax1.hist(
+                nue_order_var_dict.values(),
+                weights=list(nue_order_weight_dict.values()),
+                stacked=True,
+                label=labels,
+                **plot_options)
+            plt.close(nue_fig)
+            
+            wanted_key=5
+            nue_wanted_list = Plotter_Functions_Alex.getWantedLists.getWantedLists(wanted_key, nue_stacked)
+            n_cv_nue = nue_wanted_list
+            bins = n_bins
+            print(nue_wanted_list)
+            """
             #print(" VARIABLE NUE: , ", variable_nue)
+            #
             n_cv_nue, bins = np.histogram(
-                    variable_nue,
-                    range=x_range,
-                    bins=n_bins,
-                    weights=spline_fix_cv_nue)
+                variable_nue,
+                range=x_range,
+                bins=n_bins,
+                weights=spline_fix_cv_nue)
 
            # nue_stacked = np.histogram(
            #     nue_order_var_dict.values(),
@@ -3788,81 +3179,7 @@ class Plotter:
             
             
             #NOW DO IT FOR NUMU
-            # order stacked distributions
-            numu_order_dict = {}
-            numu_order_var_dict    = {}
-            numu_order_weight_dict = {}
-            if (stacksort >= 1 and stacksort <= 3):
-                # figure out ordering based on total yield.
-                # Options are to have no exceptions (stacksort=1),
-                # put eLEE on top (stacksort=2), or put nue+eLEE on top (stacksort=3)
-                # put numu on top (stacksort >= 4)
-                has1   = False
-                has10  = False
-                has11  = False
-                has111 = False
-                has12  = False
-                for c in numu_var_dict.keys():
-                    if stacksort >= 2:
-                        if int(c)==111:
-                            has111 = True
-                            continue
-                    if stacksort == 3:
-                        if int(c)==1:
-                            has1 = True
-                            continue
-                        if int(c)==12:
-                            has12 = True
-                            continue
-
-                        if int(c)==10:
-                            has10 = True
-                            continue
-                        if int(c)==11:
-                            has11 = True
-                            continue
-                    numu_order_dict[c] = sum(numu_weight_dict[c])
-                    numu_order_dict = {k: v for k, v in sorted(numu_order_dict.items(), key=lambda item: item[1])}
-                if has1:
-                    numu_order_dict[1] = sum(numu_weight_dict[1])
-                if has1:
-                    numu_order_dict[12] = sum(numu_weight_dict[12])
-                if has10:
-                    numu_order_dict[10] = sum(numu_weight_dict[10])
-                if has11:
-                    numu_order_dict[11] = sum(numu_weight_dict[11])
-                if has111:
-                    numu_order_dict[111] = sum(numu_weight_dict[111])
-                # now that the order has been sorted out, fill the actual dicts
-                for c in numu_order_dict.keys():
-                    numu_order_var_dict[c] = numu_var_dict[c]
-                for c in numu_order_dict.keys():
-                    numu_order_weight_dict[c] = numu_weight_dict[c]
-                    #print("order w sum ", sum(numu_order_weight_dict[c]), " c ", c)
-            elif stacksort == 4:
-                #put the numu stuff on top
-                hasprotons = 23 in numu_var_dict.keys()
-                keys = list(numu_var_dict.keys())
-                if hasprotons:
-                    keys.remove(22)#take them out
-                    keys.remove(23)
-                    keys.remove(24)
-                    keys.remove(25)
-                    keys.append(22)#and put at end
-                    keys.append(23)
-                    keys.append(24)
-                    keys.append(25)
-
-                for c in keys:
-                    numu_order_var_dict[c] = numu_var_dict[c]
-                    numu_order_weight_dict[c] = numu_weight_dict[c]
-            else:
-                for c in numu_var_dict.keys():
-                    numu_order_var_dict[c] = numu_var_dict[c]
-                for c in weight_dict.keys():
-                    numu_order_weight_dict[c] = numu_weight_dict[c]
-
-
+            c, numu_order_var_dict, numu_order_weight_dict = Plotter_Functions_Alex.plotColourSorting.sortStackDists(stacksort, numu_var_dict, numu_weight_dict)
             numu_total = sum(sum(numu_order_weight_dict[c]) for c in numu_order_var_dict)
             #if draw_data:
             numu_total += sum([self.weights["numu_ext"]] * len(numu_ext_plotted_variable))
@@ -3886,21 +3203,31 @@ class Plotter:
             else:
                 plot_options["color"] = [int_colors[c]
                                          for c in numu_order_var_dict.keys()]
-
-           # nue_stacked = np.histogram(
-           #     nue_order_var_dict.values(),
-           #     weights=list(nue_order_weight_dict.values()),
-           #     stacked=True,
-           #     label=labels,
-           #     **plot_options)
+            """
+            numu_fig = plt.figure(figsize=(8, 7))
+            numu_gs = gridspec.GridSpec(2, 1, height_ratios=[2, 1])
+            numu_ax1 = plt.subplot(numu_gs[0])
+            numu_ax2 = plt.subplot(numu_gs[1])
+                
+            numu_stacked = numu_ax1.hist(
+                numu_order_var_dict.values(),
+                weights=list(numu_order_weight_dict.values()),
+                stacked=True,
+                label=labels,
+                **plot_options)
+            plt.close(numu_fig)
             
+            wanted_key=3
+            numu_wanted_list = Plotter_Functions_Alex.getWantedLists.getWantedLists(wanted_key, numu_stacked)
+            print(numu_wanted_list)
+            """
           #  n_cv_nue, bins = np.histogram(
           #          variable_nue,
           #          range=x_range,
           #          bins=n_bins,
           #          weights=spline_fix_cv_nue)
             
-            #print(" VARIABLE NUMU: , ", variable_numu)
+            
             n_cv_numu, bins = np.histogram(
                     variable_numu,
                     range=x_range,
@@ -3908,6 +3235,9 @@ class Plotter:
                     weights=spline_fix_cv_numu)            
             
             rbin_cv_ratios = []
+            #n_cv_numu = numu_wanted_list
+            #bins = n_bins
+            #print(n_cv_numu)
             
             #print("len(n_cv_numu) ", len(n_cv_numu))
 
@@ -3919,12 +3249,6 @@ class Plotter:
                     rbin_cv_ratios.append(rratio)
                 else:
                     rbin_cv_ratios.append(0)
-
-            
-            #print("")
-            #print("bin_cv_ratios:")
-            #print(rbin_cv_ratios)
-            #print("")
             
             
             n_cv_tot += rbin_cv_ratios    #this should run twice
@@ -3947,8 +3271,90 @@ class Plotter:
                     n_n, bins = np.histogram(
                             variable_nue, weights=weight_n*spline_fix_var_nue, range=x_range, bins=n_bins)
                     n_m, bins = np.histogram(
-                            variable_numu, weights=weight_m*spline_fix_var_numu, range=x_range, bins=n_bins)       
+                            variable_numu, weights=weight_m*spline_fix_var_numu, range=x_range, bins=n_bins)  
+                    """    
+                    nue_weight_dict_unis = defaultdict(list)
+                    nue_var_dict_unis = defaultdict(list)
                     
+                    for c, v, w in zip(nue_category_mc_unis, nue_mc_plotted_variable_mc_unis, nue_mc_genie_weights_mc_unis):
+                                nue_var_dict_unis[c].append(v)
+                                nue_weight_dict_unis[c].append(self.weights["nue_mc"] * w * weight_n)
+
+                    for c, v, w in zip(nue_category_nue_unis, nue_nue_plotted_variable_nue_unis, nue_nue_genie_weights_nue_unis):
+                                nue_var_dict_unis[c].append(v)
+                                nue_weight_dict_unis[c].append(self.weights["nue_nue"] * w *  weight_n)
+
+                    for c, v, w in zip(nue_category_dirt_unis, nue_dirt_plotted_variable_dirt_unis, nue_dirt_genie_weights_dirt_unis):
+                                nue_var_dict_unis[c].append(v)
+                                nue_weight_dict_unis[c].append(self.weights["nue_dirt"] * w * weight_n)
+                    
+                    print("stacksort = ", stacksort)
+                    print(nue_var_dict_unis)
+                    print(nue_weight_dict_unis)
+                    f, nue_order_var_dict_unis, nue_order_weight_dict_unis= Plotter_Functions_Alex.plotColourSorting.sortStackDists(stacksort, nue_var_dict_unis, nue_weight_dict_unis)
+                    nue_total = sum(sum(nue_order_weight_dict_unis[f]) for f in nue_order_var_dict_unis)
+                    #if draw_data:
+                    nue_total += sum([self.weights["nue_ext"]] * len(nue_ext_plotted_variable))
+                    #print("total numu in sys ratio err ", numu_total)
+                    labels = [
+                        "%s: %.1f" % (cat_labels[f], sum(nue_order_weight_dict_unis[f])) \
+                        if sum(nue_order_weight_dict_unis[f]) else ""
+                        for c in nue_order_var_dict_unis.keys()
+                    ]
+
+
+                    if kind == "event_category":
+                        plot_options["color"] = [category_colors[c]
+                                                 for c in nue_order_var_dict_unis.keys()]
+                    elif kind == "particle_pdg":
+                        plot_options["color"] = [pdg_colors[c]
+                                                 for c in nue_order_var_dict_unis.keys()]
+                    elif kind == "flux":
+                        plot_options["color"] = [flux_colors[c]
+                                                 for c in nue_order_var_dict_unis.keys()]
+                    else:
+                        plot_options["color"] = [int_colors[c]
+                                                 for c in nue_order_var_dict_unis.keys()]
+                    
+                    nue_fig = plt.figure(figsize=(8, 7))
+                    nue_gs = gridspec.GridSpec(2, 1, height_ratios=[2, 1])
+                    nue_ax1 = plt.subplot(nue_gs[0])
+                    nue_ax2 = plt.subplot(nue_gs[1])
+
+                    print(variable_nue)
+                    nue_stacked = nue_ax1.hist(
+                        nue_order_var_dict_unis.values(),
+                        weights=list(nue_order_weight_dict_unis.values()),
+                        stacked=True,
+                        label=labels,
+                        **plot_options)
+                    plt.close(nue_fig)
+
+                    wanted_key=5
+                    nue_wanted_list = Plotter_Functions_Alex.getWantedLists.getWantedLists(wanted_key, nue_stacked)
+                    n_n = nue_wanted_list
+                    bins = n_bins
+                    print(n_n)
+                    
+                    numu_fig = plt.figure(figsize=(8, 7))
+                    numu_gs = gridspec.GridSpec(2, 1, height_ratios=[2, 1])
+                    numu_ax1 = plt.subplot(numu_gs[0])
+                    numu_ax2 = plt.subplot(numu_gs[1])
+
+                    numu_stacked = numu_ax1.hist(
+                        numu_order_var_dict.values(),
+                        weights=list(numu_order_weight_dict.values()),
+                        stacked=True,
+                        label=labels,
+                        **plot_options)
+                    plt.close(numu_fig)
+
+                    wanted_key=3
+                    numu_wanted_list = Plotter_Functions_Alex.getWantedLists.getWantedLists(wanted_key, numu_stacked)
+                    n_m= numu_wanted_list
+                    bins = n_bins
+                    print(n_m)
+                    """
                     rbin_ratios_sys = []
         
                     for g in range(len(n_n)):
@@ -3971,11 +3377,11 @@ class Plotter:
 
         cov = np.empty([len(rbin_cv_ratios), len(rbin_cv_ratios)])
         cov.fill(0)
-        #print("n_tot")
-        #print(n_tot)
-        #print("")
-        #print("n_cv_tot")
-        #print(n_cv_tot)
+        print("n_tot")
+        print(len(n_tot))
+        print("")
+        print("n_cv_tot")
+        print(n_cv_tot)
 
         for n in n_tot:
             for i in range(len(rbin_cv_ratios)):
@@ -4066,6 +3472,8 @@ class Plotter:
                     cov[i][j] += (n[i] - n_cv_tot[i]) * (n[j] - n_cv_tot[j])
 
         cov /= Nuniverse
+        
+        
 
         return cov
     
@@ -4075,8 +3483,8 @@ class Plotter:
         for variationNumber in [x*2 for x in range(10)]:
             n_tot = np.empty([2, n_bins])
             n_cv_tot = np.empty(n_bins)
-            n_tot.fill(0)
-            n_cv_tot.fill(0)########
+            n_tot.fill(0.)
+            n_cv_tot.fill(0.)########
 
             for t in self.samples:
                 if t in ["nue_ext", "numu_ext","nue_data", "numu_data", "lee", "data_7e18", "data_1e20","nue_dirt","numu_dirt", "numu_mc", "numu_nue"] and key == "nue": 
@@ -4126,6 +3534,15 @@ class Plotter:
                         #print("i = ", i)
                         n_tot[i] += n
 
+                        
+            print("")
+            print("variation number ", variationNumber)
+            print("n_tot") 
+            print(n_tot)
+            print("--------##--------")
+            print("n_cv_tot") 
+            print(n_cv_tot)
+            print("------------------")
             tempCov = np.empty([len(n_cv), len(n_cv)])
             tempCov.fill(0)
             for n in n_tot:
@@ -4138,6 +3555,7 @@ class Plotter:
                 cov = tempCov
             else:
                 cov += tempCov
+                
             
         print("")
         print("cov NuMI Geo = ", cov)
@@ -4156,11 +3574,7 @@ class Plotter:
             n_cv_tot = np.empty(n_bins)
             n_tot.fill(0)
             n_cv_tot.fill(0)########
-
-            #for t in self.samples:
-            #    if t in ["nue_ext", "numu_ext","nue_data", "numu_data", "lee", "data_7e18", "data_1e20","nue_dirt","numu_dirt"]: 
-            #        continue
-            #keylist = [["nue_mc", "numu_mc"], ["nue_nue", "numu_nue"]]
+            
             keylist = [["nue_nue", "numu_mc"]]
             
 
@@ -4207,81 +3621,7 @@ class Plotter:
 
                 stacksort = 3
 
-                # order stacked distributions
-                nue_order_dict = {}
-                nue_order_var_dict    = {}
-                nue_order_weight_dict = {}
-                if (stacksort >= 1 and stacksort <= 3):
-                    # figure out ordering based on total yield.
-                    # Options are to have no exceptions (stacksort=1),
-                    # put eLEE on top (stacksort=2), or put nue+eLEE on top (stacksort=3)
-                    # put numu on top (stacksort >= 4)
-                    has1   = False
-                    has10  = False
-                    has11  = False
-                    has111 = False
-                    has12  = False
-                    for c in nue_var_dict.keys():
-                        if stacksort >= 2:
-                            if int(c)==111:
-                                has111 = True
-                                continue
-                        if stacksort == 3:
-                            if int(c)==1:
-                                has1 = True
-                                continue
-                            if int(c)==12:
-                                has12 = True
-                                continue
-
-                            if int(c)==10:
-                                has10 = True
-                                continue
-                            if int(c)==11:
-                                has11 = True
-                                continue
-                        nue_order_dict[c] = sum(nue_weight_dict[c])
-                        nue_order_dict = {k: v for k, v in sorted(nue_order_dict.items(), key=lambda item: item[1])}
-                    if has1:
-                        nue_order_dict[1] = sum(nue_weight_dict[1])
-                    if has1:
-                        nue_order_dict[12] = sum(nue_weight_dict[12])
-                    if has10:
-                        nue_order_dict[10] = sum(nue_weight_dict[10])
-                    if has11:
-                        nue_order_dict[11] = sum(nue_weight_dict[11])
-                    if has111:
-                        nue_order_dict[111] = sum(nue_weight_dict[111])
-                    # now that the order has been sorted out, fill the actual dicts
-                    for c in nue_order_dict.keys():
-                        nue_order_var_dict[c] = nue_var_dict[c]
-                    for c in nue_order_dict.keys():
-                        nue_order_weight_dict[c] = nue_weight_dict[c]
-                        #print("order w sum ", sum(numu_order_weight_dict[c]), " c ", c)
-                elif stacksort == 4:
-                    #put the numu stuff on top
-                    hasprotons = 23 in nue_var_dict.keys()
-                    keys = list(nue_var_dict.keys())
-                    if hasprotons:
-                        keys.remove(22)#take them out
-                        keys.remove(23)
-                        keys.remove(24)
-                        keys.remove(25)
-                        keys.append(22)#and put at end
-                        keys.append(23)
-                        keys.append(24)
-                        keys.append(25)
-
-                    for c in keys:
-                        nue_order_var_dict[c] = nue_var_dict[c]
-                        nue_order_weight_dict[c] = nue_weight_dict[c]
-                else:
-                    for c in nue_var_dict.keys():
-                        nue_order_var_dict[c] = nue_var_dict[c]
-                    for c in weight_dict.keys():
-                        nue_order_weight_dict[c] = nue_weight_dict[c]
-
-
+                c, nue_order_var_dict, nue_order_weight_dict = Plotter_Functions_Alex.plotColourSorting.sortStackDists(stacksort, nue_var_dict, nue_weight_dict)
                 nue_total = sum(sum(nue_order_weight_dict[c]) for c in nue_order_var_dict)
                 #if draw_data:
                 nue_total += sum([self.weights["nue_ext"]] * len(nue_ext_plotted_variable))
@@ -4316,80 +3656,8 @@ class Plotter:
                 
                 #NOW DO IT FOR NUMU
                 # order stacked distributions
-                numu_order_dict = {}
-                numu_order_var_dict    = {}
-                numu_order_weight_dict = {}
-                if (stacksort >= 1 and stacksort <= 3):
-                    # figure out ordering based on total yield.
-                    # Options are to have no exceptions (stacksort=1),
-                    # put eLEE on top (stacksort=2), or put nue+eLEE on top (stacksort=3)
-                    # put numu on top (stacksort >= 4)
-                    has1   = False
-                    has10  = False
-                    has11  = False
-                    has111 = False
-                    has12  = False
-                    for c in numu_var_dict.keys():
-                        if stacksort >= 2:
-                            if int(c)==111:
-                                has111 = True
-                                continue
-                        if stacksort == 3:
-                            if int(c)==1:
-                                has1 = True
-                                continue
-                            if int(c)==12:
-                                has12 = True
-                                continue
 
-                            if int(c)==10:
-                                has10 = True
-                                continue
-                            if int(c)==11:
-                                has11 = True
-                                continue
-                        numu_order_dict[c] = sum(numu_weight_dict[c])
-                        numu_order_dict = {k: v for k, v in sorted(numu_order_dict.items(), key=lambda item: item[1])}
-                    if has1:
-                        numu_order_dict[1] = sum(numu_weight_dict[1])
-                    if has1:
-                        numu_order_dict[12] = sum(numu_weight_dict[12])
-                    if has10:
-                        numu_order_dict[10] = sum(numu_weight_dict[10])
-                    if has11:
-                        numu_order_dict[11] = sum(numu_weight_dict[11])
-                    if has111:
-                        numu_order_dict[111] = sum(numu_weight_dict[111])
-                    # now that the order has been sorted out, fill the actual dicts
-                    for c in numu_order_dict.keys():
-                        numu_order_var_dict[c] = numu_var_dict[c]
-                    for c in numu_order_dict.keys():
-                        numu_order_weight_dict[c] = numu_weight_dict[c]
-                        #print("order w sum ", sum(numu_order_weight_dict[c]), " c ", c)
-                elif stacksort == 4:
-                    #put the numu stuff on top
-                    hasprotons = 23 in numu_var_dict.keys()
-                    keys = list(numu_var_dict.keys())
-                    if hasprotons:
-                        keys.remove(22)#take them out
-                        keys.remove(23)
-                        keys.remove(24)
-                        keys.remove(25)
-                        keys.append(22)#and put at end
-                        keys.append(23)
-                        keys.append(24)
-                        keys.append(25)
-
-                    for c in keys:
-                        numu_order_var_dict[c] = numu_var_dict[c]
-                        numu_order_weight_dict[c] = numu_weight_dict[c]
-                else:
-                    for c in numu_var_dict.keys():
-                        numu_order_var_dict[c] = numu_var_dict[c]
-                    for c in weight_dict.keys():
-                        numu_order_weight_dict[c] = numu_weight_dict[c]
-
-
+                c, numu_order_var_dict, numu_order_weight_dict = Plotter_Functions_Alex.plotColourSorting.sortStackDists(stacksort, numu_var_dict, numu_weight_dict)
                 numu_total = sum(sum(numu_order_weight_dict[c]) for c in numu_order_var_dict)
                 #if draw_data:
                 numu_total += sum([self.weights["numu_ext"]] * len(numu_ext_plotted_variable))
@@ -4442,10 +3710,10 @@ class Plotter:
                     else:
                         rbin_cv_ratios.append(0)
 
-                #print("")
-                #print("bin_cv_ratios in geo sys:")
-                #print(rbin_cv_ratios)
-                #print("")
+                print("")
+                print("bin_cv_ratios in geo sys:")
+                print(rbin_cv_ratios)
+                print("")
 
 
                 n_cv_tot += rbin_cv_ratios    #this should run twice
@@ -4482,11 +3750,21 @@ class Plotter:
                         #print("bin_ratios in NuMI Geo Ratio Sys:")
                         #print(rbin_ratios_sys)
                         #print("")
-
+                        
+                        #so first set of ratios + second set of ratios
                         #n->rbin_ratios_sys
                         n_tot[i] += rbin_ratios_sys          #will run 500 times
 
-
+            print("")
+            print(len(n_tot))
+            print(n_tot)
+            print("")
+            print("n_tot") 
+            print(n_tot)
+            print("--------##--------")
+            print("n_cv_tot") 
+            print(n_cv_tot)
+            print("------------------")
             tempCov = np.empty([len(rbin_cv_ratios), len(rbin_cv_ratios)])
             tempCov.fill(0)
             for n in n_tot:
@@ -4502,9 +3780,10 @@ class Plotter:
                 cov += tempCov            
 
             
-        #print("")
-        #print("cov NuMI Geo ratio = ", cov)
-        #print("")
+        print("")
+        print("cov NuMI Geo ratio = ", cov)
+        print("")
+        print("-------------------------------------------------------")
 
         return cov
 
