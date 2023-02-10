@@ -4,7 +4,9 @@ def sortStackDists(stacksort, nue_var_dict, nue_weight_dict):
     nue_order_dict = {}
     nue_order_var_dict    = {}
     nue_order_weight_dict = {}
+    print("1")
     if (stacksort >= 1 and stacksort <= 3):
+        print("2")
         #print("In stacksort 1")
         # figure out ordering based on total yield.
         # Options are to have no exceptions (stacksort=1),   
@@ -16,7 +18,6 @@ def sortStackDists(stacksort, nue_var_dict, nue_weight_dict):
         has111 = False
         has12  = False
         for c in nue_var_dict.keys():
-            #print("for c in var dict keys!")
             if stacksort >= 2:
                 if int(c)==111:
                     has111 = True
@@ -48,6 +49,7 @@ def sortStackDists(stacksort, nue_var_dict, nue_weight_dict):
         if has111:
             nue_order_dict[111] = sum(nue_weight_dict[111])
         # now that the order has been sorted out, fill the actual dicts
+        print("3")
         for c in nue_order_dict.keys():
             nue_order_var_dict[c] = nue_var_dict[c]
         for c in nue_order_dict.keys():
@@ -72,12 +74,14 @@ def sortStackDists(stacksort, nue_var_dict, nue_weight_dict):
             nue_order_var_dict[c] = nue_var_dict[c]
             nue_order_weight_dict[c] = weight_dict[c]
     else:
-        #print("in else")
+        print("in else")
         for c in nue_var_dict.keys():
             nue_order_var_dict[c] = nue_var_dict[c]
         for c in weight_dict.keys():
             nue_order_weight_dict[c] = weight_dict[c]
             
-
+    try: c
+    except NameError: c = 0
+        
     #print("c = ", c)        
     return c, nue_order_var_dict, nue_order_weight_dict

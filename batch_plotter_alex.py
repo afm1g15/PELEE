@@ -1046,7 +1046,7 @@ class Plotter:
         elif (currentsample == "nue_dirt"):
             print("current sample is: ", currentsample)
             current_category, current_plotted_variable = categorization(
-                self.samples["nue_dirt"], variable, query=query, track_cuts=track_cuts, select_longest=select_longest) 
+                self.samples["nue_dirt"], variable, query=query, track_cuts=track_cuts, select_longest=select_longest)
         elif (currentsample == "numu_mc"):
             current_category, current_plotted_variable = categorization(
                 self.samples["numu_mc"], variable, query=query, extra_cut=self.nu_pdg, track_cuts=track_cuts, select_longest=select_longest)
@@ -1074,18 +1074,21 @@ class Plotter:
             current_genie_weights = self._get_genie_weight(
                 self.samples["numu_dirt"], variable, query=query, track_cuts=track_cuts,select_longest=select_longest, weightvar=genieweight) 
 
-        for c, v, w in zip(current_category, current_plotted_variable, current_genie_weights):
-            current_var_dict[c].append(v)
-            if (currentsample == "nue_nue"):
-                current_weight_dict[c].append(self.weights["nue_nue"] * w)
-            elif (currentsample == "nue_mc"):
-                current_weight_dict[c].append(self.weights["nue_mc"] * w)
-            elif (currentsample == "nue_dirt"):
-                current_weight_dict[c].append(self.weights["nue_dirt"] * w)
-            elif (currentsample == "numu_mc"):
-                current_weight_dict[c].append(self.weights["numu_mc"] * w)
-            elif (currentsample == "numu_dirt"):
-                current_weight_dict[c].append(self.weights["numu_dirt"] * w)    
+        mcsamples = ["nue_nue", "nue_mc", "nue_dirt", "numu_mc", "numu_dirt"]
+            
+        if (currentsample in mcsamples):
+            for c, v, w in zip(current_category, current_plotted_variable, current_genie_weights):
+                current_var_dict[c].append(v)
+                if (currentsample == "nue_nue"):
+                    current_weight_dict[c].append(self.weights["nue_nue"] * w)
+                elif (currentsample == "nue_mc"):
+                    current_weight_dict[c].append(self.weights["nue_mc"] * w)
+                elif (currentsample == "nue_dirt"):
+                    current_weight_dict[c].append(self.weights["nue_dirt"] * w)
+                elif (currentsample == "numu_mc"):
+                    current_weight_dict[c].append(self.weights["numu_mc"] * w)
+                elif (currentsample == "numu_dirt"):
+                    current_weight_dict[c].append(self.weights["numu_dirt"] * w)    
        
         
         if "ncpi0" in self.samples:
@@ -1164,6 +1167,29 @@ class Plotter:
                 bins=plot_options["bins"],
                 range=plot_options["range"],
                 weights=weight_dict[111])
+            
+        if draw_data:
+            if (currentsample == "nue_ext"):
+                current_plotted_variable = self._selection(
+                    variable, self.samples["nue_ext"], query=query, track_cuts=track_cuts, select_longest=select_longest)
+                current_plotted_variable = self._select_showers(
+                current_plotted_variable, variable, self.samples["nue_ext"], query=query)
+            elif (currentsample == "nue_data"):
+                current_plotted_variable = self._selection(
+                variable, self.samples["nue_data"], query=query, track_cuts=track_cuts, select_longest=select_longest)
+                current_plotted_variable = self._select_showers(current_plotted_variable, variable,
+                                                         self.samples["nue_data"], query=query)
+            elif (currentsample == "numu_ext"):
+                current_plotted_variable = self._selection(
+                    variable, self.samples["numu_ext"], query=query, track_cuts=track_cuts, select_longest=select_longest)
+                current_plotted_variable = self._select_showers(
+                current_plotted_variable, variable, self.samples["numu_ext"], query=query)
+                print("current_plotted_variable ", current_plotted_variable)
+            elif (currentsample == "numu_data"):
+                current_plotted_variable = self._selection(
+                variable, self.samples["numu_data"], query=query, track_cuts=track_cuts, select_longest=select_longest)
+                current_plotted_variable = self._select_showers(current_plotted_variable, variable,
+                                                         self.samples["numu_data"], query=query)
 
         if ratio:
             nue_fig = plt.figure(figsize=(8, 7))
@@ -1177,81 +1203,100 @@ class Plotter:
             
             
 #-------------------------------
-        if (len(current_var_dict) != 0):
+        if (len(current_var_dict) != 0) and (currentsample in mcsamples):
             c, current_order_var_dict, current_order_weight_dict = Plotter_Functions_Alex.plotColourSorting.sortStackDists(stacksort, current_var_dict, current_weight_dict)
-        else:
-            print("Had to return early.")
+        elif (currentsample in mcsamples):
+            print("Had to return early (colour sorting).")
             #return nue_fig, nue_ax1, nue_ax1, nue_var_dict, nue_weight_dict
             return current_var_dict, current_weight_dict, current_weight_dict
+        else:
+            c, current_order_var_dict, current_order_weight_dict = Plotter_Functions_Alex.plotColourSorting.sortStackDists(stacksort, current_var_dict, current_weight_dict)
+            #current_order_dict = {}
+            #current_order_var_dict    = {}
+            #current_order_weight_dict = {}
 
         current_total = sum(sum(current_order_weight_dict[c]) for c in current_order_var_dict)
         print("current_total ", current_total)
+        if draw_data:
+            if (currentsample == "nue_ext"):
+                current_total += sum([self.weights["ext"]] * len(current_plotted_variable))
+                print("total ", current_total)
+            if (currentsample == "numu_ext"):
+                current_total += sum([self.weights["ext"]] * len(current_plotted_variable))
+                print("total ", current_total)
         
-        labels = [
-            "%s: %.1f" % (cat_labels[c], sum(current_order_weight_dict[c])) \
-            if sum(current_order_weight_dict[c]) else ""
-            for c in current_order_var_dict.keys()
-        ]
+        if (len(current_var_dict) != 0):
+            labels = [
+                "%s: %.1f" % (cat_labels[c], sum(current_order_weight_dict[c])) \
+                if sum(current_order_weight_dict[c]) else ""
+                for c in current_order_var_dict.keys()
+            ]
 
 
-        if kind == "event_category":
-            plot_options["color"] = [category_colors[c]
-                                     for c in current_order_var_dict.keys()]
-        elif kind == "particle_pdg":
-            plot_options["color"] = [pdg_colors[c]
-                                     for c in current_order_var_dict.keys()]
-        elif kind == "flux":
-            plot_options["color"] = [flux_colors[c]
-                                     for c in current_order_var_dict.keys()]
+            if kind == "event_category":
+                plot_options["color"] = [category_colors[c]
+                                         for c in current_order_var_dict.keys()]
+            elif kind == "particle_pdg":
+                plot_options["color"] = [pdg_colors[c]
+                                         for c in current_order_var_dict.keys()]
+            elif kind == "flux":
+                plot_options["color"] = [flux_colors[c]
+                                         for c in current_order_var_dict.keys()]
+            else:
+                plot_options["color"] = [int_colors[c]
+                                         for c in current_order_var_dict.keys()]
+
+            #print("---------------Current order var----------------")
+            #print(len(current_order_var_dict[2]))
+            #print(np.sum(~np.isnan(current_order_var_dict[2])))
+            #print(type(current_order_var_dict[2]))
+            #print(current_order_var_dict[2])
+            #print("-------------------------------")
+            #print("----------current weight var------------")
+            #print(len(current_order_weight_dict[2]))
+            #print(np.sum(~np.isnan(current_order_weight_dict[2])))
+            #print(type(current_order_weight_dict[2]))
+            #print(current_order_weight_dict[2])
+            #print("-------------------------------")
         else:
-            plot_options["color"] = [int_colors[c]
-                                     for c in current_order_var_dict.keys()]
+            labels = ""
 
-        #print("---------------Current order var----------------")
-        #print(len(current_order_var_dict[2]))
-        #print(np.sum(~np.isnan(current_order_var_dict[2])))
-        #print(type(current_order_var_dict[2]))
-        #print(current_order_var_dict[2])
-        #print("-------------------------------")
-        #print("----------current weight var------------")
-        #print(len(current_order_weight_dict[2]))
-        #print(np.sum(~np.isnan(current_order_weight_dict[2])))
-        #print(type(current_order_weight_dict[2]))
-        #print(current_order_weight_dict[2])
-        #print("-------------------------------")
-            
         current_stacked = nue_ax1.hist(
             current_order_var_dict.values(),
             weights=list(current_order_weight_dict.values()),
             stacked=True,
-            label=labels,
+            label=labels or "",
             **plot_options)
-        
+
         #print("-----------------current stacked--------------")
         #print(len(current_stacked))
         #print(np.sum(~np.isnan(current_stacked)))
         #print(type(current_stacked))
         #print(current_stacked)
         #print("-------------------------------")
-        
+
         #print("plot opts")
         #print(**plot_options)
 
-        current_total_array = np.concatenate(list(current_order_var_dict.values()))
-        current_total_weight = np.concatenate(list(current_order_weight_dict.values()))
-        
+        if (len(list(current_order_var_dict.values())) != 0):
+            current_total_array = np.concatenate(list(current_order_var_dict.values()))
+            current_total_weight = np.concatenate(list(current_order_weight_dict.values()))
+        else:
+            current_total_array = list(current_order_var_dict.values())
+            current_total_weight = list(current_order_weight_dict.values())
+
         #print("-----------------current total array--------------")
         #print(len(current_total_array))
         #print(np.sum(~np.isnan(current_total_array)))
         #print(type(current_total_array))
         #print(current_total_array)
         #print("-------------------------------")
-        
+
         wanted_key = 1 # 7 for full, 5 for truth 
 
         current_wanted_list = Plotter_Functions_Alex.getWantedLists.getWantedLists(wanted_key, current_stacked)
         print("current_wanted_list ", current_wanted_list)
-        
+
         #Remove smearing part
         ###################################################################
         # true nu energy 
@@ -1270,30 +1315,30 @@ class Plotter:
             current_selected = self.samples["numu_mc"].query(query)
         elif (currentsample == "numu_dirt"):
             current_selected = self.samples["numu_dirt"].query(query)
-            
+
         """    
         current_selected_fid = current_selected.query(current_fiduc_q)
         bins = np.arange(0, 5.5, 0.5)
         norm = True 
-        
+
         current_norm_array = self.plot_smearing(current_selected_fid, current_fiduc_q, true_var, reco_var, bins, norm)
-        
+
         for i in range(len(bins)-1): # reco bins (rows)
             for j in range(len(bins)-1): # truth bins (cols)
                 if current_norm_array[i][j] > 0:
                     continue
                 else:
                     current_norm_array[i][j] = 0
-                    
+
         """
         #nue_smeared_array = np.matmul(np.array(nue_wanted_list), nue_norm_array)
-        
+
         #nue_wanted_list_smeared = list(nue_smeared_array)
-        
+
         ##################################################################
         current_wanted_list_smeared = current_wanted_list
         current_smeared_array = np.array(current_wanted_list)
-        
+
         """
         if (currentsample == "nue_nue"):
             current_eff = self.plot_signal_and_eff_and_B(current_selected_fid, self.samples["nue_nue"], current_fiduc_q, bins, self.samples["nue_nue"].query(current_fiduc_q))
@@ -1314,7 +1359,7 @@ class Plotter:
                 current_ratio_nums.append(num)
             else:
                 current_ratio_nums.append(0)
-            
+
         print("")
         print("current_ratio_nums:")
         print(current_ratio_nums)
@@ -1325,7 +1370,7 @@ class Plotter:
 
         current_total_hist, current_total_bins = np.histogram(
             current_total_array, weights=current_total_weight,  **plot_options)
-        
+
         print("current_total_hist ", current_total_hist)
         
        
@@ -1333,6 +1378,23 @@ class Plotter:
         ##############################################################
         #Initial plots calculated
         ##############################################################
+        
+        if draw_data and ((currentsample == "nue_ext") or (currentsample == "numu_ext")):
+            ext_weight = [self.weights["ext"]] * len(current_plotted_variable)
+            n_ext, ext_bins, patches = nue_ax1.hist(
+            current_plotted_variable,
+            weights=ext_weight,
+            bottom=current_total_hist,
+            label="EXT: %.1f" % sum(ext_weight) if sum(ext_weight) else "",
+            hatch="//",
+            color="white",
+            **plot_options)
+            
+            print("n_ext ", n_ext)
+
+            current_total_array = np.concatenate([current_total_array, current_plotted_variable])
+            current_total_weight = np.concatenate([current_total_weight, ext_weight])
+        
 
         
         #----------------------------------
@@ -1384,11 +1446,29 @@ class Plotter:
             color="grey",
             alpha=0.5)
         '''
-        if (draw_data):
-            print("")
+        current_bincenters = 0.5 * (current_bin_edges[1:] + current_bin_edges[:-1])
+        current_bin_size = [(current_bin_edges[i + 1] - current_bin_edges[i]) / 2
+                    for i in range(len(current_bin_edges) - 1)]
+        
+        if (draw_data) and ((currentsample == "nue_data") or (currentsample == "numu_data")):
+            plot_options.pop('color', None)
+            current_n_data, nue_bins = np.histogram(current_plotted_variable, **plot_options)  
+            self.nue_data = current_n_data
+            current_data_err = self._data_err(current_n_data,asymErrs)
+            #self.cov_data_stat[np.diag_indices_from(self.cov_data_stat)] = n_data
+            # This is a hacky workaround -- I should be ashamed of myself, EG
         else:
             current_n_data = np.zeros(len(current_bin_size))
             current_n_data = np.zeros(len(current_bin_size))
+        
+        if sum(current_n_data) > 0:
+            nue_ax1.errorbar(
+                current_bincenters,
+                current_n_data,
+                xerr=current_bin_size,
+                yerr=current_data_err,
+                fmt='ko',
+                label="NuMI: %i" % len(current_plotted_variable) if len(current_plotted_variable) else "")
           
 
         #frac = self.deltachisqfakedata(plot_options["range"][0], plot_options["range"][-1], np.array([1,1,1,5,5,5]), np.array([1,1,1,5,5,5]), 70)
@@ -1484,8 +1564,16 @@ class Plotter:
             return nue_fig, nue_ax1, nue_ax2, nue_stacked, labels, numu_fig, numu_ax1, labels
         elif draw_data:
             print("Returning")
-            #return nue_fig, nue_ax1, nue_stacked, labels, nue_order_var_dict, nue_order_weight_dict
-            return current_order_var_dict, current_order_weight_dict, labels
+            
+            if (currentsample == "nue_ext") or (currentsample == "numu_ext"):
+                labels = "EXT: %.1f" % sum(ext_weight) if sum(ext_weight) else ""
+                return current_total_array, current_total_weight, labels
+            elif (currentsample == "nue_data") or (currentsample == "numu_data"):
+                label="NuMI: %i" % len(current_plotted_variable) if len(current_plotted_variable) else ""
+                return current_n_data, current_data_err, labels
+            else:
+                #return nue_fig, nue_ax1, nue_stacked, labels, nue_order_var_dict, nue_order_weight_dict
+                return current_order_var_dict, current_order_weight_dict, labels
         else:
             return nue_fig, nue_ax1, nue_stacked, labels, nue_order_var_dict, nue_order_weight_dict
 

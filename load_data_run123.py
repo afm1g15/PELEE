@@ -542,7 +542,9 @@ def process_uproot_recoveryvars(up,df):
 def process_uproot_numu(up,df):
     #
     trk_llr_pid_v = up.array("trk_llr_pid_score_v")
+    print("trk_llr_pid_v ", trk_llr_pid_v)
     trk_score_v = up.array("trk_score_v")
+    print("trk_score_v ", trk_score_v)
     trk_len_v   = up.array('trk_len_v')
     trk_end_x_v = up.array('trk_sce_end_x_v')
     trk_end_y_v = up.array('trk_sce_end_y_v')
@@ -552,7 +554,10 @@ def process_uproot_numu(up,df):
     trk_start_z_v = up.array('trk_sce_start_z_v')
     trk_energy_proton_v = up.array('trk_energy_proton_v') # range-based proton kinetic energy
     trk_range_muon_mom_v   = up.array('trk_range_muon_mom_v')  # range-based muon momentum
+    print("Here:")
+    print("trk_range_muon_mom_v ", trk_range_muon_mom_v)
     trk_mcs_muon_mom_v     = up.array('trk_mcs_muon_mom_v')
+    print("trk_mcs_muon_mom_v ", trk_mcs_muon_mom_v)
     trk_theta_v        = up.array('trk_theta_v')
     trk_phi_v        = up.array('trk_phi_v')
     pfp_generation_v = up.array('pfp_generation_v')
@@ -635,7 +640,9 @@ def process_uproot_numu(up,df):
     shr_mask = (trk_score_v<0.5)
     trk_mask = (trk_score_v>0.5)
     proton_mask = (trk_score_v>0.5)&(trk_llr_pid_v < 0.)   #Plot these
+    pion_mask = (trk_score_v>0.5)&(trk_score_v<0.8)&(trk_llr_pid_v > 0.)&(trk_llr_pid_v<0.2)   #Plot these
     df['n_protons_tot'] = proton_mask.sum()
+    df['n_pions_tot'] = pion_mask.sum()
     df['n_muons_tot'] = muon_mask.sum()
     df['n_tracks_tot'] = trk_mask.sum()
     df['n_tracks_contained'] = contained_track_mask.sum()

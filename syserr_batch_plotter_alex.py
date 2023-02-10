@@ -1113,7 +1113,6 @@ class Plotter:
 
             queried_tree = tree.query(query+extra_query+category_query)
             variable = queried_tree[var_name]
-            #print(queried_tree["category"])
             syst_weights = queried_tree[name]
             
             spline_fix_cv  = queried_tree[weightVar] * self.weights[t]
@@ -1144,6 +1143,7 @@ class Plotter:
             n_cv_tot += n_cv    #this should run twice
 
             if not df.empty:  #nue, mc
+                print(df)
                 for i in range(Nuniverse):
                     weight = df[i].values / 1000.   #why 1000?
                     weight[np.isnan(weight)] = 1

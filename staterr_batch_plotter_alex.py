@@ -436,6 +436,8 @@ class Plotter:
     def add_detsys_error(self,sample,mc_entries_v,weight):
         detsys_v  = np.zeros(len(mc_entries_v))
         entries_v = np.zeros(len(mc_entries_v))
+        print("LOOK HERE FOR SETSYS")
+        print(self.detsys)
         if (self.detsys == None): return detsys_v
         if sample in self.detsys:
             if (len(self.detsys[sample]) == len(mc_entries_v)):
