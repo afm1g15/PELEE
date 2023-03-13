@@ -1061,6 +1061,7 @@ class Plotter:
         if (currentsample == "nue_nue"):
             current_genie_weights = self._get_genie_weight(
                 self.samples["nue_nue"], variable, query=query, track_cuts=track_cuts,select_longest=select_longest, weightvar=genieweight)
+            print(current_genie_weights)
         elif (currentsample == "nue_mc"):
             current_genie_weights = self._get_genie_weight(
                 self.samples["nue_mc"], variable, query=query, track_cuts=track_cuts,select_longest=select_longest, weightvar=genieweight)
