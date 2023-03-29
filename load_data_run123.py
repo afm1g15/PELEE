@@ -598,6 +598,7 @@ def process_uproot_numu(up,df):
     
     # get element-wise reconstructed neutrino energy (for each index the value will be the neutrino energy assuming the track at that index is the muon)
     df['trk_energy_tot'] = trk_energy_proton_v.sum()
+    trk_energy_tot = up.array("trk_energy_tot")
     muon_energy_correction_v = np.sqrt(trk_range_muon_mom_v**2 + 0.105**2) - trk_energy_proton_v
     # get element-wise MCS consistency
     muon_mcs_consistency_v    = ( (trk_mcs_muon_mom_v - trk_range_muon_mom_v) / trk_range_muon_mom_v )
@@ -635,12 +636,16 @@ def process_uproot_numu(up,df):
     #df['neutrino_energy'] = df['trk_energy_tot'] + df['muon_energy'] - df['muon_proton_energy']
     df['neutrino_energy'] = df['trk_energy_tot'] + get_elm_from_vec_idx(muon_energy_correction_v,muon_idx)
     df['muon_mcs_consistency'] = get_elm_from_vec_idx(muon_mcs_consistency_v,muon_idx)
+    INTERCEPT = 0.0
+    SLOPE = 0.83
+    df["reco_e"] = (df["shr_energy_tot_cali"] + INTERCEPT) / SLOPE + df["trk_energy_tot"]
+    reco_e = up.array("reco_e")
 
     trk_score_v = up.array("trk_score_v")
     shr_mask = (trk_score_v<0.5)
     trk_mask = (trk_score_v>0.5)
-    proton_mask = (trk_score_v>0.5)&(trk_llr_pid_v < 0.)   #Plot these
-    pion_mask = (trk_score_v>0.5)&(trk_score_v<0.8)&(trk_llr_pid_v > 0.)&(trk_llr_pid_v<0.2)   #Plot these
+    proton_mask = (trk_score_v>0.5)&(trk_llr_pid_v < 0.)&(trk_energy_tot>0.04)   #Plot these
+    pion_mask = (trk_score_v>0.5)&(trk_score_v<0.8)&(trk_llr_pid_v > 0.)&(trk_llr_pid_v<0.2)&(reco_e>0.04)   #Plot these
     df['n_protons_tot'] = proton_mask.sum()
     df['n_pions_tot'] = pion_mask.sum()
     df['n_muons_tot'] = muon_mask.sum()

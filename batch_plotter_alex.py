@@ -1216,20 +1216,22 @@ class Plotter:
             #current_order_var_dict    = {}
             #current_order_weight_dict = {}
 
-        current_total = sum(sum(current_order_weight_dict[c]) for c in current_order_var_dict)
+        current_total = math.fsum(math.fsum(current_order_weight_dict[c]) for c in current_order_var_dict)
         print("current_total ", current_total)
+        print('%.75f' % current_total)
+        print("---------------------------STILL TOGETHER HERE--------------------------------")
         if draw_data:
             if (currentsample == "nue_ext"):
-                current_total += sum([self.weights["ext"]] * len(current_plotted_variable))
-                print("total ", current_total)
+                current_total += math.fsum([self.weights["ext"]] * len(current_plotted_variable))
+                print("total after ext", current_total)
             if (currentsample == "numu_ext"):
-                current_total += sum([self.weights["ext"]] * len(current_plotted_variable))
-                print("total ", current_total)
+                current_total += math.fsum([self.weights["ext"]] * len(current_plotted_variable))
+                print("total after ext", current_total)
         
         if (len(current_var_dict) != 0):
             labels = [
-                "%s: %.1f" % (cat_labels[c], sum(current_order_weight_dict[c])) \
-                if sum(current_order_weight_dict[c]) else ""
+                "%s: %.1f" % (cat_labels[c], math.fsum(current_order_weight_dict[c])) \
+                if math.fsum(current_order_weight_dict[c]) else ""
                 for c in current_order_var_dict.keys()
             ]
 
@@ -1261,13 +1263,44 @@ class Plotter:
             #print("-------------------------------")
         else:
             labels = ""
+            
+        current_total = math.fsum(math.fsum(current_order_weight_dict[c]) for c in current_order_var_dict)
+        print("current_total ", current_total)
+        print('%.75f' % current_total)
+        print("---------------------------STILL TOGETHER HERE--------------------------------")
 
         current_stacked = nue_ax1.hist(
             current_order_var_dict.values(),
             weights=list(current_order_weight_dict.values()),
+            #weights=(current_order_weight_dict.values()),
             stacked=True,
             label=labels or "",
             **plot_options)
+        
+        bins = np.arange(0.0, 5.5, 0.5)
+        
+        #print("")
+        #print("TEST PLOT NUMPY")
+        #test=np.histogram(list(current_order_var_dict.values()), bins,
+        #    weights=list(current_order_weight_dict.values()))
+        #print('%.75f' % math.fsum(test[0]))
+        #print("")
+        
+        current_total = math.fsum(math.fsum(current_order_weight_dict[c]) for c in current_order_var_dict)
+        print("current_total ", current_total)
+        print('%.75f' % current_total)
+        current_total_split = (math.fsum(current_order_weight_dict[c]) for c in current_order_var_dict)
+        print("current_total_split ", [math.fsum(current_order_weight_dict[c]) for c in current_order_var_dict])
+        print("---------------------------STILL TOGETHER HERE (PAST PLOTTING)--------------------------------")
+        
+        print("")
+        print("current stacked")
+        print(current_stacked[0])
+        #print(math.fsum(current_stacked[0]))
+        #print('%.75f' % math.fsum(current_stacked[0]))
+        #print("")
+        #print("diff = ", math.fsum(current_stacked[0]) - current_total)
+        print("-------------------NOT GOOD BY HERE------------------")
 
         #print("-----------------current stacked--------------")
         #print(len(current_stacked))
@@ -1373,6 +1406,7 @@ class Plotter:
             current_total_array, weights=current_total_weight,  **plot_options)
 
         print("current_total_hist ", current_total_hist)
+        print(sum(current_total_hist))
         
        
         
