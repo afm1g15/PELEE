@@ -1,5 +1,7 @@
 #Function to sort the colours in a stacked histogram and order the stacked distributions
 
+import math
+
 def sortStackDists(stacksort, nue_var_dict, nue_weight_dict):
     nue_order_dict = {}
     nue_order_var_dict    = {}
@@ -36,18 +38,18 @@ def sortStackDists(stacksort, nue_var_dict, nue_weight_dict):
                 if int(c)==11:
                     has11 = True
                     continue
-            nue_order_dict[c] = sum(nue_weight_dict[c])
+            nue_order_dict[c] = math.fsum(nue_weight_dict[c])
             nue_order_dict = {k: v for k, v in sorted(nue_order_dict.items(), key=lambda item: item[1])}
         if has1:
-            nue_order_dict[1] = sum(nue_weight_dict[1])
+            nue_order_dict[1] = math.fsum(nue_weight_dict[1])
         if has1:
-            nue_order_dict[12] = sum(nue_weight_dict[12])
+            nue_order_dict[12] = math.fsum(nue_weight_dict[12])
         if has10:
-            nue_order_dict[10] = sum(nue_weight_dict[10])
+            nue_order_dict[10] = math.fsum(nue_weight_dict[10])
         if has11:
-            nue_order_dict[11] = sum(nue_weight_dict[11])
+            nue_order_dict[11] = math.fsum(nue_weight_dict[11])
         if has111:
-            nue_order_dict[111] = sum(nue_weight_dict[111])
+            nue_order_dict[111] = math.fsum(nue_weight_dict[111])
         # now that the order has been sorted out, fill the actual dicts
         print("3")
         for c in nue_order_dict.keys():

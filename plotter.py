@@ -1025,6 +1025,7 @@ class Plotter:
 
         for varsample in DETSAMPLES:
 
+            #input is a txt file with bin uncertainties in it
             filename = var + "_" + varsample + ".txt"
 
             if (os.path.isfile(path+filename) == False):

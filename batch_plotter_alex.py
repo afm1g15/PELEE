@@ -1055,9 +1055,11 @@ class Plotter:
             current_category, current_plotted_variable = categorization(
                 self.samples["numu_dirt"], variable, query=query, track_cuts=track_cuts, select_longest=select_longest)   
 
+        
         ##OVERLAY/MC CHANGE HERE
         current_var_dict = defaultdict(list)
         current_weight_dict = defaultdict(list)
+        
         if (currentsample == "nue_nue"):
             current_genie_weights = self._get_genie_weight(
                 self.samples["nue_nue"], variable, query=query, track_cuts=track_cuts,select_longest=select_longest, weightvar=genieweight)
@@ -1074,6 +1076,7 @@ class Plotter:
         elif (currentsample == "numu_dirt"):
             current_genie_weights = self._get_genie_weight(
                 self.samples["numu_dirt"], variable, query=query, track_cuts=track_cuts,select_longest=select_longest, weightvar=genieweight) 
+                
 
         mcsamples = ["nue_nue", "nue_mc", "nue_dirt", "numu_mc", "numu_dirt"]
             
@@ -1083,6 +1086,7 @@ class Plotter:
                 if (currentsample == "nue_nue"):
                     current_weight_dict[c].append(self.weights["nue_nue"] * w)
                 elif (currentsample == "nue_mc"):
+                    #print(self.weights["nue_mc"] * w)
                     current_weight_dict[c].append(self.weights["nue_mc"] * w)
                 elif (currentsample == "nue_dirt"):
                     current_weight_dict[c].append(self.weights["nue_dirt"] * w)
@@ -1091,7 +1095,24 @@ class Plotter:
                 elif (currentsample == "numu_dirt"):
                     current_weight_dict[c].append(self.weights["numu_dirt"] * w)    
        
+        """
+        mcsamples = ["nue_nue", "nue_mc", "nue_dirt", "numu_mc", "numu_dirt"]
+            
+        if (currentsample in mcsamples):
+            for c, v in zip(current_category, current_plotted_variable):
+                current_var_dict[c].append(v)
+                if (currentsample == "nue_nue"):
+                    current_weight_dict[c].append(currentsample['totweight_data'])
+                elif (currentsample == "nue_mc"):
+                    current_weight_dict[c].append(currentsample['totweight_data'])
+                elif (currentsample == "nue_dirt"):
+                    current_weight_dict[c].append(currentsample['totweight_data'])
+                elif (currentsample == "numu_mc"):
+                    current_weight_dict[c].append(currentsample['totweight_data'])
+                elif (currentsample == "numu_dirt"):
+                    current_weight_dict[c].append(currentsample['totweight_data']) 
         
+        """
         if "ncpi0" in self.samples:
             ncpi0_genie_weights = self._get_genie_weight(
                     self.samples["ncpi0"], variable, query=query, track_cuts=track_cuts, select_longest=select_longest, weightvar=genieweight)
@@ -1205,6 +1226,7 @@ class Plotter:
             
 #-------------------------------
         if (len(current_var_dict) != 0) and (currentsample in mcsamples):
+            print("TEST")
             c, current_order_var_dict, current_order_weight_dict = Plotter_Functions_Alex.plotColourSorting.sortStackDists(stacksort, current_var_dict, current_weight_dict)
         elif (currentsample in mcsamples):
             print("Had to return early (colour sorting).")
@@ -1277,6 +1299,14 @@ class Plotter:
             label=labels or "",
             **plot_options)
         
+        current_stacked = list(current_stacked)
+        print("")
+        #print("Rounding to 3dp")
+        #print(current_stacked[0])
+        #current_stacked[0] = np.round(current_stacked[0], 3)
+        #print(current_stacked)
+        #current_stacked = tuple(current_stacked)
+        
         bins = np.arange(0.0, 5.5, 0.5)
         
         #print("")
@@ -1294,8 +1324,8 @@ class Plotter:
         print("---------------------------STILL TOGETHER HERE (PAST PLOTTING)--------------------------------")
         
         print("")
-        print("current stacked")
-        print(current_stacked[0])
+        #print("current stacked")
+        #print(current_stacked[0])
         #print(math.fsum(current_stacked[0]))
         #print('%.75f' % math.fsum(current_stacked[0]))
         #print("")
@@ -1326,10 +1356,10 @@ class Plotter:
         #print(current_total_array)
         #print("-------------------------------")
 
-        wanted_key = 1 # 7 for full, 5 for truth 
+        #wanted_key = 1 # 7 for full, 5 for truth 
 
-        current_wanted_list = Plotter_Functions_Alex.getWantedLists.getWantedLists(wanted_key, current_stacked)
-        print("current_wanted_list ", current_wanted_list)
+        #current_wanted_list = Plotter_Functions_Alex.getWantedLists.getWantedLists(wanted_key, current_stacked)
+        #print("current_wanted_list ", current_wanted_list)
 
         #Remove smearing part
         ###################################################################
@@ -1370,8 +1400,8 @@ class Plotter:
         #nue_wanted_list_smeared = list(nue_smeared_array)
 
         ##################################################################
-        current_wanted_list_smeared = current_wanted_list
-        current_smeared_array = np.array(current_wanted_list)
+        #current_wanted_list_smeared = current_wanted_list
+        #current_smeared_array = np.array(current_wanted_list)
 
         """
         if (currentsample == "nue_nue"):
@@ -1406,6 +1436,9 @@ class Plotter:
             current_total_array, weights=current_total_weight,  **plot_options)
 
         print("current_total_hist ", current_total_hist)
+        #print("Rounding to 3dp")
+        #current_total_hist = np.round(current_total_hist, 3)
+        #print("current_total_hist ", current_total_hist)
         print(sum(current_total_hist))
         
        
@@ -1426,6 +1459,9 @@ class Plotter:
             **plot_options)
             
             print("n_ext ", n_ext)
+            #print("Rounding to 3dp")
+            #n_ext = np.round(n_ext, 3)
+            #print("n_ext ", n_ext)
 
             current_total_array = np.concatenate([current_total_array, current_plotted_variable])
             current_total_weight = np.concatenate([current_total_weight, ext_weight])
@@ -1442,10 +1478,17 @@ class Plotter:
         edgecolor="black",
         **plot_options)
         
-        print("")        
-        print("current n_tot ", current_n_tot)
-        print("total array ", current_total_array)
-        print("total weight array ", current_total_weight)
+        print("")  
+        #print("Rounding to 3dp")
+        #print("current n_tot ", current_n_tot)
+        #print("total array ", current_total_array)
+        #print("total weight array ", current_total_weight)
+        #current_n_tot = np.round(current_n_tot, 3)
+        #current_total_array = np.round(current_total_array, 3)
+        #current_total_weight = np.round(current_total_weight, 3)
+        #print("current n_tot ", current_n_tot)
+        #print("total array ", current_total_array)
+        #print("total weight array ", current_total_weight)
 
           
 
@@ -1487,7 +1530,9 @@ class Plotter:
         
         if (draw_data) and ((currentsample == "nue_data") or (currentsample == "numu_data")):
             plot_options.pop('color', None)
-            current_n_data, nue_bins = np.histogram(current_plotted_variable, **plot_options)  
+            current_n_data, nue_bins = np.histogram(current_plotted_variable, **plot_options) 
+            #print("Rounding to 3dp")
+            #current_n_data = np.round(current_n_data, 3)
             self.nue_data = current_n_data
             current_data_err = self._data_err(current_n_data,asymErrs)
             #self.cov_data_stat[np.diag_indices_from(self.cov_data_stat)] = n_data

@@ -967,7 +967,7 @@ class Plotter:
         return nue_total_variable, nue_total_weight, numu_total_variable, numu_total_weight
 
 ############################################################################################################################
-    def plot_variable(self, variable, query="selected==1", currentsample = "nue_nue", typeerr = "standard", weight = "weightsPPFX", category_query = "", title="", kind="event_category", draw_geoSys=False,
+    def plot_variable(self, variable, query="selected==1", currentsample = "nue_nue", typeerr = "standard", weight = "weightsPPFX", category_query = "", Nuniverse=1, title="", kind="event_category", draw_geoSys=False,
                       draw_sys=False, stacksort=0, track_cuts=None, select_longest=False,
                       detsys=None,ratio=True,chisq=False,draw_data=True,asymErrs=False,genieweight="weightSplineTimesTuneTimesPPFX",
                       ncol=2,
@@ -1057,10 +1057,10 @@ class Plotter:
         
         if (typeerr == "standard"):
             print("standard sys err")
-            n_cv_tot, n_tots, dfs, df_vars, df_splines = self.sys_err(weight,variable,query,plot_options["range"],plot_options["bins"],genieweight, "nue", categorization, category_query)
+            n_cv_tot, n_tots, dfs, df_vars, df_splines = self.sys_err(weight,variable,query,plot_options["range"],plot_options["bins"],genieweight, "nue", categorization, category_query, Nuniverse)
         elif (typeerr == "NuMIGeo"):
             print("NuMI Geo sys err")
-            n_cv_tot, n_tots, dfs, df_vars, df_splines = self.sys_err_NuMIGeo("weightsNuMIGeo",variable,query,plot_options["range"],plot_options["bins"],genieweight, "nue", categorization, category_query)
+            n_cv_tot, n_tots, dfs, df_vars, df_splines = self.sys_err_NuMIGeo("weightsNuMIGeo",variable,query,plot_options["range"],plot_options["bins"],genieweight, "nue", categorization, category_query, Nuniverse)
         
         
         
@@ -1081,14 +1081,14 @@ class Plotter:
 
         
 #############################################################################################################################
-    def sys_err(self, name, var_name, query, x_range, n_bins, weightVar, key, categorization, category_query):
+    def sys_err(self, name, var_name, query, x_range, n_bins, weightVar, key, categorization, category_query, Nuniverse):
         n_tots = []
         dfs_ppfx = []
         df_ppfx_vars = []
         df_ppfx_splines = []
         
         # how many universes?
-        Nuniverse = 500 #100 #len(df)
+        #Nuniverse = 500 #100 #len(df)
         print("Universes",Nuniverse)
 
         n_tot = np.empty([Nuniverse, n_bins])
@@ -1140,6 +1140,8 @@ class Plotter:
                 range=x_range,
                 bins=n_bins,
                 weights=spline_fix_cv)
+            #print("Rounding to 3dp")
+            #n_cv = np.round(n_cv, 3)
             n_cv_tot += n_cv    #this should run twice
 
             if not df.empty:  #nue, mc
@@ -1153,6 +1155,7 @@ class Plotter:
                     # n is an array - of full number mc in that df
                     n, bins = np.histogram(
                         variable, weights=weight*spline_fix_var, range=x_range, bins=n_bins)
+                    #n = np.round(n, 3)
                     n_tot[i] += n           #will run 500 times
                     
         n_tots.append(n_tot)
@@ -1181,15 +1184,15 @@ class Plotter:
         return n_cv_tot, n_tots, dfs_ppfx, df_ppfx_vars, df_ppfx_splines            
     
                       
-    def sys_err_NuMIGeo(self, name, var_name, query, x_range, n_bins, weightVar, key, categorization, category_query):
-      # how many universes?
+    def sys_err_NuMIGeo(self, name, var_name, query, x_range, n_bins, weightVar, key, categorization, category_query, Nuniverse):
+      # how many universes? 10
         n_tots = []
         dfs_geo = []
         df_geo_vars = []
         df_geo_splines = []
         
-        print("Number of variations Universes",10)
-        for variationNumber in [x*2 for x in range(10)]:
+        print("Number of variations Universes", Nuniverse)
+        for variationNumber in [x*2 for x in range(Nuniverse)]:
             n_tot = np.empty([2, n_bins])
             n_cv_tot = np.empty(n_bins)
             n_tot.fill(0)
@@ -1222,6 +1225,8 @@ class Plotter:
                     range=x_range,
                     bins=n_bins,
                     weights=spline_fix_cv)
+                #print("Rounding to 3dp")
+                #n_cv = np.round(n_cv, 3)
                 n_cv_tot += n_cv
 
                 if not df.empty:
@@ -1236,6 +1241,7 @@ class Plotter:
                         n, bins = np.histogram(
                             variable, weights=weight*spline_fix_var, range=x_range, bins=n_bins)
                         #print("i = ", i)
+                        #n = np.round(n, 3)
                         n_tot[i] += n
 
                         

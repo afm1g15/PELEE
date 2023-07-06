@@ -22,6 +22,8 @@ Attributes:
     pdg_labels (dict): Labels for PDG codes
     category_colors (dict): Color scheme for event categories
     pdg_colors (dict): Colors scheme for PDG codes
+    
+    NOTE ALEX: Detsys now dealt with in its own file
 """
 
 import math
@@ -434,14 +436,19 @@ class Plotter:
     
     
     def add_detsys_error(self,sample,mc_entries_v,weight):
+        #get empty arrays to fill
         detsys_v  = np.zeros(len(mc_entries_v))
         entries_v = np.zeros(len(mc_entries_v))
-        print("LOOK HERE FOR SETSYS")
+        print("LOOK HERE FOR DETSYS")
         print(self.detsys)
+        #return if no detsys provided
         if (self.detsys == None): return detsys_v
+        #looking for see if the sample (i.e. "nue_nue") is present in the detsys provided
         if sample in self.detsys:
+            #if the detsys sample is the same length as the current uncertainties
             if (len(self.detsys[sample]) == len(mc_entries_v)):
                 for i,n in enumerate(mc_entries_v):
+                    #multiply the sample by the uncertainty value and by the sample weight
                     detsys_v[i] = (self.detsys[sample][i] * n * weight)#**2
                     entries_v[i] = n * weight
             else:
@@ -1083,6 +1090,8 @@ class Plotter:
         if (currentsample == "nue_nue"):
             current_uncertainties, current_bins = np.histogram(
                 current_plotted_variable, **plot_options)
+            #print("Rounding to 3dp")
+            #current_uncertainties = np.round(current_uncertainties, 3)
             current_err = np.array(
                 [n * self.weights["nue_nue"] * self.weights["nue_nue"] for n in current_uncertainties])
             current_detsys = self.add_detsys_error("nue_nue", current_uncertainties, self.weights["nue_nue"])
@@ -1093,6 +1102,7 @@ class Plotter:
         elif (currentsample == "nue_mc"):
             current_uncertainties, current_bins = np.histogram(
                 current_plotted_variable, **plot_options)
+            #current_uncertainties = np.round(current_uncertainties, 3)
             current_err = np.array(
                 [n * self.weights["nue_mc"] * self.weights["nue_mc"] for n in current_uncertainties])
             current_detsys = self.add_detsys_error("nue_mc", current_uncertainties, self.weights["nue_mc"])
@@ -1103,6 +1113,7 @@ class Plotter:
         elif (currentsample == "nue_dirt"):
             current_uncertainties, current_bins = np.histogram(
                 current_plotted_variable, **plot_options)
+            #current_uncertainties = np.round(current_uncertainties, 3)
             current_err = np.array(
                 [n * self.weights["nue_dirt"] * self.weights["nue_dirt"] for n in current_uncertainties])
             current_detsys = self.add_detsys_error("nue_dirt", current_uncertainties, self.weights["nue_dirt"])
@@ -1113,6 +1124,7 @@ class Plotter:
         elif (currentsample == "numu_mc"):
             current_uncertainties, current_bins = np.histogram(
                 current_plotted_variable, **plot_options)
+            #current_uncertainties = np.round(current_uncertainties, 3)
             current_err = np.array(
                 [n * self.weights["numu_mc"] * self.weights["numu_mc"] for n in current_uncertainties])
             current_detsys = self.add_detsys_error("numu_mc", current_uncertainties, self.weights["numu_mc"])
@@ -1123,6 +1135,7 @@ class Plotter:
         elif (currentsample == "numu_dirt"):
             current_uncertainties, current_bins = np.histogram(
                 current_plotted_variable, **plot_options)
+            #current_uncertainties = np.round(current_uncertainties, 3)
             current_err = np.array(
                 [n * self.weights["numu_dirt"] * self.weights["numu_dirt"] for n in current_uncertainties])
             current_detsys = self.add_detsys_error("numu_dirt", current_uncertainties, self.weights["numu_dirt"])
@@ -1148,6 +1161,9 @@ class Plotter:
                         bins=n_bins,
                         weights=spline_fix_cv)  
             print("selected ", current_selected)
+            #print("Rounding to 3dp")
+            #current_selected = np.round(current_selected, 3)
+            #print("selected ", current_selected)
         elif (currentsample == "nue_mc"):
             current_tree = self.samples["nue_mc"]
             extra_query = "& " + self.nu_pdg
@@ -1160,6 +1176,9 @@ class Plotter:
                         bins=n_bins,
                         weights=spline_fix_cv)  
             print("selected ", current_selected)
+            #print("Rounding to 3dp")
+            #current_selected = np.round(current_selected, 3)
+            #print("selected ", current_selected)
         elif (currentsample == "nue_dirt"):
             current_tree = self.samples["nue_dirt"]
             current_queried_tree = current_tree.query(query)
@@ -1171,6 +1190,9 @@ class Plotter:
                         bins=n_bins,
                         weights=spline_fix_cv)  
             print("selected ", current_selected)
+            #print("Rounding to 3dp")
+            #current_selected = np.round(current_selected, 3)
+            #print("selected ", current_selected)
         elif (currentsample == "numu_mc"):
             current_tree = self.samples["numu_mc"]
             extra_query = "& " + self.nu_pdg
@@ -1183,6 +1205,9 @@ class Plotter:
                         bins=n_bins,
                         weights=spline_fix_cv)  
             print("selected ", current_selected)
+            #print("Rounding to 3dp")
+            #current_selected = np.round(current_selected, 3)
+            #print("selected ", current_selected)
         elif (currentsample == "numu_dirt"):
             current_tree = self.samples["numu_dirt"]
             current_queried_tree = current_tree.query(query)
@@ -1194,6 +1219,9 @@ class Plotter:
                         bins=n_bins,
                         weights=spline_fix_cv)  
             print("selected ", current_selected)
+            #print("Rounding to 3dp")
+            #current_selected = np.round(current_selected, 3)
+            #print("selected ", current_selected)
         
         
         
