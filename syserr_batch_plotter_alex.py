@@ -1057,10 +1057,10 @@ class Plotter:
         
         if (typeerr == "standard"):
             print("standard sys err")
-            n_cv_tot, n_tots, dfs, df_vars, df_splines = self.sys_err(weight,variable,query,plot_options["range"],plot_options["bins"],genieweight, "nue", categorization, category_query, Nuniverse)
+            n_cv_tot, n_tots, dfs, df_vars, df_splines, detvar_dict = self.sys_err(weight,variable,query,plot_options["range"],plot_options["bins"],genieweight, "nue", categorization, category_query, Nuniverse)
         elif (typeerr == "NuMIGeo"):
             print("NuMI Geo sys err")
-            n_cv_tot, n_tots, dfs, df_vars, df_splines = self.sys_err_NuMIGeo("weightsNuMIGeo",variable,query,plot_options["range"],plot_options["bins"],genieweight, "nue", categorization, category_query, Nuniverse)
+            n_cv_tot, n_tots, dfs, df_vars, df_splines, detvar_dict = self.sys_err_NuMIGeo("weightsNuMIGeo",variable,query,plot_options["range"],plot_options["bins"],genieweight, "nue", categorization, category_query, Nuniverse)
         
         
         
@@ -1075,7 +1075,7 @@ class Plotter:
             print("Returning")
             print("--------------------------")
             print("")
-            return n_cv_tot, n_tots, dfs, df_vars, df_splines
+            return n_cv_tot, n_tots, dfs, df_vars, df_splines, detvar_dict
         else:
             return nue_fig, nue_ax1, nue_stacked, labels, nue_order_var_dict, nue_order_weight_dict
 
@@ -1086,6 +1086,8 @@ class Plotter:
         dfs_ppfx = []
         df_ppfx_vars = []
         df_ppfx_splines = []
+        
+        detvar_dict = {}
         
         # how many universes?
         #Nuniverse = 500 #100 #len(df)
@@ -1140,6 +1142,7 @@ class Plotter:
                 range=x_range,
                 bins=n_bins,
                 weights=spline_fix_cv)
+            detvar_dict["CV"] = list(n_cv)
             #print("Rounding to 3dp")
             #n_cv = np.round(n_cv, 3)
             n_cv_tot += n_cv    #this should run twice
@@ -1155,6 +1158,7 @@ class Plotter:
                     # n is an array - of full number mc in that df
                     n, bins = np.histogram(
                         variable, weights=weight*spline_fix_var, range=x_range, bins=n_bins)
+                    detvar_dict[i] = list(n)
                     #n = np.round(n, 3)
                     n_tot[i] += n           #will run 500 times
                     
@@ -1163,6 +1167,7 @@ class Plotter:
         df_ppfx_vars.append(variable)
         df_ppfx_splines.append(spline_fix_var)
         #careful here re categories
+        #detvar_dicts.append(detvar_dict)
         
         
         """
@@ -1181,7 +1186,7 @@ class Plotter:
         print("")
         """
         
-        return n_cv_tot, n_tots, dfs_ppfx, df_ppfx_vars, df_ppfx_splines            
+        return n_cv_tot, n_tots, dfs_ppfx, df_ppfx_vars, df_ppfx_splines, detvar_dict            
     
                       
     def sys_err_NuMIGeo(self, name, var_name, query, x_range, n_bins, weightVar, key, categorization, category_query, Nuniverse):
@@ -1190,6 +1195,8 @@ class Plotter:
         dfs_geo = []
         df_geo_vars = []
         df_geo_splines = []
+        
+        detvar_dict = {}
         
         print("Number of variations Universes", Nuniverse)
         for variationNumber in [x*2 for x in range(Nuniverse)]:
@@ -1227,11 +1234,13 @@ class Plotter:
                     weights=spline_fix_cv)
                 #print("Rounding to 3dp")
                 #n_cv = np.round(n_cv, 3)
+                detvar_dict["CV"] = list(n_cv)
                 n_cv_tot += n_cv
 
                 if not df.empty:
                     for i in range(2):
                         #print(df.shape)
+                        #print(i+variationNumber)
                         weight = df[i+variationNumber].values
                         weight[np.isnan(weight)] = 1
                         weight[weight > 100] = 1
@@ -1240,6 +1249,7 @@ class Plotter:
 
                         n, bins = np.histogram(
                             variable, weights=weight*spline_fix_var, range=x_range, bins=n_bins)
+                        detvar_dict[i+variationNumber] = list(n)
                         #print("i = ", i)
                         #n = np.round(n, 3)
                         n_tot[i] += n
@@ -1267,7 +1277,7 @@ class Plotter:
 #        print("")
 
             
-        return n_cv_tot, n_tots, dfs_geo, df_geo_vars, df_geo_splines 
+        return n_cv_tot, n_tots, dfs_geo, df_geo_vars, df_geo_splines, detvar_dict
                       
 ##############################################################################################################################
     def _plot_variable_samples(self, variable, query, title, asymErrs, **plot_options):

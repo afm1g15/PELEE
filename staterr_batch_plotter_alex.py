@@ -970,7 +970,7 @@ class Plotter:
                 query)["leeweight"] * self.weights["lee"]
 
         nue_total_weight = np.concatenate((nue_mc_weight, nue_nue_weight, nue_ext_weight, nue_dirt_weight, ncpi0_weight, ccpi0_weight, ccnopi_weight, cccpi_weight, nccpi_weight, ncnopi_weight, lee_weight))
-        nuw_total_variable = np.concatenate((nue_mc_plotted_variable, nue_nue_plotted_variable, nue_ext_plotted_variable, nue_dirt_plotted_variable, ncpi0_plotted_variable, ccpi0_plotted_variable, ccnopi_plotted_variable, cccpi_plotted_variable, nccpi_plotted_variable, ncnopi_plotted_variable, lee_plotted_variable))
+        nue_total_variable = np.concatenate((nue_mc_plotted_variable, nue_nue_plotted_variable, nue_ext_plotted_variable, nue_dirt_plotted_variable, ncpi0_plotted_variable, ccpi0_plotted_variable, ccnopi_plotted_variable, cccpi_plotted_variable, nccpi_plotted_variable, ncnopi_plotted_variable, lee_plotted_variable))
         numu_total_weight = np.concatenate((numu_mc_weight, numu_nue_weight, numu_ext_weight, numu_dirt_weight, ncpi0_weight, ccpi0_weight, ccnopi_weight, cccpi_weight, nccpi_weight, ncnopi_weight, lee_weight))
         numu_total_variable = np.concatenate((numu_mc_plotted_variable, numu_nue_plotted_variable, numu_ext_plotted_variable, numu_dirt_plotted_variable, ncpi0_plotted_variable, ccpi0_plotted_variable, ccnopi_plotted_variable, cccpi_plotted_variable, nccpi_plotted_variable, ncnopi_plotted_variable, lee_plotted_variable))
         return nue_total_variable, nue_total_weight, numu_total_variable, numu_total_weight
@@ -1073,6 +1073,10 @@ class Plotter:
             print("current sample is: ", currentsample)
             current_category, current_plotted_variable = categorization(
                 self.samples["nue_dirt"], variable, query=query, track_cuts=track_cuts, select_longest=select_longest) 
+        elif (currentsample == "nue_ext"):
+            print("current sample is: ", currentsample)
+            current_category, current_plotted_variable = categorization(
+                self.samples["nue_ext"], variable, query=query, track_cuts=track_cuts, select_longest=select_longest)     
         elif (currentsample == "numu_mc"):
             print("current sample is: ", currentsample)
             current_category, current_plotted_variable = categorization(
@@ -1080,7 +1084,11 @@ class Plotter:
         elif (currentsample == "numu_dirt"):
             print("current sample is: ", currentsample)
             current_category, current_plotted_variable = categorization(
-                self.samples["numu_dirt"], variable, query=query, track_cuts=track_cuts, select_longest=select_longest)   
+                self.samples["numu_dirt"], variable, query=query, track_cuts=track_cuts, select_longest=select_longest)
+        elif (currentsample == "numu_ext"):
+            print("current sample is: ", currentsample)
+            current_category, current_plotted_variable = categorization(
+                self.samples["numu_ext"], variable, query=query, track_cuts=track_cuts, select_longest=select_longest)    
 
 
         print("")
@@ -1121,6 +1129,17 @@ class Plotter:
             print(current_err)
             print("detsys nue dirt: ")
             print(current_detsys)
+        elif (currentsample == "nue_ext"):
+            current_uncertainties, current_bins = np.histogram(
+                current_plotted_variable, **plot_options)
+            #current_uncertainties = np.round(current_uncertainties, 3)
+            current_err = np.array(
+                [n * self.weights["nue_ext"] * self.weights["nue_ext"] for n in current_uncertainties])
+            current_detsys = self.add_detsys_error("nue_ext", current_uncertainties, self.weights["nue_ext"])
+            print("err nue ext: ")
+            print(current_err)
+            print("detsys nue ext: ")
+            print(current_detsys)    
         elif (currentsample == "numu_mc"):
             current_uncertainties, current_bins = np.histogram(
                 current_plotted_variable, **plot_options)
@@ -1143,6 +1162,17 @@ class Plotter:
             print(current_err)
             print("detsys numu dirt: ")
             print(current_detsys)
+        elif (currentsample == "numu_ext"):
+            current_uncertainties, current_bins = np.histogram(
+                current_plotted_variable, **plot_options)
+            #current_uncertainties = np.round(current_uncertainties, 3)
+            current_err = np.array(
+                [n * self.weights["numu_ext"] * self.weights["numu_ext"] for n in current_uncertainties])
+            current_detsys = self.add_detsys_error("numu_ext", current_uncertainties, self.weights["numu_ext"])
+            print("err numu ext: ")
+            print(current_err)
+            print("detsys numu ext: ")
+            print(current_detsys)    
         
 
         print("")
@@ -1192,7 +1222,7 @@ class Plotter:
             print("selected ", current_selected)
             #print("Rounding to 3dp")
             #current_selected = np.round(current_selected, 3)
-            #print("selected ", current_selected)
+            #print("selected ", current_selected)  
         elif (currentsample == "numu_mc"):
             current_tree = self.samples["numu_mc"]
             extra_query = "& " + self.nu_pdg
@@ -1221,7 +1251,7 @@ class Plotter:
             print("selected ", current_selected)
             #print("Rounding to 3dp")
             #current_selected = np.round(current_selected, 3)
-            #print("selected ", current_selected)
+            #print("selected ", current_selected) 
         
         
         
@@ -1232,7 +1262,11 @@ class Plotter:
             return nue_fig, nue_ax1, nue_ax2, nue_stacked, labels, numu_fig, numu_ax1, labels
         elif draw_data:
             print("Returning")
-            return current_err, current_detsys, current_selected
+            if (currentsample == "nue_ext") or (currentsample == "numu_ext"):
+                return current_err, current_detsys
+            else:
+                return current_err, current_detsys, current_selected
+        
         else:
             return nue_fig, nue_ax1, nue_stacked, labels, nue_order_var_dict, nue_order_weight_dict
 
