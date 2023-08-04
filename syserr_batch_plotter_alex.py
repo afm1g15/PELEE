@@ -1099,8 +1099,10 @@ class Plotter:
         n_cv_tot.fill(0)
 
         for t in self.samples:
+            #print(t)
             
             tree = self.samples[t]
+            #print(tree)
 
             ##MC/OVERLAY
             extra_query = ""
@@ -1113,7 +1115,10 @@ class Plotter:
             else:
                 extra_cut = None
 
+            #print("PRINT")
+            #print(query+extra_query+category_query)
             queried_tree = tree.query(query+extra_query+category_query)
+            #print(queried_tree)
             variable = queried_tree[var_name]
             syst_weights = queried_tree[name]
             
@@ -1124,6 +1129,7 @@ class Plotter:
 
             s = syst_weights
             df = pd.DataFrame(s.values.tolist())
+            print(df)
             
             if var_name[-2:] == "_v":
                 variable = variable.apply(lambda x: x[0])
