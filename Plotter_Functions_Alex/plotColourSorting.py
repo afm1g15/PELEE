@@ -6,9 +6,7 @@ def sortStackDists(stacksort, nue_var_dict, nue_weight_dict):
     nue_order_dict = {}
     nue_order_var_dict    = {}
     nue_order_weight_dict = {}
-    print("1")
     if (stacksort >= 1 and stacksort <= 3):
-        print("2")
         #print("In stacksort 1")
         # figure out ordering based on total yield.
         # Options are to have no exceptions (stacksort=1),   
@@ -42,7 +40,7 @@ def sortStackDists(stacksort, nue_var_dict, nue_weight_dict):
             nue_order_dict = {k: v for k, v in sorted(nue_order_dict.items(), key=lambda item: item[1])}
         if has1:
             nue_order_dict[1] = math.fsum(nue_weight_dict[1])
-        if has1:
+        if has12:
             nue_order_dict[12] = math.fsum(nue_weight_dict[12])
         if has10:
             nue_order_dict[10] = math.fsum(nue_weight_dict[10])
@@ -51,7 +49,6 @@ def sortStackDists(stacksort, nue_var_dict, nue_weight_dict):
         if has111:
             nue_order_dict[111] = math.fsum(nue_weight_dict[111])
         # now that the order has been sorted out, fill the actual dicts
-        print("3")
         for c in nue_order_dict.keys():
             nue_order_var_dict[c] = nue_var_dict[c]
         for c in nue_order_dict.keys():

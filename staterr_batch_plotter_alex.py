@@ -1081,6 +1081,11 @@ class Plotter:
             print("current sample is: ", currentsample)
             current_category, current_plotted_variable = categorization(
                 self.samples["numu_mc"], variable, query=query, extra_cut=self.nu_pdg, track_cuts=track_cuts, select_longest=select_longest)
+        elif (currentsample == "numu_nue"):
+            print("current sample is: ", currentsample)
+            current_category, current_plotted_variable = categorization(
+                self.samples["numu_nue"], variable, query=query, track_cuts=track_cuts, select_longest=select_longest)    
+            print(current_plotted_variable)
         elif (currentsample == "numu_dirt"):
             print("current sample is: ", currentsample)
             current_category, current_plotted_variable = categorization(
@@ -1151,6 +1156,20 @@ class Plotter:
             print(current_err)
             print("detsys numu mc: ")
             print(current_detsys)
+        elif (currentsample == "numu_nue"):
+            print(current_plotted_variable)
+            current_uncertainties, current_bins = np.histogram(
+                current_plotted_variable, **plot_options)
+            print("current_uncertainties")
+            print(current_uncertainties)
+            #current_uncertainties = np.round(current_uncertainties, 3)
+            current_err = np.array(
+                [n * self.weights["numu_nue"] * self.weights["numu_nue"] for n in current_uncertainties])
+            current_detsys = self.add_detsys_error("numu_nue", current_uncertainties, self.weights["numu_nue"])
+            print("err numu nue: ")
+            print(current_err)
+            print("detsys numu nue: ")
+            print(current_detsys)    
         elif (currentsample == "numu_dirt"):
             current_uncertainties, current_bins = np.histogram(
                 current_plotted_variable, **plot_options)
@@ -1238,6 +1257,20 @@ class Plotter:
             #print("Rounding to 3dp")
             #current_selected = np.round(current_selected, 3)
             #print("selected ", current_selected)
+        elif (currentsample == "numu_nue"):
+            current_tree = self.samples["numu_nue"]
+            current_queried_tree = current_tree.query(query)
+            variable = current_queried_tree[variable]
+            print(weightVar)
+            spline_fix_cv  = current_queried_tree[weightVar] * self.weights["numu_nue"]
+            current_selected, bins = np.histogram(
+                        variable,
+                        range=x_range,
+                        bins=n_bins,
+                        weights=spline_fix_cv)  
+            print("spline_fix_cv")
+            print(spline_fix_cv)
+            print("selected ", current_selected)   
         elif (currentsample == "numu_dirt"):
             current_tree = self.samples["numu_dirt"]
             current_queried_tree = current_tree.query(query)
