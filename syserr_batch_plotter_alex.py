@@ -227,7 +227,8 @@ class Plotter:
         self._ratio_errs = None
         self.data = None # data binned events
 
-        self.nu_pdg = nu_pdg = "~(abs(nu_pdg) == 12 & ccnc == 0)" # query to avoid double-counting events in MC sample with other MC samples
+        #self.nu_pdg = nu_pdg = "~(abs(nu_pdg) == 12 & ccnc == 0)" # query to avoid double-counting events in MC sample with other MC samples
+        self.nu_pdg = nu_pdg = "~(abs(nu_pdg)==12 and ccnc==0 and -1.55<=true_nu_vtx_x<=254.8 and -116.5<=true_nu_vtx_y<=116.5 and 0<=true_nu_vtx_z<=1036.8)"
 
         if ("ccpi0" in self.samples):
             self.nu_pdg = self.nu_pdg+" & ~(mcf_pass_ccpi0==1)"
@@ -1033,7 +1034,9 @@ class Plotter:
                 "Unrecognized categorization, valid options are 'sample', 'event_category', and 'particle_pdg'")
 
 
-        nu_pdg = "~(abs(nu_pdg) == 12 & ccnc == 0)"
+        #nu_pdg = "~(abs(nu_pdg) == 12 & ccnc == 0)"
+        nu_pdg = "~(abs(nu_pdg)==12 and ccnc==0 and -1.55<=true_nu_vtx_x<=254.8 and -116.5<=true_nu_vtx_y<=116.5 and 0<=true_nu_vtx_z<=1036.8)"  #Removed extra cut as already dropped from overlay in main code
+        
         if ("ccpi0" in self.samples):
             nu_pdg = nu_pdg+" & ~(mcf_pass_ccpi0==1)"
         if ("ncpi0" in self.samples):

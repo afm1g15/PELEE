@@ -247,7 +247,9 @@ class Plotter:
         self._ratio_errs = None
         self.data = None # data binned events
 
-        self.nu_pdg = nu_pdg = "~(abs(nu_pdg) == 12 & ccnc == 0)" # query to avoid double-counting events in MC sample with other MC samples
+        #self.nu_pdg = nu_pdg = "~(abs(nu_pdg) == 12 & ccnc == 0)" # removed from overlay in main sample already"~(abs(nu_pdg) == 12 & ccnc == 0)" # query to avoid double-counting events in MC sample with other MC samples
+        # for replacing nue CC 
+        self.nu_pdg = nu_pdg  = "~(abs(nu_pdg)==12 and ccnc==0 and -1.55<=true_nu_vtx_x<=254.8 and -116.5<=true_nu_vtx_y<=116.5 and 0<=true_nu_vtx_z<=1036.8)"
 
         if ("ccpi0" in self.samples):
             self.nu_pdg = self.nu_pdg+" & ~(mcf_pass_ccpi0==1)"
@@ -1052,7 +1054,9 @@ class Plotter:
                 "Unrecognized categorization, valid options are 'sample', 'event_category', and 'particle_pdg'")
 
 
-        nu_pdg = "~(abs(nu_pdg) == 12 & ccnc == 0)"
+        #nu_pdg = "~(abs(nu_pdg) == 12 & ccnc == 0)"
+        nu_pdg = "~(abs(nu_pdg)==12 and ccnc==0 and -1.55<=true_nu_vtx_x<=254.8 and -116.5<=true_nu_vtx_y<=116.5 and 0<=true_nu_vtx_z<=1036.8)" #Removed extra cut as dropping these from overlay in main code
+        
         if ("ccpi0" in self.samples):
             nu_pdg = nu_pdg+" & ~(mcf_pass_ccpi0==1)"
         if ("ncpi0" in self.samples):
@@ -1067,6 +1071,7 @@ class Plotter:
             nu_pdg = nu_pdg+" & ~(mcf_pass_ncnopi==1 & (nslice==0 | (slnunhits/slnhits)>0.1))"
 
         print(query,"\n", self.nu_pdg,"\n",track_cuts,"\n",select_longest,"\n",currentsample)
+        print("--------------------------------------")
         
         ##OVERLAY MC CHANGE HERE
         if (currentsample == "nue_nue"):
@@ -1083,7 +1088,7 @@ class Plotter:
                 self.samples["nue_dirt"], variable, query=query, track_cuts=track_cuts, select_longest=select_longest)
         elif (currentsample == "numu_mc"):
             current_category, current_plotted_variable = categorization(
-                self.samples["numu_mc"], variable, query=query, extra_cut=self.nu_pdg, track_cuts=track_cuts, select_longest=select_longest)
+                self.samples["numu_mc"], variable, query=query, track_cuts=track_cuts, extra_cut=self.nu_pdg, select_longest=select_longest) # extra_cut=self.nu_pdg
         elif (currentsample == "numu_dirt"):
             print("current sample is: ", currentsample)
             current_category, current_plotted_variable = categorization(
@@ -1104,13 +1109,13 @@ class Plotter:
             print(current_genie_weights)
         elif (currentsample == "nue_mc"):
             current_genie_weights = self._get_genie_weight(
-                self.samples["nue_mc"], variable, query=query, track_cuts=track_cuts,select_longest=select_longest, weightvar=genieweight)
+                self.samples["nue_mc"], variable, query=query, track_cuts=track_cuts, extra_cut=self.nu_pdg, select_longest=select_longest, weightvar=genieweight)
         elif (currentsample == "nue_dirt"):
             current_genie_weights = self._get_genie_weight(
                 self.samples["nue_dirt"], variable, query=query, track_cuts=track_cuts,select_longest=select_longest, weightvar=genieweight)   
         elif (currentsample == "numu_mc"):
             current_genie_weights = self._get_genie_weight(
-                self.samples["numu_mc"], variable, query=query, track_cuts=track_cuts,select_longest=select_longest, weightvar=genieweight)
+                self.samples["numu_mc"], variable, query=query, track_cuts=track_cuts, extra_cut=self.nu_pdg, select_longest=select_longest, weightvar=genieweight)
         elif (currentsample == "numu_dirt"):
             current_genie_weights = self._get_genie_weight(
                 self.samples["numu_dirt"], variable, query=query, track_cuts=track_cuts,select_longest=select_longest, weightvar=genieweight)
@@ -1136,8 +1141,8 @@ class Plotter:
                     current_weight_dict[c].append(self.weights["numu_dirt"] * w)
                 elif (currentsample == "numu_nue"):
                     current_weight_dict[c].append(self.weights["numu_nue"] * w)
-           
-       
+      
+        
         """
         if "ncpi0" in self.samples:
             ncpi0_genie_weights = self._get_genie_weight(
@@ -1248,7 +1253,6 @@ class Plotter:
             nue_fig = plt.figure(figsize=(7, 5))
             nue_gs = gridspec.GridSpec(1, 1)#, height_ratios=[2, 1])
             nue_ax1 = plt.subplot(nue_gs[0])
-            
             
 #-------------------------------
         if (len(current_var_dict) != 0) and (currentsample in mcsamples):
