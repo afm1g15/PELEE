@@ -1109,6 +1109,8 @@ class Plotter:
                 current_plotted_variable, **plot_options)
             #print("Rounding to 3dp")
             #current_uncertainties = np.round(current_uncertainties, 3)
+            print("current_uncertainties ", current_uncertainties)
+            print("self.weights[nue_nue] ", self.weights["nue_nue"])
             current_err = np.array(
                 [n * self.weights["nue_nue"] * self.weights["nue_nue"] for n in current_uncertainties])
             current_detsys = self.add_detsys_error("nue_nue", current_uncertainties, self.weights["nue_nue"])
