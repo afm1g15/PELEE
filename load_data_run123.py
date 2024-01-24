@@ -554,6 +554,7 @@ def process_uproot_numu(up,df):
     trk_start_y_v = up.array('trk_sce_start_y_v')
     trk_start_z_v = up.array('trk_sce_start_z_v')
     trk_energy_proton_v = up.array('trk_energy_proton_v') # range-based proton kinetic energy
+    print("trk_energy_proton_v ", trk_energy_proton_v)
     trk_range_muon_mom_v   = up.array('trk_range_muon_mom_v')  # range-based muon momentum
     print("Here:")
     print("trk_range_muon_mom_v ", trk_range_muon_mom_v)
@@ -598,8 +599,8 @@ def process_uproot_numu(up,df):
     df["trk2_phi"]   = awkward.fromiter([vec[vid.argsort()[-2]] if len(vid)>1 else -9999. for vec,vid in zip(trk_phi_v[trk_mask],trk_len_v[trk_mask])])
     
     # get element-wise reconstructed neutrino energy (for each index the value will be the neutrino energy assuming the track at that index is the muon)
-    df['trk_energy_tot'] = trk_energy_proton_v.sum()
-    trk_energy_tot = up.array("trk_energy_tot")
+    #df['trk_energy_tot'] = trk_energy_proton_v.sum()
+    #trk_energy_tot = up.array("trk_energy_tot")
     muon_energy_correction_v = np.sqrt(trk_range_muon_mom_v**2 + 0.105**2) - trk_energy_proton_v
     # get element-wise MCS consistency
     muon_mcs_consistency_v    = ( (trk_mcs_muon_mom_v - trk_range_muon_mom_v) / trk_range_muon_mom_v )
@@ -640,18 +641,20 @@ def process_uproot_numu(up,df):
     df['muon_energy'] = np.sqrt( df['muon_momentum']**2 + 0.105**2 )
     #muon_energy = up.array("muon_energy")
 
-    df["reco_e"] = df["muon_energy"] + df["trk_energy_tot"] + 0.105
-    df["true_e"] = df["muon_e"] + df["proton_e"]
+    #df["reco_e"] = df["muon_energy"] + df["trk_energy_tot"] + 0.105
+    df["true_e"] = df["muon_e"] + df["proton_e"] - (0.939272046*df["nproton"])
+    print("Creating true_e!")
     reco_e = up.array("reco_e")
     
     #df['neutrino_energy'] = df['trk_energy_tot'] + df['muon_energy'] - df['muon_proton_energy']
-    df['neutrino_energy'] = df['trk_energy_tot'] + get_elm_from_vec_idx(muon_energy_correction_v,muon_idx)
+    ## testdf['neutrino_energy'] = df['trk_energy_tot'] + get_elm_from_vec_idx(muon_energy_correction_v,muon_idx)
     df['muon_mcs_consistency'] = get_elm_from_vec_idx(muon_mcs_consistency_v,muon_idx)
 
     trk_score_v = up.array("trk_score_v")
     shr_mask = (trk_score_v<0.5)
     trk_mask = (trk_score_v>0.5)
-    proton_mask = (trk_score_v>0.5)&(trk_llr_pid_v < 0.)&(trk_energy_tot>0.04)
+    proton_mask = (trk_score_v>0.5)&(trk_llr_pid_v < 0.) #&(trk_energy_proton_v>0.04)  #remove trk_energy_tot
+    print("updated proton mask test")
     #pion_mask = (trk_score_v>0.5)&(trk_score_v<0.8)&(trk_llr_pid_v > 0.)&(trk_llr_pid_v<0.2)&(reco_e>0.04)   #Plot these
     df['n_protons_tot'] = proton_mask.sum()
     #df['n_pions_tot'] = pion_mask.sum()
