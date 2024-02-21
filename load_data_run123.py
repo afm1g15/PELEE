@@ -544,6 +544,8 @@ def process_uproot_numu(up,df):
     print("trk_llr_pid_v ", trk_llr_pid_v)
     trk_score_v = up.array("trk_score_v")
     print("trk_score_v ", trk_score_v)
+    trk_energy_tot = up.array("trk_energy_tot")
+    trk_energy_muon = up.array("trk_energy_muon")
     proton_e = up.array("proton_e")
     elec_e = up.array("elec_e")
     trk_len_v   = up.array('trk_len_v')
@@ -554,12 +556,8 @@ def process_uproot_numu(up,df):
     trk_start_y_v = up.array('trk_sce_start_y_v')
     trk_start_z_v = up.array('trk_sce_start_z_v')
     trk_energy_proton_v = up.array('trk_energy_proton_v') # range-based proton kinetic energy
-    print("trk_energy_proton_v ", trk_energy_proton_v)
     trk_range_muon_mom_v   = up.array('trk_range_muon_mom_v')  # range-based muon momentum
-    print("Here:")
-    print("trk_range_muon_mom_v ", trk_range_muon_mom_v)
     trk_mcs_muon_mom_v     = up.array('trk_mcs_muon_mom_v')
-    print("trk_mcs_muon_mom_v ", trk_mcs_muon_mom_v)
     trk_theta_v        = up.array('trk_theta_v')
     trk_phi_v        = up.array('trk_phi_v')
     pfp_generation_v = up.array('pfp_generation_v')
@@ -610,11 +608,7 @@ def process_uproot_numu(up,df):
     df["trk1_muon_mcs_consistency"]    = awkward.fromiter([vec[vid.argsort()[-1]] if len(vid)>0 else -9999. for vec,vid in zip(muon_mcs_consistency_v[trk_mask] ,trk_len_v[trk_mask])])
     df["trk1_muon_calo_consistency"]   = awkward.fromiter([vec[vid.argsort()[-1]] if len(vid)>0 else -9999. for vec,vid in zip(muon_calo_consistency_v[trk_mask],trk_len_v[trk_mask])])
     df["trk2_proton_calo_consistency"] = awkward.fromiter([vec[vid.argsort()[-2]] if len(vid)>1 else -9999. for vec,vid in zip(proton_calo_consistency_v[trk_mask],trk_len_v[trk_mask])])
-    
-    #INTERCEPT = 0.0
-    #SLOPE = 0.83
-    #df["reco_e"] = (df["shr_energy_tot_cali"] + INTERCEPT) / SLOPE + df["trk_energy_tot"]
-    #df["true_e"] = (df["elec_e"] + INTERCEPT) / SLOPE + df["proton_e"]
+
     
     # apply numu selection as defined by Ryan. Find selection
     muon_mask = (trk_score_v>0.8) & (trk_llr_pid_v > 0.2)\
@@ -641,10 +635,10 @@ def process_uproot_numu(up,df):
     df['muon_energy'] = np.sqrt( df['muon_momentum']**2 + 0.105**2 )
     #muon_energy = up.array("muon_energy")
 
-    #df["reco_e"] = df["muon_energy"] + df["trk_energy_tot"] + 0.105
-    df["true_e"] = df["muon_e"] + df["proton_e"] - (0.939272046*df["nproton"])
-    print("Creating true_e!")
-    reco_e = up.array("reco_e")
+    #df["reco_e"] = df["trk_energy_muon"] + df["trk_energy_tot"] + 0.105
+    #df["true_e"] = df["muon_e"] + df["proton_e"]
+    #print("Creating energies!")
+    #reco_e = up.array("reco_e")
     
     #df['neutrino_energy'] = df['trk_energy_tot'] + df['muon_energy'] - df['muon_proton_energy']
     ## testdf['neutrino_energy'] = df['trk_energy_tot'] + get_elm_from_vec_idx(muon_energy_correction_v,muon_idx)
