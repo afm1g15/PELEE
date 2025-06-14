@@ -6,6 +6,8 @@ root_files
 *.root
 plots
 *.pdf
+*.csv
+*.svg
 .ipynb_checkpoints/
 Background rejection.ipynb
 Sandbox.ipynb
