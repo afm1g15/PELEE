@@ -66,7 +66,6 @@ category_labels = {
     31: r"$\nu$ NC $\pi^{0}$",
     4: r"Cosmic",
     5: r"Out. fid. vol.",
-    # eta categories start with 80XX
     801: r"$\eta \rightarrow$ other",
     802: r"$\nu_{\mu} \eta \rightarrow \gamma\gamma$",
     803: r'1 $\pi^0$',
@@ -227,13 +226,12 @@ class Plotter:
         self._ratio_errs = None
         self.data = None # data binned events
 
-        #self.nu_pdg = nu_pdg = "~(abs(nu_pdg) == 12 & ccnc == 0)" # query to avoid double-counting events in MC sample with other MC samples
         self.nu_pdg = nu_pdg = "~(abs(nu_pdg)==12 and ccnc==0 and -1.55<=true_nu_vtx_x<=254.8 and -116.5<=true_nu_vtx_y<=116.5 and 0<=true_nu_vtx_z<=1036.8)"
 
         if ("ccpi0" in self.samples):
             self.nu_pdg = self.nu_pdg+" & ~(mcf_pass_ccpi0==1)"
         if ("ncpi0" in self.samples):
-            self.nu_pdg = self.nu_pdg+" & ~(mcf_np0==1 & mcf_nmp==0 & mcf_nmm==0 & mcf_nem==0 & mcf_nep==0)" #note: mcf_pass_ccpi0 is wrong (includes 'mcf_actvol' while sample is in all cryostat)
+            self.nu_pdg = self.nu_pdg+" & ~(mcf_np0==1 & mcf_nmp==0 & mcf_nmm==0 & mcf_nem==0 & mcf_nep==0)"
         if ("ccnopi" in self.samples):
             self.nu_pdg = self.nu_pdg+" & ~(mcf_pass_ccnopi==1 & (nslice==0 | (slnunhits/slnhits)>0.1))"
         if ("cccpi" in self.samples):
@@ -245,14 +243,6 @@ class Plotter:
 
         necessary = ["category"]
 
-        ##OVERLAY/MC
-        #nue_missing = np.setdiff1d(necessary, samples["nue_mc"].columns)
-        #numu_missing = np.setdiff1d(necessary, samples["numu_mc"].columns)
-
-        #if nue_missing.size > 0 or numu_missing.size > 0:
-        #    raise ValueError(
-        #        "Missing necessary columns in the DataFrame: ")
-##MC /OVERLAY SECTION
     @staticmethod
     def _chisquare(data, overlay, err_mc):
         num = (data - overlay)**2
@@ -328,16 +318,10 @@ class Plotter:
         deltachisq_v = []
         deltachisq_SM_v  = []
         deltachisq_LEE_v = []
-
-        #print('deltachisqfakedata!!!!!!')
         
         for n in range(1000):
 
             SM_obs, LEE_obs = self.genfakedata(BinMin, BinMax, LEE_v, SM_v, nsample)
-
-            #chisq = self._chisq_CNP(SM_obs,LEE_obs)           
-            #print ('LEE obs : ',LEE_obs)
-            #print ('SM obs : ',SM_obs)
             
             chisq_SM_SM  = self._chisq_CNP(SM_v,SM_obs)
             chisq_LEE_SM = self._chisq_CNP(LEE_v,SM_obs)
@@ -347,25 +331,12 @@ class Plotter:
             
             deltachisq_SM  = (chisq_SM_SM-chisq_LEE_SM)
             deltachisq_LEE = (chisq_SM_LEE-chisq_LEE_LEE)
-
-            #if (np.isnan(chisq)):
-            #    continue
-
-            #deltachisq_v.append(chisq)
             
             if (np.isnan(deltachisq_SM ) or np.isnan(deltachisq_LEE) ):
                 continue
 
             deltachisq_SM_v.append(deltachisq_SM)
             deltachisq_LEE_v.append(deltachisq_LEE)
-
-        #median = np.median(deltachisq_v)
-        #dof = len(LEE_v)
-
-        #return median/float(dof)
-
-        #print ('delta SM  : ',deltachisq_SM_v)
-        #print ('delta LEE : ',deltachisq_LEE_v)
 
         deltachisq_SM_v  = np.array(deltachisq_SM_v)
         deltachisq_LEE_v = np.array(deltachisq_LEE_v)
@@ -375,17 +346,11 @@ class Plotter:
         
         # find median of LEE distribution
         med_LEE = np.median(deltachisq_LEE_v)
-        #print ('median LEE is ',med_LEE)
         # how many values in SM are above this value?
         nabove = len( np.where(deltachisq_SM_v > med_LEE)[0] )
-        #print ('n above is ',nabove)
         frac = float(nabove) / len(deltachisq_SM_v)
-
-        #print ('deltachisqfakedata!!!!!!')
         
         return math.sqrt(2)*scipy.special.erfinv(1-frac*2)
-        
-        #return frac
 
             
     def genfakedata(self, BinMin, BinMax, LEE_v, SM_v, nsample):
@@ -393,17 +358,11 @@ class Plotter:
         p_LEE = LEE_v / np.sum(LEE_v)
         p_SM  = SM_v / np.sum(SM_v)
 
-        #print ('PDF for LEE : ',p_LEE)
-        #print ('PDF for SM  : ',p_SM)
-
         obs_LEE = np.zeros(len(LEE_v))
         obs_SM  = np.zeros(len(SM_v))
 
         max_LEE = np.max(p_LEE)
         max_SM  = np.max(p_SM)
-
-        #print ('max of LEE : ',max_LEE)
-        #print ('max of SM  : ',max_SM)
 
         n_sampled_LEE = 0
         n_sampled_SM  = 0
@@ -416,7 +375,6 @@ class Plotter:
             
             prob = np.random.random() * max_LEE
             if (prob < p_LEE[BinNumber]):
-                #print ('LEE simulation: prob of %.02f vs. bin prob of %.02f leads to selecting event at bin %i'%(prob,p_LEE[BinNumber],BinNumber))
                 obs_LEE[BinNumber] += 1
                 n_sampled_LEE += 1
 
@@ -449,8 +407,7 @@ class Plotter:
         return detsys_v
 
             
-            
-##MC/OVERLAY CHANGES
+    
     def _chisq_full_covariance(self,data, mc,key, CNP=True,STATONLY=False):
 
         np.set_printoptions(precision=3)
@@ -497,8 +454,6 @@ class Plotter:
 
         if (STATONLY == True):
             COV = COV_STAT
-
-        #print("COV matrix : ",COV)
                 
         diff = (data-mc)
         emtxinv = np.linalg.inv(COV)
@@ -507,7 +462,6 @@ class Plotter:
         covdiag = np.diag(COV)
         chisqsum = 0.
         for i,d in enumerate(diff):
-            #print ('bin %i has COV value %.02f'%(i,covdiag[i]))
             chisqsum += ( (d**2) /covdiag[i])
 
         return chisq, chisqsum, dof
@@ -516,7 +470,6 @@ class Plotter:
     def _data_err(data,doAsym=False):
         obs = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
         low = [0.00,0.17,0.71,1.37,2.09,2.84,3.62,4.42,5.23,6.06,6.89,7.73,8.58,9.44,10.30,11.17,12.04,12.92,13.80,14.68,15.56]
-#        hig = [0.38,3.30,4.64,5.92,7.16,8.38,9.58,10.77,11.95,13.11,14.27,15.42,16.56,17.70,18.83,19.96,21.08,22.20,23.32,24.44,25.55]
         hig = [1.15,3.30,4.64,5.92,7.16,8.38,9.58,10.77,11.95,13.11,14.27,15.42,16.56,17.70,18.83,19.96,21.08,22.20,23.32,24.44,25.55]
         if doAsym:
             lb = [i-low[i] if i<=20 else (np.sqrt(i)) for i in data]
@@ -529,9 +482,7 @@ class Plotter:
     def _ratio_err(num, den, num_err, den_err):
         n, d, n_e, d_e = num, den, num_err, den_err
         n[n == 0] = 0.00001
-        #d[d == 0] = 0.00001
         return np.array([
-            #n[i] / d[i] * math.sqrt((n_e[i] / n[i])**2 + (d_e[i] / d[i])**2) <= this does not work if n[i]==0
             math.sqrt( ( n_e[i] / d[i] )**2 + ( n[i] * d_e[i] / (d[i]*d[i]) )**2) if d[i]>0 else 0
             for i, k in enumerate(num)
         ])
@@ -587,8 +538,6 @@ class Plotter:
             Series of values of variable that pass all track_cuts
             boolean mask that represents union of input mask and new cut mask
         '''
-        #need to do this fancy business with the apply function to make masks
-        #this is because unflattened DataFrames are used
         for (var,op,val) in track_cuts:
             if type(op) == list:
                 #this means treat two conditions in an 'or' fashion
@@ -618,9 +567,6 @@ class Plotter:
             list of values of variable corresponding to longest track in each slices
             boolean mask for longest tracks in df
         '''
-
-        #print("selecting longest...")
-        #print("mask", mask)
         trk_lens = (df['trk_len_v']*mask).apply(lambda x: x[x != False])#apply mask to track lengths
         trk_lens = trk_lens[trk_lens.apply(lambda x: len(x) > 0)]#clean up slices
         variable = variable.apply(lambda x: x[~np.isnan(x)])#clean up nan vals
@@ -661,29 +607,9 @@ class Plotter:
         sel_query = query
         if extra_cut is not None:
             sel_query += "& %s" % extra_cut
-        '''
-        if ( (track_cuts == None) or (select_longest == False) ):
-            return sample.query(sel_query).eval(variable).ravel()
-        '''
-
-
-        '''
         df = sample.query(sel_query)
-        #print (df.isna().sum())
-        dfna = df.isna()
-        for (colname,colvals) in dfna.iteritems():
-            if (colvals.sum() != 0):
-                print ('name : ',colname)
-                print ('nan entries : ',colvals.sum())
-        '''
-        df = sample.query(sel_query)
-        
-        #if (track_cuts != None):
-        #    df = sample.query(sel_query).dropna().copy() #don't want to eliminate anything from memory
 
-        #df = sample.query(sel_query).dropna().copy() #don't want to eliminate anything from memory
-
-        track_cuts_mask = None #df['trk_score_v'].apply(lambda x: x == x) #all-True mask, assuming trk_score_v is available
+        track_cuts_mask = None
         if track_cuts is not None:
             vars, track_cuts_mask = self._apply_track_cuts(df,variable,track_cuts,track_cuts_mask)
         else:
@@ -807,7 +733,6 @@ class Plotter:
         return category, plotted_variable
 
 
-
     @staticmethod
     def _variable_bin_scaling(bins, bin_width, variable):
         idx = bisect.bisect_left(bins, variable)
@@ -841,7 +766,6 @@ class Plotter:
 
     def _get_variable(self, variable, query, track_cuts=None):
 
-        ##MC/OVERLAY CHANGED HERE
         nue_mc_plotted_variable = self._selection(
             variable, self.samples["nue_mc"], query=query, extra_cut=self.nu_pdg, track_cuts=track_cuts)
         nue_mc_plotted_variable = self._select_showers(
@@ -896,7 +820,6 @@ class Plotter:
                 dirt_plotted_variable, variable, self.samples["numu_dirt"], query=query)
             numu_dirt_weight = [self.weights["numu_dirt"]] * len(dirt_plotted_variable)
 
-        #DO WE NEED TO DUPLICATE HERE??
         ncpi0_weight = []
         ncpi0_plotted_variable = []
         if "ncpi0" in self.samples:
@@ -997,7 +920,6 @@ class Plotter:
             Figure, top subplot, and bottom subplot (ratio)
 
         """
-        #if (detsys != None):
         self.detsys = detsys
 
         if not title:
@@ -1034,13 +956,12 @@ class Plotter:
                 "Unrecognized categorization, valid options are 'sample', 'event_category', and 'particle_pdg'")
 
 
-        #nu_pdg = "~(abs(nu_pdg) == 12 & ccnc == 0)"
         nu_pdg = "~(abs(nu_pdg)==12 and ccnc==0 and -1.55<=true_nu_vtx_x<=254.8 and -116.5<=true_nu_vtx_y<=116.5 and 0<=true_nu_vtx_z<=1036.8)"  #Removed extra cut as already dropped from overlay in main code
         
         if ("ccpi0" in self.samples):
             nu_pdg = nu_pdg+" & ~(mcf_pass_ccpi0==1)"
         if ("ncpi0" in self.samples):
-            nu_pdg = nu_pdg+" & ~(mcf_np0==1 & mcf_nmp==0 & mcf_nmm==0 & mcf_nem==0 & mcf_nep==0)" #note: mcf_pass_ccpi0 is wrong (includes 'mcf_actvol' while sample is in all cryostat)
+            nu_pdg = nu_pdg+" & ~(mcf_np0==1 & mcf_nmp==0 & mcf_nmm==0 & mcf_nem==0 & mcf_nep==0)"
         if ("ccnopi" in self.samples):
             nu_pdg = nu_pdg+" & ~(mcf_pass_ccnopi==1 & (nslice==0 | (slnunhits/slnhits)>0.1))"
         if ("cccpi" in self.samples):
@@ -1056,19 +977,13 @@ class Plotter:
         
         
         
-        
-        
         if (typeerr == "standard"):
             print("standard sys err")
             n_cv_tot, n_tots, dfs, df_vars, df_splines, detvar_dict = self.sys_err(weight,variable,query,plot_options["range"],plot_options["bins"],genieweight, "nue", categorization, category_query, Nuniverse)
         elif (typeerr == "NuMIGeo"):
             print("NuMI Geo sys err")
             n_cv_tot, n_tots, dfs, df_vars, df_splines, detvar_dict = self.sys_err_NuMIGeo("weightsNuMIGeo",variable,query,plot_options["range"],plot_options["bins"],genieweight, "nue", categorization, category_query, Nuniverse)
-        
-        
-        
-        
-       
+
         
         if ratio and draw_data:
             return nue_fig, nue_ax1, nue_ax2, nue_stacked, labels, labels
@@ -1092,8 +1007,6 @@ class Plotter:
         
         detvar_dict = {}
         
-        # how many universes?
-        #Nuniverse = 500 #100 #len(df)
         print("Universes",Nuniverse)
 
         n_tot = np.empty([Nuniverse, n_bins])
@@ -1102,12 +1015,7 @@ class Plotter:
         n_cv_tot.fill(0)
 
         for t in self.samples:
-            #print(t)
-            
             tree = self.samples[t]
-            #print(tree)
-
-            ##MC/OVERLAY
             extra_query = ""
             if t == ("nue_mc" or "numu_mc"):
                 extra_query = "& " + self.nu_pdg
@@ -1118,10 +1026,7 @@ class Plotter:
             else:
                 extra_cut = None
 
-            #print("PRINT")
-            #print(query+extra_query+category_query)
             queried_tree = tree.query(query+extra_query+category_query)
-            #print(queried_tree)
             variable = queried_tree[var_name]
             syst_weights = queried_tree[name]
             
@@ -1136,15 +1041,6 @@ class Plotter:
             
             if var_name[-2:] == "_v":
                 variable = variable.apply(lambda x: x[0])
-                
-            #track_cuts = None
-            #select_longest=False
-            
-            #category, mc_plotted_variable = categorization(
-            #        tree, "reco_e", query=query, extra_cut=extra_cut, track_cuts=track_cuts, select_longest=select_longest)
-            
-            #print(category)
-            #print(type(category))
 
             n_cv, bins = np.histogram(
                 variable,
@@ -1152,8 +1048,6 @@ class Plotter:
                 bins=n_bins,
                 weights=spline_fix_cv)
             detvar_dict["CV"] = list(n_cv)
-            #print("Rounding to 3dp")
-            #n_cv = np.round(n_cv, 3)
             n_cv_tot += n_cv    #this should run twice
 
             if not df.empty:  #nue, mc
@@ -1168,33 +1062,13 @@ class Plotter:
                     n, bins = np.histogram(
                         variable, weights=weight*spline_fix_var, range=x_range, bins=n_bins)
                     detvar_dict[i] = list(n)
-                    #n = np.round(n, 3)
                     n_tot[i] += n           #will run 500 times
                     
         n_tots.append(n_tot)
         dfs_ppfx.append(df)
         df_ppfx_vars.append(variable)
         df_ppfx_splines.append(spline_fix_var)
-        #careful here re categories
-        #detvar_dicts.append(detvar_dict)
-        
-        
-        """
-        cov = np.empty([len(n_cv), len(n_cv)])
-        cov.fill(0)
 
-        print("n_tot ", n_tot)
-        for n in n_tot:
-            for i in range(len(n_cv)):
-                for j in range(len(n_cv)):
-                    cov[i][j] += (n[i] - n_cv_tot[i]) * (n[j] - n_cv_tot[j])
-
-        cov /= Nuniverse
-        print("cov ")
-        print(cov)
-        print("")
-        """
-        
         return n_cv_tot, n_tots, dfs_ppfx, df_ppfx_vars, df_ppfx_splines, detvar_dict            
     
                       
@@ -1219,7 +1093,7 @@ class Plotter:
                 tree = self.samples[t]
                 extra_query = ""
                 if t == ("nue_mc" or "numu_mc"):
-                    extra_query = "& " + self.nu_pdg # "& ~(abs(nu_pdg) == 12 & ccnc == 0) & ~(npi0 == 1 & category != 5)"
+                    extra_query = "& " + self.nu_pdg
 
                 queried_tree = tree.query(query+extra_query+category_query)
                 variable = queried_tree[var_name]
@@ -1233,7 +1107,6 @@ class Plotter:
                 df = pd.DataFrame(s.values.tolist())
 
                 if var_name[-2:] == "_v":
-                    #this will break for vector, "_v", entries
                     variable = variable.apply(lambda x: x[0])
 
                 n_cv, bins = np.histogram(
@@ -1241,15 +1114,11 @@ class Plotter:
                     range=x_range,
                     bins=n_bins,
                     weights=spline_fix_cv)
-                #print("Rounding to 3dp")
-                #n_cv = np.round(n_cv, 3)
                 detvar_dict["CV"] = list(n_cv)
                 n_cv_tot += n_cv
 
                 if not df.empty:
                     for i in range(2):
-                        #print(df.shape)
-                        #print(i+variationNumber)
                         weight = df[i+variationNumber].values
                         weight[np.isnan(weight)] = 1
                         weight[weight > 100] = 1
@@ -1259,8 +1128,6 @@ class Plotter:
                         n, bins = np.histogram(
                             variable, weights=weight*spline_fix_var, range=x_range, bins=n_bins)
                         detvar_dict[i+variationNumber] = list(n)
-                        #print("i = ", i)
-                        #n = np.round(n, 3)
                         n_tot[i] += n
 
                         
@@ -1268,24 +1135,7 @@ class Plotter:
                 dfs_geo.append(df)
                 df_geo_vars.append(variable)
                 df_geo_splines.append(spline_fix_var)
-    #        tempCov = np.empty([len(n_cv), len(n_cv)])
-    #        tempCov.fill(0)
-    #        for n in n_tot:
-    #            for i in range(len(n_cv)):
-    #                for j in range(len(n_cv)):
-    #                    tempCov[i][j] += (n[i] - n_cv_tot[i]) * (n[j] - n_cv_tot[j])
-#
-#            tempCov /= 2
-#            if variationNumber == 0:
-#                cov = tempCov
-#            else:
-#                cov += tempCov
-            
-#        print("")
-#        print("cov NuMI Geo = ", cov)
-#        print("")
 
-            
         return n_cv_tot, n_tots, dfs_geo, df_geo_vars, df_geo_splines, detvar_dict
                       
 ##############################################################################################################################
@@ -1295,7 +1145,6 @@ class Plotter:
             query += "& %s <= %g & %s >= %g" % (
                 variable, plot_options["range"][1], variable, plot_options["range"][0])
 
-            ##OVERLAY/MC
         mc_plotted_variable = self._selection(
             variable, self.samples["mc"], query=query, extra_cut=self.nu_pdg)
         mc_plotted_variable = self._select_showers(
@@ -1445,13 +1294,9 @@ class Plotter:
 
 
         fig = plt.figure(figsize=(7, 7))
-        #fig = plt.figure(figsize=(8, 7))
-        gs = gridspec.GridSpec(1, 1)#, height_ratios=[2, 1])
-        #gs = gridspec.GridSpec(2, 1, height_ratios=[2, 1])
-        #print (gs[0])
+        gs = gridspec.GridSpec(1, 1)
 
         ax1 = plt.subplot(gs[0])
-        #ax2 = plt.subplot(gs[1])
 
         n_mc, mc_bins, patches = ax1.hist(
             mc_plotted_variable,
@@ -1554,7 +1399,6 @@ class Plotter:
             edgecolor="black",
             **plot_options)
 
-        #ERRORS
         mc_uncertainties, bins = np.histogram(
             mc_plotted_variable, **plot_options)
         nue_uncertainties, bins = np.histogram(
@@ -1624,7 +1468,6 @@ class Plotter:
             err_lee = self.samples["lee"].query(query).groupby(binned_lee)['leeweight'].agg(
                 "sum").values * self.weights["lee"] * self.weights["lee"]
 
-        #Full Error?
         exp_err = np.sqrt(err_mc + err_ext + err_nue + err_dirt + err_lee + err_ncpi0 + err_ccpi0 + err_ccnopi + err_cccpi + err_nccpi + err_ncnopi)
         print("exp_err = ", exp_err)
 
@@ -1656,17 +1499,11 @@ class Plotter:
         else:
             ax1.set_ylabel(
                 "N. Entries / %g %s" % (xrange / plot_options["bins"], unit))
-        #ax1.set_xticks([])
         ax1.set_xlim(plot_options["range"][0], plot_options["range"][1])
 
-        #self._draw_ratio(ax2, bins, n_tot, n_data, exp_err, data_err)
-
-        #ax2.set_xlabel(title)
         ax1.set_xlabel(title)
-        #ax2.set_xlim(plot_options["range"][0], plot_options["range"][1])
         fig.tight_layout()
-        # fig.savefig("plots/%s_samples.pdf" % variable)
-        return fig, ax1#, ax2
+        return fig, ax1
 
     def _draw_ratio(self, ax, bins, n_tot, n_data, tot_err, data_err, draw_data=True):
         bincenters = 0.5 * (bins[1:] + bins[:-1])
@@ -1695,7 +1532,6 @@ class Plotter:
         ax.set_ylim(0, 2)
         ax.set_ylabel("NuMI / (MC+EXT)")
         ax.axhline(1, linestyle="--", color="k")
-   
 
     
     def div_err(self, res, err1, val1, err2, val2):

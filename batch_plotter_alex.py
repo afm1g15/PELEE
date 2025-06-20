@@ -45,40 +45,6 @@ importlib.reload(plotColourSorting)
 importlib.reload(getWantedLists)
 import math as m
 
-"""
-category_labels = {
-    1: r"$\nu_e$ Other",
-    11110: r"$\nu_e$",
-    11111: r"$\bar\nu_e$",
-    10: r"$\nu_e$ CC0$\pi$0p",
-    9: r"$\bar\nu_e$ CC0$\pi$0p",
-    12: r"$\bar\nu_e$ CC0$\pi$Np",
-    11: r"$\nu_e$ CC0$\pi$Np",
-    11357: r"$\nu_e$ CC $\pi^{0}$",
-    111: r"MiniBooNE LEE",
-    2: r"$\nu_{\mu}$ CC",
-    21: r"$\nu_{\mu}$ CC $\pi^{0}$",
-    22: r"$\nu_{\mu}$ CC 0p$^+$",
-    23: r"$\nu_{\mu}$ CC 1p$^+$",
-    24: r"$\nu_{\mu}$ CC 2p$^+$",
-    25: r"$\nu_{\mu}$ CC Np$^+$",
-    3: r"$\nu$ NC",
-    31: r"$\nu$ NC $\pi^{0}$",
-    4: r"Cosmic",
-    5: r"Out. fid. vol.",
-    # eta categories start with 80XX
-    801: r"$\eta \rightarrow$ other",
-    802: r"$\nu_{\mu} \eta \rightarrow \gamma\gamma$",
-    803: r'1 $\pi^0$',
-    804: r'2 $\pi^0$',
-    805: r'$\nu$ other',
-    806: r'out of FV',
-    6: r"other",
-    0: r"No slice"
-}
-
-"""
-#can just edit labels later, doesn't really matter here in terms of names
 category_labels = {
     1 : r'$\nu_e$ CC0$\pi$Np', 
     2 : r'Out FV',
@@ -89,8 +55,6 @@ category_labels = {
     7 : r'$\bar{\nu}_e$ CC0$\pi$Np',
     8: r'$\nu_e$ NC',
     9: r'$\nu_e$ CC other 0pi0',
-    #31: r'$\nu_e$ CC other Npi0',
-    #21: r'$\nu_e$ CC other 0pi0 Npi',
     10 : r'$\nu_e$ / $\overline{\nu_e}$  other', 
     11 : r'$\nu_\mu$ / $\overline{\nu_\mu}$  $\pi^{0}$', 
     12 : r'$\nu_\mu$ / $\overline{\nu_\mu}$  other',
@@ -192,7 +156,6 @@ category_colors = {
     11111:"xkcd:green",
     11357:"xkcd:pink",
 
-    # eta categories
     803: "xkcd:cerulean",
     804: "xkcd:blue",
     801: "xkcd:purple",
@@ -247,14 +210,13 @@ class Plotter:
         self._ratio_errs = None
         self.data = None # data binned events
 
-        #self.nu_pdg = nu_pdg = "~(abs(nu_pdg) == 12 & ccnc == 0)" # removed from overlay in main sample already"~(abs(nu_pdg) == 12 & ccnc == 0)" # query to avoid double-counting events in MC sample with other MC samples
         # for replacing nue CC 
         self.nu_pdg = nu_pdg  = "~(abs(nu_pdg)==12 and ccnc==0 and -1.55<=true_nu_vtx_x<=254.8 and -116.5<=true_nu_vtx_y<=116.5 and 0<=true_nu_vtx_z<=1036.8)"
 
         if ("ccpi0" in self.samples):
             self.nu_pdg = self.nu_pdg+" & ~(mcf_pass_ccpi0==1)"
         if ("ncpi0" in self.samples):
-            self.nu_pdg = self.nu_pdg+" & ~(mcf_np0==1 & mcf_nmp==0 & mcf_nmm==0 & mcf_nem==0 & mcf_nep==0)" #note: mcf_pass_ccpi0 is wrong (includes 'mcf_actvol' while sample is in all cryostat)
+            self.nu_pdg = self.nu_pdg+" & ~(mcf_np0==1 & mcf_nmp==0 & mcf_nmm==0 & mcf_nem==0 & mcf_nep==0)"
         if ("ccnopi" in self.samples):
             self.nu_pdg = self.nu_pdg+" & ~(mcf_pass_ccnopi==1 & (nslice==0 | (slnunhits/slnhits)>0.1))"
         if ("cccpi" in self.samples):
@@ -266,14 +228,8 @@ class Plotter:
 
         necessary = ["category"]
 
-        ##OVERLAY/MC
-        #nue_missing = np.setdiff1d(necessary, samples["nue_mc"].columns)
-        #numu_missing = np.setdiff1d(necessary, samples["numu_mc"].columns)
 
-        #if nue_missing.size > 0 or numu_missing.size > 0:
-        #    raise ValueError(
-        #        "Missing necessary columns in the DataFrame: ")
-##MC /OVERLAY SECTION
+    ##MC /OVERLAY SECTION
     @staticmethod
     def _chisquare(data, overlay, err_mc):
         num = (data - overlay)**2
@@ -349,16 +305,10 @@ class Plotter:
         deltachisq_v = []
         deltachisq_SM_v  = []
         deltachisq_LEE_v = []
-
-        #print('deltachisqfakedata!!!!!!')
         
         for n in range(1000):
 
             SM_obs, LEE_obs = self.genfakedata(BinMin, BinMax, LEE_v, SM_v, nsample)
-
-            #chisq = self._chisq_CNP(SM_obs,LEE_obs)           
-            #print ('LEE obs : ',LEE_obs)
-            #print ('SM obs : ',SM_obs)
             
             chisq_SM_SM  = self._chisq_CNP(SM_v,SM_obs)
             chisq_LEE_SM = self._chisq_CNP(LEE_v,SM_obs)
@@ -369,24 +319,11 @@ class Plotter:
             deltachisq_SM  = (chisq_SM_SM-chisq_LEE_SM)
             deltachisq_LEE = (chisq_SM_LEE-chisq_LEE_LEE)
 
-            #if (np.isnan(chisq)):
-            #    continue
-
-            #deltachisq_v.append(chisq)
-            
             if (np.isnan(deltachisq_SM ) or np.isnan(deltachisq_LEE) ):
                 continue
 
             deltachisq_SM_v.append(deltachisq_SM)
             deltachisq_LEE_v.append(deltachisq_LEE)
-
-        #median = np.median(deltachisq_v)
-        #dof = len(LEE_v)
-
-        #return median/float(dof)
-
-        #print ('delta SM  : ',deltachisq_SM_v)
-        #print ('delta LEE : ',deltachisq_LEE_v)
 
         deltachisq_SM_v  = np.array(deltachisq_SM_v)
         deltachisq_LEE_v = np.array(deltachisq_LEE_v)
@@ -396,17 +333,11 @@ class Plotter:
         
         # find median of LEE distribution
         med_LEE = np.median(deltachisq_LEE_v)
-        #print ('median LEE is ',med_LEE)
         # how many values in SM are above this value?
         nabove = len( np.where(deltachisq_SM_v > med_LEE)[0] )
-        #print ('n above is ',nabove)
         frac = float(nabove) / len(deltachisq_SM_v)
-
-        #print ('deltachisqfakedata!!!!!!')
         
         return math.sqrt(2)*scipy.special.erfinv(1-frac*2)
-        
-        #return frac
 
             
     def genfakedata(self, BinMin, BinMax, LEE_v, SM_v, nsample):
@@ -414,17 +345,11 @@ class Plotter:
         p_LEE = LEE_v / np.sum(LEE_v)
         p_SM  = SM_v / np.sum(SM_v)
 
-        #print ('PDF for LEE : ',p_LEE)
-        #print ('PDF for SM  : ',p_SM)
-
         obs_LEE = np.zeros(len(LEE_v))
         obs_SM  = np.zeros(len(SM_v))
 
         max_LEE = np.max(p_LEE)
         max_SM  = np.max(p_SM)
-
-        #print ('max of LEE : ',max_LEE)
-        #print ('max of SM  : ',max_SM)
 
         n_sampled_LEE = 0
         n_sampled_SM  = 0
@@ -437,7 +362,6 @@ class Plotter:
             
             prob = np.random.random() * max_LEE
             if (prob < p_LEE[BinNumber]):
-                #print ('LEE simulation: prob of %.02f vs. bin prob of %.02f leads to selecting event at bin %i'%(prob,p_LEE[BinNumber],BinNumber))
                 obs_LEE[BinNumber] += 1
                 n_sampled_LEE += 1
 
@@ -454,8 +378,7 @@ class Plotter:
 
         return obs_SM, obs_LEE
             
-            
-##MC/OVERLAY CHANGES
+
     def _chisq_full_covariance(self,data, mc,key, CNP=True,STATONLY=False):
 
         np.set_printoptions(precision=3)
@@ -502,8 +425,6 @@ class Plotter:
 
         if (STATONLY == True):
             COV = COV_STAT
-
-        #print("COV matrix : ",COV)
                 
         diff = (data-mc)
         emtxinv = np.linalg.inv(COV)
@@ -512,7 +433,6 @@ class Plotter:
         covdiag = np.diag(COV)
         chisqsum = 0.
         for i,d in enumerate(diff):
-            #print ('bin %i has COV value %.02f'%(i,covdiag[i]))
             chisqsum += ( (d**2) /covdiag[i])
 
         return chisq, chisqsum, dof
@@ -521,7 +441,6 @@ class Plotter:
     def _data_err(data,doAsym=False):
         obs = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
         low = [0.00,0.17,0.71,1.37,2.09,2.84,3.62,4.42,5.23,6.06,6.89,7.73,8.58,9.44,10.30,11.17,12.04,12.92,13.80,14.68,15.56]
-#        hig = [0.38,3.30,4.64,5.92,7.16,8.38,9.58,10.77,11.95,13.11,14.27,15.42,16.56,17.70,18.83,19.96,21.08,22.20,23.32,24.44,25.55]
         hig = [1.15,3.30,4.64,5.92,7.16,8.38,9.58,10.77,11.95,13.11,14.27,15.42,16.56,17.70,18.83,19.96,21.08,22.20,23.32,24.44,25.55]
         if doAsym:
             lb = [i-low[i] if i<=20 else (np.sqrt(i)) for i in data]
@@ -534,9 +453,7 @@ class Plotter:
     def _ratio_err(num, den, num_err, den_err):
         n, d, n_e, d_e = num, den, num_err, den_err
         n[n == 0] = 0.00001
-        #d[d == 0] = 0.00001
         return np.array([
-            #n[i] / d[i] * math.sqrt((n_e[i] / n[i])**2 + (d_e[i] / d[i])**2) <= this does not work if n[i]==0
             math.sqrt( ( n_e[i] / d[i] )**2 + ( n[i] * d_e[i] / (d[i]*d[i]) )**2) if d[i]>0 else 0
             for i, k in enumerate(num)
         ])
@@ -592,8 +509,6 @@ class Plotter:
             Series of values of variable that pass all track_cuts
             boolean mask that represents union of input mask and new cut mask
         '''
-        #need to do this fancy business with the apply function to make masks
-        #this is because unflattened DataFrames are used
         for (var,op,val) in track_cuts:
             if type(op) == list:
                 #this means treat two conditions in an 'or' fashion
@@ -623,9 +538,6 @@ class Plotter:
             list of values of variable corresponding to longest track in each slices
             boolean mask for longest tracks in df
         '''
-
-        #print("selecting longest...")
-        #print("mask", mask)
         trk_lens = (df['trk_len_v']*mask).apply(lambda x: x[x != False])#apply mask to track lengths
         trk_lens = trk_lens[trk_lens.apply(lambda x: len(x) > 0)]#clean up slices
         variable = variable.apply(lambda x: x[~np.isnan(x)])#clean up nan vals
@@ -665,30 +577,10 @@ class Plotter:
         '''
         sel_query = query
         if extra_cut is not None:
-            sel_query += "& %s" % extra_cut
-        '''
-        if ( (track_cuts == None) or (select_longest == False) ):
-            return sample.query(sel_query).eval(variable).ravel()
-        '''
-
-
-        '''
+            sel_query += "& %s" % extra_cut 
         df = sample.query(sel_query)
-        #print (df.isna().sum())
-        dfna = df.isna()
-        for (colname,colvals) in dfna.iteritems():
-            if (colvals.sum() != 0):
-                print ('name : ',colname)
-                print ('nan entries : ',colvals.sum())
-        '''  
-        df = sample.query(sel_query)
-        
-        #if (track_cuts != None):
-        #    df = sample.query(sel_query).dropna().copy() #don't want to eliminate anything from memory
 
-        #df = sample.query(sel_query).dropna().copy() #don't want to eliminate anything from memory
-
-        track_cuts_mask = None #df['trk_score_v'].apply(lambda x: x == x) #all-True mask, assuming trk_score_v is available
+        track_cuts_mask = None
         if track_cuts is not None:
             vars, track_cuts_mask = self._apply_track_cuts(df,variable,track_cuts,track_cuts_mask)
         else:
@@ -706,7 +598,6 @@ class Plotter:
     def _categorize_entries_pdg(self, sample, variable, query="selected==1", extra_cut=None, track_cuts=None, select_longest=True):
 
         if "trk" in variable:
-            #pfp_id_variable = "trk_pfp_id"
             pfp_id_variable = "mc_pdg"
             score_v = self._selection("trk_score_v", sample, query=query, extra_cut=extra_cut, track_cuts=track_cuts, select_longest=select_longest)
         else:
@@ -753,7 +644,6 @@ class Plotter:
     def _categorize_entries(self, sample, variable, query="selected==1", extra_cut=None, track_cuts=None, select_longest=True):
         category = self._selection(
             "category", sample, query=query, extra_cut=extra_cut, track_cuts=track_cuts, select_longest=select_longest)
-        #print("CATEGORY = ", category)
         plotted_variable = self._selection(
             variable, sample, query=query, extra_cut=extra_cut, track_cuts=track_cuts, select_longest=select_longest)
 
@@ -814,7 +704,6 @@ class Plotter:
         return category, plotted_variable
 
 
-
     @staticmethod
     def _variable_bin_scaling(bins, bin_width, variable):
         idx = bisect.bisect_left(bins, variable)
@@ -849,7 +738,6 @@ class Plotter:
 
     def _get_variable(self, variable, query, track_cuts=None):
 
-        ##MC/OVERLAY CHANGED HERE
         nue_mc_plotted_variable = self._selection(
             variable, self.samples["nue_mc"], query=query, extra_cut=self.nu_pdg, track_cuts=track_cuts)
         nue_mc_plotted_variable = self._select_showers(
@@ -904,7 +792,6 @@ class Plotter:
                 dirt_plotted_variable, variable, self.samples["numu_dirt"], query=query)
             numu_dirt_weight = [self.weights["numu_dirt"]] * len(dirt_plotted_variable)
 
-        #DO WE NEED TO DUPLICATE HERE??
         ncpi0_weight = []
         ncpi0_plotted_variable = []
         if "ncpi0" in self.samples:
@@ -1005,14 +892,12 @@ class Plotter:
             Figure, top subplot, and bottom subplot (ratio)
 
         """
-        #if (detsys != None):
         self.detsys = detsys
 
         if not title:
             title = variable
         if not query:
             query==""
-            #query = "nslice==1"
             
         # pandas bug https://github.com/pandas-dev/pandas/issues/16363
         if plot_options["range"][0] >= 0 and plot_options["range"][1] >= 0 and variable[-2:] != "_v" and query:
@@ -1054,7 +939,6 @@ class Plotter:
                 "Unrecognized categorization, valid options are 'sample', 'event_category', and 'particle_pdg'")
 
 
-        #nu_pdg = "~(abs(nu_pdg) == 12 & ccnc == 0)"
         nu_pdg = "~(abs(nu_pdg)==12 and ccnc==0 and -1.55<=true_nu_vtx_x<=254.8 and -116.5<=true_nu_vtx_y<=116.5 and 0<=true_nu_vtx_z<=1036.8)" #Removed extra cut as dropping these from overlay in main code
         
         if ("ccpi0" in self.samples):
@@ -1073,7 +957,6 @@ class Plotter:
         print(query,"\n", self.nu_pdg,"\n",track_cuts,"\n",select_longest,"\n",currentsample)
         print("--------------------------------------")
         
-        ##OVERLAY MC CHANGE HERE
         if (currentsample == "nue_nue"):
             print("current sample is: ", currentsample)
             current_category, current_plotted_variable = categorization(
@@ -1099,7 +982,6 @@ class Plotter:
                 self.samples["numu_nue"], variable, query=query, track_cuts=track_cuts, select_longest=select_longest)
 
         
-        ##OVERLAY/MC CHANGE HERE
         current_var_dict = defaultdict(list)
         current_weight_dict = defaultdict(list)
         
@@ -1141,86 +1023,7 @@ class Plotter:
                     current_weight_dict[c].append(self.weights["numu_dirt"] * w)
                 elif (currentsample == "numu_nue"):
                     current_weight_dict[c].append(self.weights["numu_nue"] * w)
-      
-        
-        """
-        if "ncpi0" in self.samples:
-            ncpi0_genie_weights = self._get_genie_weight(
-                    self.samples["ncpi0"], variable, query=query, track_cuts=track_cuts, select_longest=select_longest, weightvar=genieweight)
-            category, ncpi0_plotted_variable = categorization(
-                self.samples["ncpi0"], variable, query=query, track_cuts=track_cuts, select_longest=select_longest)
-
-            for c, v, w in zip(category, ncpi0_plotted_variable, ncpi0_genie_weights):
-                var_dict[c].append(v)
-                weight_dict[c].append(self.weights["ncpi0"] * w)
-
-        if "ccpi0" in self.samples:
-            ccpi0_genie_weights = self._get_genie_weight(
-                    self.samples["ccpi0"], variable, query=query, track_cuts=track_cuts, select_longest=select_longest, weightvar=genieweight)
-            category, ccpi0_plotted_variable = categorization(
-                self.samples["ccpi0"], variable, query=query, track_cuts=track_cuts, select_longest=select_longest)
-
-            for c, v, w in zip(category, ccpi0_plotted_variable, ccpi0_genie_weights):
-                var_dict[c].append(v)
-                weight_dict[c].append(self.weights["ccpi0"] * w)
-
-        if "ccnopi" in self.samples:
-            ccnopi_genie_weights = self._get_genie_weight(
-                    self.samples["ccnopi"], variable, query=query, track_cuts=track_cuts, select_longest=select_longest, weightvar=genieweight)
-            category, ccnopi_plotted_variable = categorization(
-                self.samples["ccnopi"], variable, query=query, track_cuts=track_cuts, select_longest=select_longest)
-
-            for c, v, w in zip(category, ccnopi_plotted_variable, ccnopi_genie_weights):
-                var_dict[c].append(v)
-                weight_dict[c].append(self.weights["ccnopi"] * w)
-
-        if "cccpi" in self.samples:
-            cccpi_genie_weights = self._get_genie_weight(
-                    self.samples["cccpi"], variable, query=query, track_cuts=track_cuts, select_longest=select_longest, weightvar=genieweight)
-            category, cccpi_plotted_variable = categorization(
-                self.samples["cccpi"], variable, query=query, track_cuts=track_cuts, select_longest=select_longest)
-
-            for c, v, w in zip(category, cccpi_plotted_variable, cccpi_genie_weights):
-                var_dict[c].append(v)
-                weight_dict[c].append(self.weights["cccpi"] * w)
-
-        if "nccpi" in self.samples:
-            nccpi_genie_weights = self._get_genie_weight(
-                    self.samples["nccpi"], variable, query=query, track_cuts=track_cuts, select_longest=select_longest, weightvar=genieweight)
-            category, nccpi_plotted_variable = categorization(
-                self.samples["nccpi"], variable, query=query, track_cuts=track_cuts, select_longest=select_longest)
-
-            for c, v, w in zip(category, nccpi_plotted_variable, nccpi_genie_weights):
-                var_dict[c].append(v)
-                weight_dict[c].append(self.weights["nccpi"] * w)
-
-        if "ncnopi" in self.samples:
-            ncnopi_genie_weights = self._get_genie_weight(
-                    self.samples["ncnopi"], variable, query=query, track_cuts=track_cuts, select_longest=select_longest, weightvar=genieweight)
-            category, ncnopi_plotted_variable = categorization(
-                self.samples["ncnopi"], variable, query=query, track_cuts=track_cuts, select_longest=select_longest)
-
-            for c, v, w in zip(category, ncnopi_plotted_variable, ncnopi_genie_weights):
-                var_dict[c].append(v)
-                weight_dict[c].append(self.weights["ncnopi"] * w)
-        
-
-        if "lee" in self.samples:
-            category, lee_plotted_variable = categorization(
-                self.samples["lee"], variable, query=query, track_cuts=track_cuts, select_longest=select_longest)
-            leeweight = self._get_genie_weight(
-                self.samples["lee"], variable, query=query, track_cuts=track_cuts, select_longest=select_longest,weightsignal="leeweight", weightvar=genieweight)
-
-            for c, v, w in zip(category, lee_plotted_variable, leeweight):
-                var_dict[c].append(v)
-                weight_dict[c].append(self.weights["lee"] * w)
-
-            lee_hist, lee_bins = np.histogram(
-                var_dict[111],
-                bins=plot_options["bins"],
-                range=plot_options["range"],
-                weights=weight_dict[111])
-        """   
+       
         if draw_data:
             if (currentsample == "nue_ext"):
                 current_plotted_variable = self._selection(
@@ -1251,7 +1054,7 @@ class Plotter:
             nue_ax2 = plt.subplot(nue_gs[1])
         else:
             nue_fig = plt.figure(figsize=(7, 5))
-            nue_gs = gridspec.GridSpec(1, 1)#, height_ratios=[2, 1])
+            nue_gs = gridspec.GridSpec(1, 1)
             nue_ax1 = plt.subplot(nue_gs[0])
             
 #-------------------------------
@@ -1268,8 +1071,6 @@ class Plotter:
             
         current_total = math.fsum(math.fsum(current_order_weight_dict[c]) for c in current_order_var_dict)
         print("current_total ", current_total)
-        print('%.75f' % current_total)
-        print("---------------------------STILL TOGETHER HERE--------------------------------")
         if draw_data:
             if (currentsample == "nue_ext"):
                 current_total += math.fsum([self.weights["ext"]] * len(current_plotted_variable))
@@ -1304,13 +1105,10 @@ class Plotter:
             
         current_total = math.fsum(math.fsum(current_order_weight_dict[c]) for c in current_order_var_dict)
         print("current_total ", current_total)
-        print('%.75f' % current_total)
-        print("---------------------------STILL TOGETHER HERE--------------------------------")
 
         current_stacked = nue_ax1.hist(
             current_order_var_dict.values(),
             weights=list(current_order_weight_dict.values()),
-            #weights=(current_order_weight_dict.values()),
             stacked=True,
             label=labels or "",
             **plot_options)
@@ -1336,8 +1134,6 @@ class Plotter:
             current_total_array = list(current_order_var_dict.values())
             current_total_weight = list(current_order_weight_dict.values())
 
-
-        #Remove smearing part
         ###################################################################
         # true nu energy 
         true_var = 'nu_e'
@@ -1405,9 +1201,6 @@ class Plotter:
         print("")  
 
 
-          
-
-#Don't need this for ratio
         if "lee" in self.samples:
             if kind == "event_category":
                 try:
@@ -1415,30 +1208,10 @@ class Plotter:
                         lee_hist, n_tot-lee_hist, scale_factor=1.01e21/self.pot, cov=(self.cov+self.cov_mc_stat))
                     self.significance_likelihood = self._sigma_calc_likelihood(
                         lee_hist, n_tot-lee_hist, np.sqrt(err_mc + err_ext + err_nue + err_dirt + err_ncpi0 + err_ccpi0 + err_ccnopi + err_cccpi + err_nccpi + err_ncnopi), scale_factor=1.01e21/self.pot)
-                    # area normalized version
-                    #normLEE = 68. / np.sum(n_tot)
-                    #normSM  = 68. / np.sum(n_tot-lee_hist)
-                    #self.significance_likelihood = self._sigma_calc_likelihood(
-                    #    lee_hist * normLEE, (n_tot-lee_hist) * normSM, np.sqrt(normSM) * np.sqrt(err_mc + err_ext + err_nue + err_dirt + err_ncpi0 + err_ccpi0 + err_ccnopi + err_cccpi + err_nccpi + err_ncnopi), scale_factor=1.0)
                 except (np.linalg.LinAlgError, ValueError) as err:
                     print("Error calculating the significance", err)
                     self.significance = -1
                     self.significance_likelihood = -1
-        # old error-bar plotting
-        #ax1.bar(bincenters, n_tot, facecolor='none',
-        #       edgecolor='none', width=0, yerr=exp_err)
-        
-        
-
-        '''
-        ax1.fill_between(
-            bincenters+(bincenters[1]-bincenters[0])/2.,
-            n_tot-exp_err,
-            n_tot+exp_err,
-            step="pre",
-            color="grey",
-            alpha=0.5)
-        '''
         current_bincenters = 0.5 * (current_bin_edges[1:] + current_bin_edges[:-1])
         current_bin_size = [(current_bin_edges[i + 1] - current_bin_edges[i]) / 2
                     for i in range(len(current_bin_edges) - 1)]
@@ -1448,7 +1221,6 @@ class Plotter:
             current_n_data, nue_bins = np.histogram(current_plotted_variable, **plot_options) 
             self.nue_data = current_n_data
             current_data_err = self._data_err(current_n_data,asymErrs)
-            #self.cov_data_stat[np.diag_indices_from(self.cov_data_stat)] = n_data
             # This is a hacky workaround -- I should be ashamed of myself, EG
         else:
             current_n_data = np.zeros(len(current_bin_size))
@@ -1462,13 +1234,9 @@ class Plotter:
                 yerr=current_data_err,
                 fmt='ko',
                 label="NuMI: %i" % len(current_plotted_variable) if len(current_plotted_variable) else "")
-          
 
-        #frac = self.deltachisqfakedata(plot_options["range"][0], plot_options["range"][-1], np.array([1,1,1,5,5,5]), np.array([1,1,1,5,5,5]), 70)
         if "lee" in self.samples:
             self.sigma_shapeonly = self.deltachisqfakedata(plot_options["range"][0], plot_options["range"][-1], n_tot, (n_tot-lee_hist), 70)
-
-
 
         if (ncol > 3):
             current_leg = nue_ax1.legend(
@@ -1493,17 +1261,7 @@ class Plotter:
         if (ratio==True):
             nue_ax1.set_xticks([])
 
-        nue_ax1.set_xlim(plot_options["range"][0], plot_options["range"][1])       
-
-        '''
-        ax1.fill_between(
-            bincenters+(bincenters[1]-bincenters[0])/2.,
-            n_tot - exp_err,
-            n_tot + exp_err,
-            step="pre",
-            color="grey",
-            alpha=0.5)
-        '''     
+        nue_ax1.set_xlim(plot_options["range"][0], plot_options["range"][1])        
         
         if (ratio==True):
             if draw_data == False:
@@ -1517,7 +1275,6 @@ class Plotter:
                     0.725,
                     0.9,
                     r'$\chi^2 /$n.d.f. = %.2f' % (self.stats['nue_chisq']/self.stats['nue_dof']) +
-                             #'K.S. prob. = %.2f' % scipy.stats.ks_2samp(n_data, n_tot)[1],
                              ', p = %.2f' % (1 - scipy.stats.chi2.cdf(self.stats['nue_chisq'],self.stats['nue_dof'])) +
                              ', O/P = %.2f' % (sum(nue_n_data)/sum(nue_n_tot)) +
                              ' $\pm$ %.2f' % (self._data_err([sum(nue_n_data)],asymErrs)[0]/sum(nue_n_tot)),
@@ -1531,7 +1288,6 @@ class Plotter:
                     0.725,
                     0.9,
                     r'$\chi^2 /$n.d.f. = %.2f' % (self.stats['numu_chisq']/self.stats['numu_dof']) +
-                             #'K.S. prob. = %.2f' % scipy.stats.ks_2samp(n_data, n_tot)[1],
                              ', p = %.2f' % (1 - scipy.stats.chi2.cdf(self.stats['numu_chisq'],self.stats['numu_dof'])) +
                              ', O/P = %.2f' % (sum(numu_n_data)/sum(numu_n_tot)) +
                              ' $\pm$ %.2f' % (self._data_err([sum(numu_n_data)],asymErrs)[0]/sum(numu_n_tot)),
@@ -1565,7 +1321,6 @@ class Plotter:
                 label="NuMI: %i" % len(current_plotted_variable) if len(current_plotted_variable) else ""
                 return current_n_data, current_data_err, labels
             else:
-                #return nue_fig, nue_ax1, nue_stacked, labels, nue_order_var_dict, nue_order_weight_dict
                 return current_order_var_dict, current_order_weight_dict, labels
         else:
             return nue_fig, nue_ax1, nue_stacked, labels, nue_order_var_dict, nue_order_weight_dict
@@ -1576,7 +1331,6 @@ class Plotter:
             query += "& %s <= %g & %s >= %g" % (
                 variable, plot_options["range"][1], variable, plot_options["range"][0])
 
-            ##OVERLAY/MC
         mc_plotted_variable = self._selection(
             variable, self.samples["mc"], query=query, extra_cut=self.nu_pdg)
         mc_plotted_variable = self._select_showers(
@@ -1726,13 +1480,9 @@ class Plotter:
 
 
         fig = plt.figure(figsize=(7, 7))
-        #fig = plt.figure(figsize=(8, 7))
-        gs = gridspec.GridSpec(1, 1)#, height_ratios=[2, 1])
-        #gs = gridspec.GridSpec(2, 1, height_ratios=[2, 1])
-        #print (gs[0])
+        gs = gridspec.GridSpec(1, 1)
 
         ax1 = plt.subplot(gs[0])
-        #ax2 = plt.subplot(gs[1])
 
         n_mc, mc_bins, patches = ax1.hist(
             mc_plotted_variable,
@@ -1905,7 +1655,7 @@ class Plotter:
             err_lee = self.samples["lee"].query(query).groupby(binned_lee)['leeweight'].agg(
                 "sum").values * self.weights["lee"] * self.weights["lee"]
 
-        #Full Error?
+
         exp_err = np.sqrt(err_mc + err_ext + err_nue + err_dirt + err_lee + err_ncpi0 + err_ccpi0 + err_ccnopi + err_cccpi + err_nccpi + err_ncnopi)
         print("exp_err = ", exp_err)
 
@@ -1937,17 +1687,11 @@ class Plotter:
         else:
             ax1.set_ylabel(
                 "N. Entries / %g %s" % (xrange / plot_options["bins"], unit))
-        #ax1.set_xticks([])
         ax1.set_xlim(plot_options["range"][0], plot_options["range"][1])
 
-        #self._draw_ratio(ax2, bins, n_tot, n_data, exp_err, data_err)
-
-        #ax2.set_xlabel(title)
         ax1.set_xlabel(title)
-        #ax2.set_xlim(plot_options["range"][0], plot_options["range"][1])
         fig.tight_layout()
-        # fig.savefig("plots/%s_samples.pdf" % variable)
-        return fig, ax1#, ax2
+        return fig, ax1
 
     def _draw_ratio(self, ax, bins, n_tot, n_data, tot_err, data_err, draw_data=True):
         bincenters = 0.5 * (bins[1:] + bins[:-1])
@@ -2008,7 +1752,6 @@ class Plotter:
 
             norm_array = smear[0].T
 
-            # for each truth bin (column): 
             for j in range(len(bins)-1): 
 
                 reco_events_in_column = [ norm_array[i][j] for i in range(len(bins)-1) ]
@@ -2045,7 +1788,6 @@ class Plotter:
         plt.ylabel('Reco Nu Energy [GeV]', fontsize=15)
         plt.text(0.1, 4.2, r'MicroBooNE Preliminary', fontweight='bold')
 
-        #plt.show()
         return norm_array
 
     
@@ -2055,11 +1797,6 @@ class Plotter:
         gen = plt.hist(df.query(signal)['nu_e'], bins, color='deepskyblue')
         plt.close()
         print("Full numbers = ", gen[0])
-
-        #This should give selected numbers in bin
-        #print(selected['neutrino_energy'])
-        #This should be the total numbers in bin
-        #print(df.query(signal)['neutrino_energy'])
 
         # plot selected signal events 
         fig, ax1 = plt.subplots(figsize=(4, 5))
@@ -2094,8 +1831,6 @@ class Plotter:
         plt.text(0, 0.95, r'MicroBooNE Preliminary', fontweight='bold')
         plt.close()
        
-
-        #plt.show()
         return eff
     
     def div_err(self, res, err1, val1, err2, val2):

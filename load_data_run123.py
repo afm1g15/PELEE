@@ -64,19 +64,7 @@ def pick_closest_shower(up,df):
     df["shr2_start_x"] = get_elm_from_vec_idx(shr_start_x_v,shr2_id,-9999.)
     df["shr2_start_y"] = get_elm_from_vec_idx(shr_start_y_v,shr2_id,-9999.)
     df["shr2_start_z"] = get_elm_from_vec_idx(shr_start_z_v,shr2_id,-9999.)
-    #df["trk1_start_x"] = get_elm_from_vec_idx(trk_start_x_v,trk1_id,-9999.)
-    #df["trk1_start_y"] = get_elm_from_vec_idx(trk_start_y_v,trk1_id,-9999.)
-    #df["trk1_start_z"] = get_elm_from_vec_idx(trk_start_z_v,trk1_id,-9999.)
-    #
-    #df['tk1sh1_distance'] = np.where((df['n_showers_contained']>0)&(df['n_tracks_contained']>0),\
-    #                                 distance(df['shr1_start_x'],df['shr1_start_y'],df['shr1_start_z'],\
-    #                                          df['trk1_start_x'],df['trk1_start_y'],df['trk1_start_z']),\
-    #                                 9999.)
-    #df['tk1sh2_distance'] = np.where((df['n_showers_contained']>1)&(df['n_tracks_contained']>0),\
-    #                                 distance(df['shr2_start_x'],df['shr2_start_y'],df['shr2_start_z'],\
-    #                                          df['trk1_start_x'],df['trk1_start_y'],df['trk1_start_z']),\
-    #                                 9999.)
-    
+
     # set the shr_id
     df['shr_id'] = shr1_id
     df["is_shr2clsr"] = np.zeros_like(df["n_tracks_contained"])
@@ -102,8 +90,6 @@ def pick_closest_shower(up,df):
     df["trk1_dir_x"] = get_elm_from_vec_idx(trk_dir_x_v,trk1_id,-9999.)
     df["trk1_dir_y"] = get_elm_from_vec_idx(trk_dir_y_v,trk1_id,-9999.)
     df["trk1_dir_z"] = get_elm_from_vec_idx(trk_dir_z_v,trk1_id,-9999.)
-    #df["tk1sh2_angle"] = cosAngleTwoVecs(df["trk1_dir_x"],df["trk1_dir_y"],df["trk1_dir_z"],\
-    #                                     df["shr2_px"],    df["shr2_py"],    df["shr2_pz"])
     df.loc[shr2clsr,"tksh_angle"] = df['tk1sh2_angle']
     # shr_tkfit_dedx_max
     shr_tkfit_dedx_u_v = up.array("shr_tkfit_dedx_u_v")
@@ -213,75 +199,17 @@ def process_uproot(up,df):
     trk_start_x_v   = up.array("trk_start_x_v")
     trk_start_y_v   = up.array("trk_start_y_v")
     trk_start_z_v   = up.array("trk_start_z_v")
-    #df["trk1_start_x_alltk"] = get_elm_from_vec_idx(trk_start_x_v,trk_id_all)
-    #df["trk1_start_y_alltk"] = get_elm_from_vec_idx(trk_start_y_v,trk_id_all)
-    #df["trk1_start_z_alltk"] = get_elm_from_vec_idx(trk_start_z_v,trk_id_all)
     trk_dir_x_v = up.array("trk_dir_x_v")
     trk_dir_y_v = up.array("trk_dir_y_v")
     trk_dir_z_v = up.array("trk_dir_z_v")
-    #df["trk1_dir_x_alltk"] = get_elm_from_vec_idx(trk_dir_x_v,trk_id_all)
-    #df["trk1_dir_y_alltk"] = get_elm_from_vec_idx(trk_dir_y_v,trk_id_all)
-    #df["trk1_dir_z_alltk"] = get_elm_from_vec_idx(trk_dir_z_v,trk_id_all)
-    #
-    # tksh_distance and tksh_angle for track with most hits, regardless of containment
-    #
-    #df['tk1sh1_distance_alltk'] = np.where(df['n_tracks_tot']==0,99999,
-    #                                 distance(df['shr_start_x'],       df['shr_start_y'],       df['shr_start_z'],\
-    #                                          df['trk1_start_x_alltk'],df['trk1_start_y_alltk'],df['trk1_start_z_alltk']))
-    #df["tk1sh1_angle_alltk"] = np.where(df['n_tracks_tot']==0,99999,
-    #                              cosAngleTwoVecs(df["trk1_dir_x_alltk"],df["trk1_dir_y_alltk"],df["trk1_dir_z_alltk"],\
-    #                                              df["shr_px"],          df["shr_py"],          df["shr_pz"]))
 
-    # return # DAVIDC
-    
-    #
-    # fix the 'subcluster' bug (in case of more than one shower, it comes from the one with least hits, not the one with most)
-    # so we overwrite the dataframe column taking the correct value from the corrsponding vector branches
-    #
     pfpplanesubclusters_U_v = up.array("pfpplanesubclusters_U")
     pfpplanesubclusters_V_v = up.array("pfpplanesubclusters_V")
     pfpplanesubclusters_Y_v = up.array("pfpplanesubclusters_Y")
     df["shrsubclusters0"] = get_elm_from_vec_idx(pfpplanesubclusters_U_v,shr_id,0)
     df["shrsubclusters1"] = get_elm_from_vec_idx(pfpplanesubclusters_V_v,shr_id,0)
     df["shrsubclusters2"] = get_elm_from_vec_idx(pfpplanesubclusters_Y_v,shr_id,0)
-    #
-    # do the best we can to get the right shr2_id
-    #
-    #shr2_id_corr = up.array('shr2_id')-1 # I think we need this -1 to get the right result
-    #shr2_id_appr = get_idx_from_vec_sort(-2,pfnhits_v,shr_mask)
-    #shr2_id = np.where((shr2_id_corr>=0)&(shr2_id_corr<df['n_showers_tot']),shr2_id_corr,shr2_id_appr)
-    #
-    #df["shr2subclusters0"] = get_elm_from_vec_idx(pfpplanesubclusters_U_v,shr2_id,0)
-    #df["shr2subclusters1"] = get_elm_from_vec_idx(pfpplanesubclusters_V_v,shr2_id,0)
-    #df["shr2subclusters2"] = get_elm_from_vec_idx(pfpplanesubclusters_Y_v,shr2_id,0)
-    #df['subcluster2tmp'] = df['shr2subclusters0'] + df['shr2subclusters1'] + df['shr2subclusters2']
-    #
-    #df["shr2_start_x"] = get_elm_from_vec_idx(shr_start_x_v,shr2_id,-9999.)
-    #df["shr2_start_y"] = get_elm_from_vec_idx(shr_start_y_v,shr2_id,-9999.)
-    #df["shr2_start_z"] = get_elm_from_vec_idx(shr_start_z_v,shr2_id,-9999.)
-    #df["trk1_start_x"] = get_elm_from_vec_idx(trk_start_x_v,trk_id,-9999.)
-    #df["trk1_start_y"] = get_elm_from_vec_idx(trk_start_y_v,trk_id,-9999.)
-    #df["trk1_start_z"] = get_elm_from_vec_idx(trk_start_z_v,trk_id,-9999.)
-    #df['tk1sh2_distance'] = np.where((df['n_showers_contained']>1)&(df['n_tracks_contained']>0),\
-    #                                 distance(df['shr2_start_x'], df['shr2_start_y'], df['shr2_start_z'],\
-    #                                 df['trk1_start_x'],df['trk1_start_y'],df['trk1_start_z']),\
-    #                                 9999.)
-    #
-    #df['sh1sh2_distance'] = np.where(df['n_showers_contained']>1,\
-    #                                 distance(df['shr2_start_x'], df['shr2_start_y'], df['shr2_start_z'],\
-    #                                 df['shr_start_x'],df['shr_start_y'],df['shr_start_z']),\
-    #                                 9999.)
-    #
-    #df['shr2pid'] = get_elm_from_vec_idx(trk_llr_pid_v,shr2_id,9999.)
-    #df['shr2_score'] = get_elm_from_vec_idx(trk_score_v,shr2_id,9999.)
-    #
-    #df.drop(columns=['shr_start_x', 'shr_start_y', 'shr_start_z'])
-    #df.drop(columns=['trk1_start_x_alltk', 'trk1_start_y_alltk', 'trk1_start_z_alltk'])
-    #df.drop(columns=['trk1_dir_x_alltk', 'trk1_dir_y_alltk', 'trk1_dir_z_alltk'])
-    #df.drop(columns=['shr2subclusters0', 'shr2subclusters1', 'shr2subclusters2'])
-    #
-    #pick_closest_shower(up,df)
-    #
+
     return
 
 def process_uproot_recoveryvars(up,df):
@@ -465,12 +393,6 @@ def process_uproot_recoveryvars(up,df):
     df.loc[trk2srtshr, 'hits_ratio' ] = (df["shr_hits_tot"]+df["trk2_nhits"])/(df["shr_hits_tot"]+df["trk_hits_tot"])
     #
     df.loc[trk2srtshr, 'shr_tkfit_npointsvalid' ] = df["shr_tkfit_npointsvalid"] + df["trk2_nhits"] #patched!
-    # other option... taking the track fit npoints for both (results do not change)
-    #shr_tkfit_nhits_v = up.array("shr_tkfit_nhits_v")
-    #df["trk2_tkfit_npointsvalid"] = get_elm_from_vec_idx(shr_tkfit_nhits_v,trk2_id,-9999.)
-    #df.loc[trk2srtshr, 'shr_tkfit_npointsvalid' ] = df["shr_tkfit_npointsvalid"] + df["trk2_tkfit_npointsvalid"]
-    #df.loc[trk2srtshr, 'shr_tkfit_npoints' ] = df["shr_tkfit_npoints"] + df["trk2_nhits"]
-    #
     df.loc[trk2srtshr & (df["trk1trk2hitdist2"]>0) & (df["trkshrhitdist2"]>0) & (df["trk1trk2hitdist2"]<df["trkshrhitdist2"]), 'trkshrhitdist2' ] = df["trk1trk2hitdist2"]
     df.loc[trk2srtshr & (df["trk1trk2hitdist2"]>0) & (df["trkshrhitdist2"]<0), 'trkshrhitdist2' ] = df["trk1trk2hitdist2"]
     df.loc[trk2srtshr, 'shrsubclusters0' ] = df["shrsubclusters0"] + df["trk2subclusters0"]
@@ -505,19 +427,12 @@ def process_uproot_recoveryvars(up,df):
     df["is_trk1embd"] = np.zeros_like(df["n_tracks_contained"])
     trk1embd = ((df["n_tracks_contained"]>1) & (df['tksh_angle'] > 0.99) & (df["is_trk1bad"]==0))
     df.loc[trk1embd, 'is_trk1embd' ] = 1
-    #df.loc[trk1embd, 'trkpid' ] = df["trk2_llr_pid"]
-    #df.loc[trk1embd, 'tksh_distance' ] = df["tk2sh1_distance"]
-    #df.loc[trk1embd, 'tksh_angle' ] = df["tk2sh1_angle"]
-    #df.loc[trk1embd, 'hits_ratio' ] = (df["shr_hits_tot"]+df["trk1_nhits"])/(df["shr_hits_tot"]+df["trk_hits_tot"])
-    #df.loc[trk1embd, 'trkshrhitdist2' ] = df["tk2sh1_distance"] #patched!
-    #df.loc[trk1embd, 'n_tracks_contained' ] = df["n_tracks_contained"]-1
     #
     # Let's save memory by dropping some stuff we just used and won't use anymore
     #
     df.drop(columns=['shr1_start_x', 'shr1_start_y', 'shr1_start_z'])
     df.drop(columns=['shr2_start_x', 'shr2_start_y', 'shr2_start_z'])
     df.drop(columns=['shr12_start_dx', 'shr12_start_dy', 'shr12_start_dz'])
-    #df.drop(columns=['shr2_energy'])
     df.drop(columns=['trk1_len', 'trk2_len'])
     df.drop(columns=['trk1_distance', 'trk2_distance'])
     df.drop(columns=['trk1_llr_pid', 'trk2_llr_pid'])
@@ -564,10 +479,6 @@ def process_uproot_numu(up,df):
     trk_distance_v  = up.array('trk_distance_v')
     trk_calo_energy_y_v = up.array('trk_calo_energy_y_v')
     
-    #trk_dir_x_v = up.array('trk_dir_x_v')
-    #trk_dir_y_v = up.array('trk_dir_y_v')
-    #trk_dir_z_v = up.array('trk_dir_z_v')
-    
     trk_mask = (trk_score_v>0.0)
 
     df["trk1_score"] = awkward.fromiter([vec[vid.argsort()[-1]] if len(vid)>0 else -9999. for vec,vid in zip(trk_score_v[trk_mask],trk_len_v[trk_mask])])
@@ -597,8 +508,6 @@ def process_uproot_numu(up,df):
     df["trk2_phi"]   = awkward.fromiter([vec[vid.argsort()[-2]] if len(vid)>1 else -9999. for vec,vid in zip(trk_phi_v[trk_mask],trk_len_v[trk_mask])])
     
     # get element-wise reconstructed neutrino energy (for each index the value will be the neutrino energy assuming the track at that index is the muon)
-    #df['trk_energy_tot'] = trk_energy_proton_v.sum()
-    #trk_energy_tot = up.array("trk_energy_tot")
     muon_energy_correction_v = np.sqrt(trk_range_muon_mom_v**2 + 0.105**2) - trk_energy_proton_v
     # get element-wise MCS consistency
     muon_mcs_consistency_v    = ( (trk_mcs_muon_mom_v - trk_range_muon_mom_v) / trk_range_muon_mom_v )
@@ -608,7 +517,6 @@ def process_uproot_numu(up,df):
     df["trk1_muon_mcs_consistency"]    = awkward.fromiter([vec[vid.argsort()[-1]] if len(vid)>0 else -9999. for vec,vid in zip(muon_mcs_consistency_v[trk_mask] ,trk_len_v[trk_mask])])
     df["trk1_muon_calo_consistency"]   = awkward.fromiter([vec[vid.argsort()[-1]] if len(vid)>0 else -9999. for vec,vid in zip(muon_calo_consistency_v[trk_mask],trk_len_v[trk_mask])])
     df["trk2_proton_calo_consistency"] = awkward.fromiter([vec[vid.argsort()[-2]] if len(vid)>1 else -9999. for vec,vid in zip(proton_calo_consistency_v[trk_mask],trk_len_v[trk_mask])])
-
     
     # apply numu selection as defined by Ryan. Find selection
     muon_mask = (trk_score_v>0.8) & (trk_llr_pid_v > 0.2)\
@@ -624,7 +532,6 @@ def process_uproot_numu(up,df):
                            & (trk_start_z_v > 20.) & (trk_start_z_v < 986.) & (trk_end_z_v > 20.) & (trk_end_z_v < 986.) \
                            & (trk_score_v>0.5)
 
-    #p_v = up.array("pfnhits")
     muon_idx = get_idx_from_vec_sort(-1,trk_len_v,muon_mask)
     trk_score_v = up.array("trk_score_v")
     df["muon_length"] = get_elm_from_vec_idx(trk_len_v,muon_idx)
@@ -633,40 +540,25 @@ def process_uproot_numu(up,df):
     df['muon_theta']  = get_elm_from_vec_idx(np.cos(trk_theta_v),muon_idx)
     df['muon_proton_energy'] = get_elm_from_vec_idx(np.cos(trk_energy_proton_v),muon_idx) 
     df['muon_energy'] = np.sqrt( df['muon_momentum']**2 + 0.105**2 )
-    #muon_energy = up.array("muon_energy")
-
-    #df["reco_e"] = df["trk_energy_muon"] + df["trk_energy_tot"] + 0.105
-    #df["true_e"] = df["muon_e"] + df["proton_e"]
-    #print("Creating energies!")
-    #reco_e = up.array("reco_e")
-    
-    #df['neutrino_energy'] = df['trk_energy_tot'] + df['muon_energy'] - df['muon_proton_energy']
-    ## testdf['neutrino_energy'] = df['trk_energy_tot'] + get_elm_from_vec_idx(muon_energy_correction_v,muon_idx)
     df['muon_mcs_consistency'] = get_elm_from_vec_idx(muon_mcs_consistency_v,muon_idx)
 
     trk_score_v = up.array("trk_score_v")
     shr_mask = (trk_score_v<0.5)
     trk_mask = (trk_score_v>0.5)
-    proton_mask = (trk_score_v>0.5)&(trk_llr_pid_v < 0.) #&(trk_energy_proton_v>0.04)  #remove trk_energy_tot
+    proton_mask = (trk_score_v>0.5)&(trk_llr_pid_v < 0.)
     print("updated proton mask test")
-    #pion_mask = (trk_score_v>0.5)&(trk_score_v<0.8)&(trk_llr_pid_v > 0.)&(trk_llr_pid_v<0.2)&(reco_e>0.04)   #Plot these
     df['n_protons_tot'] = proton_mask.sum()
-    #df['n_pions_tot'] = pion_mask.sum()
     df['n_muons_tot'] = muon_mask.sum()
     df['n_tracks_tot'] = trk_mask.sum()
     df['n_tracks_contained'] = contained_track_mask.sum()
     df['n_showers_tot'] = shr_mask.sum()    
     
-    #df["trk1_dir_x"] = awkward.fromiter([vec[vid.argsort()[-1]] if len(vid)>0 else -9999. for vec,vid in zip(trk_dir_x_v[trk_mask],trk_len_v[trk_mask])])
-    #df["trk1_dir_y"] = awkward.fromiter([vec[vid.argsort()[-1]] if len(vid)>0 else -9999. for vec,vid in zip(trk_dir_y_v[trk_mask],trk_len_v[trk_mask])])
-    #df["trk1_dir_z"] = awkward.fromiter([vec[vid.argsort()[-1]] if len(vid)>0 else -9999. for vec,vid in zip(trk_dir_z_v[trk_mask],trk_len_v[trk_mask])])
     return
 
 def process_uproot_eta(up,df):
     #
     trk_score_v = up.array("trk_score_v")
     shr_mask = (trk_score_v<0.5)
-    #df['n_tracks_tot'] = trk_mask.sum()
     df['n_showers_tot'] = shr_mask.sum()
 
 
@@ -675,30 +567,22 @@ def get_variables():
     VARDICT = {}
     
     VARIABLES = [
-        "nu_pdg", "slpdg", "backtracked_pdg", #"trk_score_v", 
+        "nu_pdg", "slpdg", "backtracked_pdg",
         "category", "ccnc",
-        #"NeutrinoEnergy0","NeutrinoEnergy1","NeutrinoEnergy2",
         "run","sub","evt",
         "CosmicIP","CosmicDirAll3D","CosmicIPAll3D",
-        #"nu_flashmatch_score","best_cosmic_flashmatch_score","best_obviouscosmic_flashmatch_score",
         "flash_pe",
-        "trk_llr_pid_score_v", # trk-PID score
-        "_opfilter_pe_beam", "_opfilter_pe_veto", # did the event pass the common optical filter (for MC only)
+        "trk_llr_pid_score_v",
+        "_opfilter_pe_beam", "_opfilter_pe_veto",
         "reco_nu_vtx_sce_x","reco_nu_vtx_sce_y","reco_nu_vtx_sce_z",
         "nproton", "nu_e", 
-        #"hits_u", "hits_v", "hits_y", 
         "nproton", "mc_pdg", "slnunhits", "slnhits", "true_e_visible",
         "npi0","npion","pion_e","muon_e","pi0truth_elec_etot",
         "pi0_e", "evnunhits", "nslice", "interaction",
         "slclustfrac", "reco_nu_vtx_x", "reco_nu_vtx_y", "reco_nu_vtx_z",
-        #"trk_sce_start_x_v","trk_sce_start_y_v","trk_sce_start_z_v",
-        #"trk_sce_end_x_v","trk_sce_end_y_v","trk_sce_end_z_v",
-        #"trk_start_x_v","trk_start_z_v","trk_start_z_v",
         "topological_score",
         "isVtxInFiducial",
-        "theta", # angle between incoming and outgoing leptons in radians
-        #"nu_decay_mode","nu_hadron_pdg","nu_parent_pdg", # flux truth info
-        #"shr_energy_tot_cali","selected","n_showers_contained",  # only if CC0piNp variables are saved!
+        "theta", #
     ]
 
     VARDICT['VARIABLES'] = VARIABLES
@@ -758,7 +642,7 @@ def get_variables():
 
     VARDICT['NUEVARS'] = NUEVARS
     
-    NUMUVARS = []#'contained_fraction']
+    NUMUVARS = []
 
     VARDICT['NUMUVARS'] = NUMUVARS
     
@@ -815,7 +699,6 @@ def load_data_run123(which_sideband='pi0', return_plotter=True,
     # sample list
     R1BNB = 'data_bnb_mcc9.1_v08_00_00_25_reco2_C1_beam_good_reco2_5e19'
     R1EXT = 'data_extbnb_mcc9.1_v08_00_00_25_reco2_C_all_reco2'
-    #R1EXT = 'data_extbnb_mcc9.1_v08_00_00_25_reco2_C1_C2_D1_D2_E1_E2_all_reco2' #Run1 + Run2
     R1NU  = 'prodgenie_bnb_nu_uboone_overlay_mcc9.1_v08_00_00_26_filter_run1_reco2_reco2'
     R1NUE = 'prodgenie_bnb_intrinsice_nue_uboone_overlay_mcc9.1_v08_00_00_26_run1_reco2_reco2'
     R1DRT = 'prodgenie_bnb_dirt_overlay_mcc9.1_v08_00_00_26_run1_reco2_reco2'
@@ -847,7 +730,6 @@ def load_data_run123(which_sideband='pi0', return_plotter=True,
     R3EXT = 'data_extbnb_mcc9.1_v08_00_00_25_reco2_F_G_all_reco2'
     if (loadnumucrtonly):
         R3EXT = 'data_extbnb_mcc9.1_v08_00_00_25_reco2_G_all_reco2'
-    #R3EXT = 'data_extbnb_mcc9.1_v08_00_00_25_reco2_G_all_reco2'
     R3NU  = 'prodgenie_bnb_nu_uboone_overlay_mcc9.1_v08_00_00_26_filter_run3_reco2_G_reco2'
     R3NUE = 'prodgenie_bnb_intrinsice_nue_uboone_overlay_mcc9.1_v08_00_00_26_run3_reco2_reco2'
     R3DRT = 'prodgenie_bnb_dirt_overlay_mcc9.1_v08_00_00_26_run3_reco2_reco2'
@@ -1056,13 +938,12 @@ def load_data_run123(which_sideband='pi0', return_plotter=True,
         r3data_np_far_sidebands["is_signal"] = r3data_np_far_sidebands["category"] == 11
     if (which_sideband == "0p_far"):
         r3data_0p_far_sidebands["is_signal"] = r3data_0p_far_sidebands["category"] == 11
-    #if (loadshowervariables == False):
     if ( (loadshowervariables == False) and (loadnumuntuples == True)):
         r3data_numu_sidebands["is_signal"]   = r3data_numu_sidebands["category"] == 11
     if (loadrecoveryvars == True):
         r3ext_np_recovery_sidebands["is_signal"] = r3ext_np_recovery_sidebands["category"] == 11
     
-    r3_datasets = [r3lee, r3data, r3nue, r3mc, r3dirt, r3ext, r3lee, r3lee, r3lee]#, r3data_two_showers_sidebands, r3data_np_far_sidebands, r3data_0p_far_sidebands]
+    r3_datasets = [r3lee, r3data, r3nue, r3mc, r3dirt, r3ext, r3lee, r3lee, r3lee]#,
     if (which_sideband == "2plus_showers" or which_sideband == "np_sb_comb"):
         r3_datasets += [r3data_two_showers_sidebands]
     if (which_sideband == "np_far" or which_sideband == "np_sb_comb"):
@@ -1071,7 +952,6 @@ def load_data_run123(which_sideband='pi0', return_plotter=True,
         r3_datasets += [r3data_0p_far_sidebands]
     if (loadtruthfilters == True):
         r3_datasets += [r3ncpi0, r3ccpi0, r3ccnopi, r3cccpi, r3ncnopi, r3nccpi]
-    #if (loadshowervariables == False):
     if ( (loadshowervariables == False) and (loadnumuntuples == True)):
         r3_datasets += [r3data_numu_sidebands]
     if (loadrecoveryvars == True):
@@ -1083,7 +963,7 @@ def load_data_run123(which_sideband='pi0', return_plotter=True,
         r3_dataset['run3'] = np.ones(len(r3_dataset), dtype=bool)
         r3_dataset['run12'] = np.zeros(len(r3_dataset), dtype=bool)
         
-    uproot_v = [ur3lee,ur3mc,ur3nue,ur3ext,ur3data,ur3dirt]#, ur3data_two_showers_sidebands, ur3data_np_far_sidebands, ur3data_0p_far_sidebands]
+    uproot_v = [ur3lee,ur3mc,ur3nue,ur3ext,ur3data,ur3dirt]
     if (which_sideband == "2plus_showers" or which_sideband == "np_sb_comb"):
         uproot_v += [ur3data_two_showers_sidebands]
     if (which_sideband == "np_far" or which_sideband == "np_sb_comb"):
@@ -1092,13 +972,12 @@ def load_data_run123(which_sideband='pi0', return_plotter=True,
         uproot_v += [ur3data_0p_far_sidebands]
     if (loadtruthfilters == True):
         uproot_v += [ur3ncpi0,ur3ccpi0,ur3ccnopi, ur3cccpi, ur3ncnopi, ur3nccpi]
-    #if (loadshowervariables == False):
     if ( (loadshowervariables == False) and (loadnumuntuples == True)):
         uproot_v += [ur3data_numu_sidebands]
     if (loadrecoveryvars == True):
         uproot_v += [ur3ext_np_recovery_sidebands]
 
-    df_v = [r3lee,r3mc,r3nue,r3ext,r3data,r3dirt]#, r3data_two_showers_sidebands, r3data_np_far_sidebands, r3data_0p_far_sidebands]
+    df_v = [r3lee,r3mc,r3nue,r3ext,r3data,r3dirt]
     if (which_sideband == "2plus_showers" or which_sideband == "np_sb_comb"):
         df_v += [r3data_two_showers_sidebands]
     if (which_sideband == "np_far" or which_sideband == "np_sb_comb"):
@@ -1108,12 +987,10 @@ def load_data_run123(which_sideband='pi0', return_plotter=True,
     if (loadtruthfilters == True):
         df_v += [r3ncpi0,r3ccpi0,r3ccnopi, r3cccpi, r3ncnopi, r3nccpi]
     if ( (loadshowervariables == False) and (loadnumuntuples == True)):
-    #if (loadshowervariables == False):
         df_v += [r3data_numu_sidebands]
     if (loadrecoveryvars == True):
         df_v += [r3ext_np_recovery_sidebands]
 
-    #if (loadshowervariables == True):
     for i,df in enumerate(df_v):
         up = uproot_v[i]
         if (loadnumuvariables == True):
@@ -1133,7 +1010,6 @@ def load_data_run123(which_sideband='pi0', return_plotter=True,
         r3ccpi0 = pd.merge(r3ccpi0, dfcsv, how='inner', on=['identifier'],suffixes=('', '_VAR'))
         Npost = float(r3ccpi0.shape[0])
         print ('fraction of R3 CCpi0 sample after split : %.02f'%(Npost/Npre))
-        #train_r3ccpi0, r3ccpi0 = train_test_split(r3ccpi0, test_size=0.5, random_state=1990)
 
     print("Loading Run1 dataframes")
     r1nue = ur1nue.pandas.df(VARIABLES + WEIGHTS, flatten=False)
@@ -1191,7 +1067,7 @@ def load_data_run123(which_sideband='pi0', return_plotter=True,
     if (loadrecoveryvars == True):
         r1ext_np_recovery_sidebands["is_signal"] = r1ext_np_recovery_sidebands["category"] == 11
     
-    r1_datasets = [r1lee, r1data, r1nue, r1mc, r1dirt, r1ext, r1lee] #, r1data_two_showers_sidebands, r1data_np_far_sidebands, r1data_0p_far_sidebands]
+    r1_datasets = [r1lee, r1data, r1nue, r1mc, r1dirt, r1ext, r1lee]
     
     if (which_sideband == "2plus_showers" or which_sideband == "np_sb_comb"):
         r1_datasets += [r1data_two_showers_sidebands]
@@ -1202,7 +1078,6 @@ def load_data_run123(which_sideband='pi0', return_plotter=True,
         
     if (loadtruthfilters == True):
         r1_datasets += [r1ncpi0, r1ccpi0, r1ccnopi, r1cccpi, r1ncnopi, r1nccpi]
-    #if (loadshowervariables == False):
     if ( (loadshowervariables == False) and (loadnumuntuples == True)):
         r1_datasets += [r1data_numu_sidebands]
     if (loadrecoveryvars == True):
@@ -1214,12 +1089,11 @@ def load_data_run123(which_sideband='pi0', return_plotter=True,
         r1_dataset['run3'] = np.zeros(len(r1_dataset), dtype=bool)
         r1_dataset['run12'] = np.ones(len(r1_dataset), dtype=bool)
         if (loadnumucrtonly == True):
-            #r1_dataset["_closestNuCosmicDist"] = np.zeros(len(r1_dataset),dtype=float)
             r1_dataset["crtveto"] = np.zeros(len(r1_dataset),dtype=int)
             r1_dataset["crthitpe"] = np.zeros(len(r1_dataset),dtype=float)
             r1_dataset["_closestNuCosmicDist"] = np.zeros(len(r1_dataset),dtype=float)
     
-    uproot_v = [ur1lee,ur1mc,ur1nue,ur1ext,ur1data,ur1dirt]#, ur1data_two_showers_sidebands, ur1data_np_far_sidebands, ur1data_0p_far_sidebands]
+    uproot_v = [ur1lee,ur1mc,ur1nue,ur1ext,ur1data,ur1dirt]
     if (which_sideband == "2plus_showers" or which_sideband == "np_sb_comb"):
         uproot_v += [ur1data_two_showers_sidebands]
     if (which_sideband == "np_far" or which_sideband == "np_sb_comb"):
@@ -1228,13 +1102,12 @@ def load_data_run123(which_sideband='pi0', return_plotter=True,
         uproot_v += [ur1data_0p_far_sidebands]
     if (loadtruthfilters == True):
         uproot_v += [ur1ncpi0,ur1ccpi0,ur1ccnopi, ur1cccpi, ur1ncnopi, ur1nccpi]
-    #if (loadshowervariables == False):
     if ( (loadshowervariables == False) and (loadnumuntuples == True)):
         uproot_v += [ur1data_numu_sidebands]
     if (loadrecoveryvars == True):
         uproot_v += [ur1ext_np_recovery_sidebands]
         
-    df_v = [r1lee,r1mc,r1nue,r1ext,r1data,r1dirt]#, r1data_two_showers_sidebands, r1data_np_far_sidebands, r1data_0p_far_sidebands]
+    df_v = [r1lee,r1mc,r1nue,r1ext,r1data,r1dirt]
     if (which_sideband == "2plus_showers" or which_sideband == "np_sb_comb"):
         df_v += [r1data_two_showers_sidebands]
     if (which_sideband == "np_far" or which_sideband == "np_sb_comb"):
@@ -1243,13 +1116,11 @@ def load_data_run123(which_sideband='pi0', return_plotter=True,
         df_v += [r1data_0p_far_sidebands]
     if (loadtruthfilters == True):
         df_v += [r1ncpi0,r1ccpi0,r1ccnopi, r1cccpi, r1ncnopi, r1nccpi]
-    #if (loadshowervariables == False):
     if ( (loadshowervariables == False) and (loadnumuntuples == True)):
         df_v += [r1data_numu_sidebands]
     if (loadrecoveryvars == True):
         df_v += [r1ext_np_recovery_sidebands]
 
-    #if (loadshowervariables == True):
     for i,df in enumerate(df_v):
         up = uproot_v[i]
         if (loadnumuvariables == True):
@@ -1291,14 +1162,13 @@ def load_data_run123(which_sideband='pi0', return_plotter=True,
     if (which_sideband == "np_far" or which_sideband == "np_sb_comb"):
         r2data_np_far_sidebands["is_signal"] = r2data_np_far_sidebands["category"] == 11
     if (which_sideband == "0p_far"):
-        r2data_0p_far_sidebands["is_signal"] = r2data_0p_far_sidebands["category"] == 11    
-    #if (loadshowervariables == False):
+        r2data_0p_far_sidebands["is_signal"] = r2data_0p_far_sidebands["category"] == 11
     if ( (loadshowervariables == False) and (loadnumuntuples == True)):
         r2data_numu_sidebands["is_signal"] = r2data_numu_sidebands["category"] == 11
     if (loadrecoveryvars == True):
         r2ext_np_recovery_sidebands["is_signal"] = r2ext_np_recovery_sidebands["category"] == 11
     
-    r2_datasets = [r2lee, r2nue, r2mc, r2ext]#, r2data_two_showers_sidebands, r2data_np_far_sidebands, r2data_0p_far_sidebands]
+    r2_datasets = [r2lee, r2nue, r2mc, r2ext]
     if (which_sideband == "2plus_showers" or which_sideband == "np_sb_comb"):
         r2_datasets += [r2data_two_showers_sidebands]
     if (which_sideband == "np_far" or which_sideband == "np_sb_comb"):
@@ -1316,7 +1186,6 @@ def load_data_run123(which_sideband='pi0', return_plotter=True,
         r2_dataset['run3'] = np.zeros(len(r2_dataset), dtype=bool)
         r2_dataset['run12'] = np.ones(len(r2_dataset), dtype=bool)
         if (loadnumucrtonly == True):
-            #r2_dataset["_closestNuCosmicDist"] = np.zeros(len(r1_dataset),dtype=float)
             r2_dataset["crtveto"] = np.zeros(len(r2_dataset),dtype=int)
             r2_dataset["crthitpe"] = np.zeros(len(r2_dataset),dtype=float)
             r2_dataset["_closestNuCosmicDist"] = np.zeros(len(r2_dataset),dtype=float)
@@ -1327,7 +1196,7 @@ def load_data_run123(which_sideband='pi0', return_plotter=True,
         for r_dataset in [r1ncpi0, r1ccpi0, r3ncpi0, r3ccpi0,r1ccnopi, r1cccpi, r1ncnopi, r1nccpi, r3ccnopi, r3cccpi, r3ncnopi, r3nccpi]:
             r_dataset['run2'] = np.ones(len(r_dataset), dtype=bool)
     
-    uproot_v = [ur2lee,ur2mc,ur2nue, ur2ext]#, ur2data_two_showers_sidebands, ur2data_np_far_sidebands, ur2data_0p_far_sidebands]
+    uproot_v = [ur2lee,ur2mc,ur2nue, ur2ext]
     if (which_sideband == "2plus_showers" or which_sideband == "np_sb_comb"):
         uproot_v += [ur2data_two_showers_sidebands]
     if (which_sideband == "np_far" or which_sideband == "np_sb_comb"):
@@ -1339,7 +1208,7 @@ def load_data_run123(which_sideband='pi0', return_plotter=True,
     if (loadrecoveryvars == True):
         uproot_v += [ur2ext_np_recovery_sidebands]
 
-    df_v = [r2lee,r2mc,r2nue, r2ext]#, r2data_two_showers_sidebands, r2data_np_far_sidebands, r2data_0p_far_sidebands]
+    df_v = [r2lee,r2mc,r2nue, r2ext]
     if (which_sideband == "2plus_showers" or which_sideband == "np_sb_comb"):
         df_v += [r2data_two_showers_sidebands]
     if (which_sideband == "np_far" or which_sideband == "np_sb_comb"):
@@ -1381,9 +1250,7 @@ def load_data_run123(which_sideband='pi0', return_plotter=True,
     r3ext["pot_scale"] = 1 
 
     nue = pd.concat([r1nue,r2nue,r3nue],ignore_index=True)
-    #nue = pd.concat([r3nue,r1nue],ignore_index=True)
     mc = pd.concat([r3mc,r2mc,r1mc],ignore_index=True)
-    #mc = pd.concat([r3mc,r1mc],ignore_index=True)
     if (loadtruthfilters == True):
         ncpi0 = pd.concat([r3ncpi0,r1ncpi0],ignore_index=True)
         ccpi0 = pd.concat([r3ccpi0,r1ccpi0],ignore_index=True,sort=True)
@@ -1391,7 +1258,6 @@ def load_data_run123(which_sideband='pi0', return_plotter=True,
         cccpi = pd.concat([r3cccpi,r1cccpi],ignore_index=True)
         ncnopi = pd.concat([r3ncnopi,r1ncnopi],ignore_index=True)
         nccpi = pd.concat([r3nccpi,r1nccpi],ignore_index=True)
-    # data = pd.concat([r3data,r1data],ignore_index=True)
     if which_sideband == '2plus_showers':
         data = pd.concat([r1data_two_showers_sidebands, r2data_two_showers_sidebands, r3data_two_showers_sidebands],ignore_index=True)
     elif which_sideband == 'np_far':
@@ -1414,7 +1280,6 @@ def load_data_run123(which_sideband='pi0', return_plotter=True,
         ext = pd.concat([r3ext, r2ext, r1ext],ignore_index=True)
     dirt = pd.concat([r3dirt,r1dirt],ignore_index=True)
     lee = pd.concat([r1lee,r2lee,r3lee],ignore_index=True)
-    #lee = pd.concat([r3lee,r1lee],ignore_index=True)
     
     print("Add derived variables")
 
@@ -1434,8 +1299,6 @@ def load_data_run123(which_sideband='pi0', return_plotter=True,
         df.loc[ np.isnan(df['weightSplineTimesTune']) == True, 'weightSplineTimesTune' ] = 1.
         # flux parentage
         df['flux'] = np.zeros_like(df['nslice'])
-        #df.loc[ (((df['nu_pdg'] == 12) | (df['nu_pdg'] == -12)) & (df['nu_decay_mode'] < 11)) , 'flux'] = 10
-        #df.loc[ (((df['nu_pdg'] == 12) | (df['nu_pdg'] == -12)) & (df['nu_decay_mode'] > 10)) , 'flux'] = 1
         # pi0 scaling
         if pi0scaling == 1:
             df.loc[ df['npi0'] > 0, 'weightSplineTimesTune' ] = df['weightSpline'] * df['weightTune'] * 0.759
@@ -1468,7 +1331,6 @@ def load_data_run123(which_sideband='pi0', return_plotter=True,
     if (loadshowervariables):
         for i,df in enumerate(df_v):
             df['subcluster'] = df['shrsubclusters0'] + df['shrsubclusters1'] + df['shrsubclusters2']
-            #df['subcluster2'] = df['shr2subclusters0'] + df['shr2subclusters1'] + df['shr2subclusters2']
             #
             df['trkfit'] = df['shr_tkfit_npointsvalid'] / df['shr_tkfit_npoints']
             # and the 2d angle difference
@@ -1476,15 +1338,6 @@ def load_data_run123(which_sideband='pi0', return_plotter=True,
             df['anglediff_V'] = np.abs(df['secondshower_V_dir']-df['shrclusdir1'])
             df['anglediff_U'] = np.abs(df['secondshower_U_dir']-df['shrclusdir0'])
             #
-            #df["hitratio_shr12"] = (df["shr2_nhits"]/df["shr1_nhits"])
-            #df["hitratio_mod_shr12"] = (df["shr2_nhits"]/(df["shr1_nhits"]*np.sqrt(df["shr1_nhits"])))
-            #df["cos_shr12"] = np.sin(df["shr1_theta"])*np.cos(df["shr1_phi"])*np.sin(df["shr2_theta"])*np.cos(df["shr2_phi"])\
-            #                  + np.sin(df["shr1_theta"])*np.sin(df["shr1_phi"])*np.sin(df["shr2_theta"])*np.sin(df["shr2_phi"])\
-            #                  + np.cos(df["shr1_theta"])*np.cos(df["shr2_theta"])
-            #df["tksh1_dist"] = np.sqrt( (df["shr1_start_x"]-df["trk_start_x"])**2 + (df["shr1_start_y"]-df["trk_start_y"])**2 + (df["shr1_start_z"]-df["trk_start_z"])**2)
-            #df["tksh2_dist"] = np.sqrt( (df["shr2_start_x"]-df["trk_start_x"])**2 + (df["shr2_start_y"]-df["trk_start_y"])**2 + (df["shr2_start_z"]-df["trk_start_z"])**2)
-            #df["min_tksh_dist"] = np.minimum(df["tksh1_dist"],df["tksh2_dist"])
-            #df["max_tksh_dist"] = np.maximum(df["tksh1_dist"],df["tksh2_dist"])
 
     if (loadshowervariables):                    
         for i,df in enumerate(df_v):
@@ -1517,11 +1370,8 @@ def load_data_run123(which_sideband='pi0', return_plotter=True,
     if (loadshowervariables):
         for i,df in enumerate(df_v):
             df['shr_tkfit_nhits_tot'] = (df['shr_tkfit_nhits_Y']+df['shr_tkfit_nhits_U']+df['shr_tkfit_nhits_V'])
-            #df['shr_tkfit_dedx_avg'] = (df['shr_tkfit_nhits_Y']*df['shr_tkfit_dedx_Y'] + df['shr_tkfit_nhits_U']*df['shr_tkfit_dedx_U'] + df['shr_tkfit_nhits_V']*df['shr_tkfit_dedx_V'])/df['shr_tkfit_nhits_tot']
             df['shr_tkfit_2cm_nhits_tot'] = (df['shr_tkfit_2cm_nhits_Y']+df['shr_tkfit_2cm_nhits_U']+df['shr_tkfit_2cm_nhits_V'])
-            #df['shr_tkfit_2cm_dedx_avg'] = (df['shr_tkfit_2cm_nhits_Y']*df['shr_tkfit_2cm_dedx_Y'] + df['shr_tkfit_2cm_nhits_U']*df['shr_tkfit_2cm_dedx_U'] + df['shr_tkfit_2cm_nhits_V']*df['shr_tkfit_2cm_dedx_V'])/df['shr_tkfit_2cm_nhits_tot']
             df['shr_tkfit_gap10_nhits_tot'] = (df['shr_tkfit_gap10_nhits_Y']+df['shr_tkfit_gap10_nhits_U']+df['shr_tkfit_gap10_nhits_V'])
-            #df['shr_tkfit_gap10_dedx_avg'] = (df['shr_tkfit_gap10_nhits_Y']*df['shr_tkfit_gap10_dedx_Y'] + df['shr_tkfit_gap10_nhits_U']*df['shr_tkfit_gap10_dedx_U'] + df['shr_tkfit_gap10_nhits_V']*df['shr_tkfit_gap10_dedx_V'])/df['shr_tkfit_gap10_nhits_tot']
             df.loc[:,'shr_tkfit_dedx_max'] = df['shr_tkfit_dedx_Y']
             df.loc[(df['shr_tkfit_nhits_U']>df['shr_tkfit_nhits_Y']),'shr_tkfit_dedx_max'] = df['shr_tkfit_dedx_U']
             df.loc[(df['shr_tkfit_nhits_V']>df['shr_tkfit_nhits_Y']) & (df['shr_tkfit_nhits_V']>df['shr_tkfit_nhits_U']),'shr_tkfit_dedx_max'] = df['shr_tkfit_dedx_V']
@@ -1570,43 +1420,7 @@ def load_data_run123(which_sideband='pi0', return_plotter=True,
         if (loadeta == True):
             df.loc[ (df['category']== 4), 'category' ] = 806
     # category switch
-    '''
-    for i,df in enumerate([nue]):
-        #1e0p
-        df.loc[(df['category']==5)&(df['ccnc']==0)&(df['nproton']==0)&(df['npi0']==0)&(df['npion']==0), 'category'] = 10
-        #1eNp
-        df.loc[(df['category']==5)&(df['ccnc']==0)&(df['nproton']>0)&(df['npi0']==0)&(df['npion']==0), 'category'] = 11
-        #1eMpi
-        #df.loc[(df['category']==5)&(df['ccnc']==0)&((df['npi0']>0) | (df['npion']>0)), 'category'] = 1
-        df.loc[(df['category']==5)&(df['ccnc']==0)&((df['npi0']>0)), 'category'] = 1
-        df.loc[(df['category']==5)&(df['ccnc']==0)&((df['npion']>0)), 'category'] = 1
-        #NCpi0
-        df.loc[(df['category']==5)&(df['ccnc']==1)&(df['npi0']==1) & (df['npion']==0), 'category'] = 31
-        #NCOther
-        #df.loc[(df['category']==5)&(df['ccnc']==1)&((df['npi0']>1) | (df['npion']>0)), 'category'] = 3
-        df.loc[(df['category']==5)&(df['ccnc']==1)&((df['npi0']==0)), 'category'] = 3
-        df.loc[(df['category']==5)&(df['ccnc']==1)&((df['npi0']>1)), 'category'] = 3
-        df.loc[(df['category']==5)&(df['ccnc']==1)&((df['npion']>=0)), 'category'] = 3
-    for i,df in enumerate([lee]):
-        df.loc[(df['category']==5), 'category'] = 111
-    df_filter_v = [mc,ncpi0,ccpi0,ccnopi,cccpi,ncnopi,nccpi,dirt]
-    for i,df in enumerate(df_filter_v):
-        #NCpi0
-        df.loc[(df['category']==5)&(df['ccnc']==1)&(df['npi0']==1) & (df['npion']==0), 'category'] = 31
-        #NCOther
-        #df.loc[(df['category']==5)&(df['ccnc']==1)&((df['npi0']>1) | (df['npion']>0)), 'category'] = 3
-        df.loc[(df['category']==5)&(df['ccnc']==1)&((df['npi0']==0)), 'category'] = 3
-        df.loc[(df['category']==5)&(df['ccnc']==1)&((df['npi0']>1)), 'category'] = 3
-        df.loc[(df['category']==5)&(df['ccnc']==1)&((df['npion']>=0)), 'category'] = 3
-        #CCpi0
-        df.loc[(df['category']==5)&(df['ccnc']==0)&(df['npi0']==1) & (df['npion']==0), 'category'] = 21
-        #CCOther
-        #df.loc[(df['category']==5)&(df['ccnc']==0)&((df['npi0']>1) | (df['npion']>0)), 'category'] = 2
-        #CCOther
-        df.loc[(df['category']==5)&(df['ccnc']==0)&((df['npi0']==0)), 'category'] = 2
-        df.loc[(df['category']==5)&(df['ccnc']==0)&((df['npi0']>1)), 'category'] = 2
-        df.loc[(df['category']==5)&(df['ccnc']==0)&((df['npion']>=0)), 'category'] = 2
-    '''
+
     print("Add BDT scores")
     # Np BDT
 
@@ -1659,14 +1473,6 @@ def load_data_run123(which_sideband='pi0', return_plotter=True,
         cccpi = cccpi.query('(nslice==0 | (slnunhits/slnhits)>0.1)')
         ncnopi = ncnopi.query('(nslice==0 | (slnunhits/slnhits)>0.1)')
         nccpi = nccpi.query('(nslice==0 | (slnunhits/slnhits)>0.1)')
-
-    # avoid double-counting of events out of FV in the NC/CC pi0 samples
-    # not needed anymore since we improved matching with filtered samples
-    #ncpi0 = ncpi0.query('category != 5')
-    #ccpi0 = ccpi0.query('category != 5')
-    #ccnopi = ccnopi.query('category != 5')
-    #nccpi = nccpi.query('category != 5')
-    #ncnopi = ncnopi.query('category != 5')
 
     lee['flux'] = 111
                 
@@ -1739,11 +1545,6 @@ pot_data_unblinded = {
         2: (2.62E+20, 62168648),
         3: (2.57E+20, 61381194),
         123: (6.86E+20, 160643943), },
-# 0304 samples
-#    "opendata" : {
-#        1: (4.08E+19, 9028010),
-#        2: (1.00E+01, 1),
-#        3: (7.63E+18, 1838700), },
 # 0628 samples
     "opendata" : {
         1: (4.54E+19, 10080350),

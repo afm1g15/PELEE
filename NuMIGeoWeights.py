@@ -14,8 +14,6 @@ import time
 
 
 
-
-
 class NuMIGeoWeights:
     def __init__(self, geoVarRootFileName="/media/alex/TOSHIBA EXT/NuMI_Geometry_Weights_Histograms.root", current="FHC"):
         self.nameDictionary = {14: 'numu', -14: 'numubar', 12: 'nue', -12:'nuebar'}
